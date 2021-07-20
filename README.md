@@ -1,2 +1,4 @@
-# Pcod-Bering-SeaThis repo houses code for the EBS Pacific Cod habitat suitability project
+# Pcod-Bering-Sea
+
+This repo houses code for the EBS Pacific Cod habitat suitability project
 
