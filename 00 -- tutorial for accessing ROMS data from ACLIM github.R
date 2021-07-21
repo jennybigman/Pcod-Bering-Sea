@@ -149,12 +149,12 @@ library(thredds)
 
    # temp has three dimensions - xi_rho, eta_rho, and ocean_time
    # Now we make vectors of each axis.
-   xi_axis  <- seq(1,182) # Hardcoded axis length
+   xi_axis  <- seq(1,182) # Hardcoded axis length #### what is this ####
    eta_axis <- seq(1,258) # Hardcoded axis length
    
    # time units in GMT: seconds since 1900-01-01 00:00:00
    t_axis   <- ncvar_get(nc,"ocean_time")
-   time_axis <- as.POSIXct(t_axis, origin = "1900-01-01", tz = "GMT")
+   time_axis <- as.POSIXct(t_axis, origin = "1900-01-01", tz = "GMT") #### what is this ####
 
    # Make two dates to find in the data
    date1 <- ISOdate(year=2010, month=7, day=1, hour = 12, tz = "GMT")
@@ -180,7 +180,7 @@ library(thredds)
    image(temp1)
    image(temp2)
    
-   # Get lat/lon for better mapping - getting whole variable 
+   # Get lat/lon for better mapping - getting whole variable #### is this lat/long ####
    lats <- ncvar_get(nc,"lat_rho")
    lons <- ncvar_get(nc,"lon_rho")
 
@@ -210,7 +210,7 @@ library(thredds)
    # run this line if load_gis is set to F in R/setup.R:
     source("R/sub_scripts/load_maps.R")  
 
-    # now create plots of average BT during four time periods
+    # now create plots of average BT during four time periods ### five time periods ? ####
     time_seg   <- list( '1970-1980' = c(1970:1980),
                         '1980-1990' = c(1980:1990),
                         '1990-2000' = c(1990:2000),
@@ -351,4 +351,267 @@ library(thredds)
   
     # graphics.off()
    
-    #### START with 5.2.2 ####
+    #### Level 2 hindcasts #### Section 5.2
+    
+    # 5.2.1 Level 2 hindcasts: custom spatial indices
+    
+    # create spatial plots of hindcast time periods for Aug 1 of each year
+    
+    # run this line if load_gis is set to F in R/setup.R:
+    source("R/sub_scripts/load_maps.R")  
+
+    # now create plots of average BT during four time periods
+    time_seg   <- list( '1970-1980' = c(1970:1980),
+                        '1980-1990' = c(1980:1990),
+                        '1990-2000' = c(1990:2000),
+                        '2000-2010' = c(2000:2010),
+                        '2010-2020' = c(2010:2020))
+    
+    # preview the datasets on the server:
+    tds_list_datasets(thredds_url = ACLIM_data_url)
+  
+    # assign the simulation to download
+    # --> Tinker: try selecting a different set of models to compare
+    sim        <- "B10K-K20_CORECFS" 
+    #ms <- c("B10K-H16_CORECFS","B10K-K20_CORECFS" )
+    
+    # Currently available Level 2 variables
+    dl     <- proj_l2_datasets$dataset  # datasets
+    
+    svl    <- list(
+                'Bottom 5m' = "temp",
+                'Surface 5m' = "temp",
+                'Integrated' = c("EupS","Cop","NCaS") )
+    
+    # Let's sample the model years as close to Aug 1 as the model timesteps run:
+    tr          <- c("-08-1 12:00:00 GMT") 
+    
+    # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
+   
+    IDin       <- "_Aug1_subgrid" #### what is this #### how do you make this not for one day?
+    var_use    <- "_bottom5m_temp"
+    
+    # open a "region" or strata specific nc file
+    fl         <- file.path(main,Rdata_path,sim,"Level2",
+                            paste0(sim,var_use,IDin,".Rdata"))
+    
+    
+    # load data from level 2 nc files (approx <10sec)
+    startTime = Sys.time()
+    if(!file.exists(file.path(Rdata_path,fl))){
+      get_l2(
+        ID          = "_1990_subgrid",
+        overwrite   = T,
+        xi_rangeIN  = seq(1,182,10),
+        eta_rangeIN = seq(1,258,10),
+        ds_list     = dl[1],  # must be same length as sub_varlist
+        trIN        = tr,
+        yearsIN     = 1990,
+        sub_varlist = list('Bottom 5m' = "temp" ),  
+        sim_list    = sim  )
+    }
+    endTime  = Sys.time()
+    endTime  - startTime
+    
+    # load data from level 2 nc files for all years and vars (yearsIN = NULL by default)
+    # NOTE: THIS IS SLOOOOOW..~ 2 min
+    startTime2 = Sys.time()
+    if(!file.exists(file.path(Rdata_path,fl))){
+      get_l2(
+        ID          = IDin,
+        overwrite   = T,
+        xi_rangeIN  = seq(1,182,10),
+        eta_rangeIN = seq(1,258,10),
+        ds_list     = dl,
+        trIN        = tr,
+        sub_varlist = svl,  
+        sim_list    = sim  )
+    }
+    endTime2  = Sys.time()
+    endTime2  - startTime2
+    
+    # load R data file
+    load(fl)   # temp
+    
+    # there are smarter ways to do this;looping because 
+    # we don't want to mess it up but this is slow...
+    i <-1
+    data_long <- data.frame(latitude = as.vector(temp$lat),
+                       longitude = as.vector(temp$lon),
+                       val = as.vector(temp$val[,,i]),
+                       time = temp$time[i],
+                       year = substr( temp$time[i],1,4),stringsAsFactors = F
+                       )
+    
+    for(i in 2:dim(temp$val)[3])
+      data_long <- rbind(data_long,
+                          data.frame(latitude = as.vector(temp$lat),
+                           longitude = as.vector(temp$lon),
+                           val = as.vector(temp$val[,,i]),
+                           time = temp$time[i],
+                           year = substr( temp$time[i],1,4),stringsAsFactors = F)
+                       )
+    
+    # get the mean values for the time blocks from the rdata versions
+    # may throw "implicit NA" errors that can be ignored
+    tmp_var <-data_long # get mean var val for each time segment
+    j<-0
+    for(i in 1:length(time_seg)){
+      if(length( which(as.numeric(tmp_var$year)%in%time_seg[[i]] ))>0){
+        j <- j +1
+        mn_tmp_var <- tmp_var%>%
+          filter(year%in%time_seg[[i]],!is.na(val))%>%
+          group_by(latitude, longitude)%>%
+          summarise(mnval = mean(val,rm.na=T))
+        
+        mn_tmp_var$time_period <- factor(names(time_seg)[i],levels=names(time_seg))
+        
+      if(j == 1) mn_var <- mn_tmp_var
+      if(j >  1) mn_var <- rbind(mn_var,mn_tmp_var)
+       rm(mn_tmp_var)
+      }
+    }
+    
+    # convert results to a shapefile
+    L2_sf  <- convert2shp(mn_var%>%filter(!is.na(mnval)))
+    
+    p9_hind     <- plot_stations_basemap(sfIN = L2_sf,
+                                fillIN = "mnval",
+                                colorIN = "mnval",
+                                sizeIN=.6) +
+      #facet_wrap(.~time_period,nrow=2,ncol=3)+
+      facet_grid(.~time_period)+
+      scale_color_viridis_c()+
+      scale_fill_viridis_c()+
+      guides(
+        color =  guide_legend(title="Bottom T (degC)"),
+        fill  =  guide_legend(title="Bottom T (degC)")) +
+      ggtitle(paste(sim,var_use,IDin))
+   
+    # This is slow but it works (repeat dev.new() twice if in Rstudio)...
+    dev.new()
+    p9_hind
+    
+    # 5.2.2. Level 2 hindcasts: M2 mooring comparison
+    
+    # as a final hindcast comparison, let's look at a surface temperature from observations vs the
+    # H16 and K20 versions of the hindcast
+    
+    # M2_lat <- (56.87°N, -164.06°W)
+    # 56.877    -164.06 xi = 99    eta= 62
+    IDin       <- "_2013_M2"
+    var_use    <- "_surface5m_temp"
+    
+    # get data from M2 data page:
+    pmelM2_url <-"https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0157599/"
+    yr_dat     <- "M2_164W_57N_Apr2019_May2019.csv"
+    yr_dat     <- "M2_164W_57N_May2013_Sep2013.csv"
+        
+    # preview the datasets on the server:
+    temp <- tempfile()
+    download.file(paste0(pmelM2_url,yr_dat),temp)
+    #M2data <- read.csv(temp,skip=4,stringsAsFactors = F)
+    M2data <- read.csv(temp,skip=0,stringsAsFactors = F)
+    
+    unlink(temp)
+      
+    # convert date and time to t 
+    M2data$t <-as.POSIXct(paste0(M2data$Date," ",M2data$Time,":00"),"%m/%d/%Y %H:%M:%S",
+                             origin =   "1900-01-01 00:00:00",
+                             tz = "GMT")
+    
+    # open a "region" or strata specific nc file
+    fl         <- file.path(main,Rdata_path,sim,"Level2",
+                            paste0(sim,var_use,IDin,".Rdata"))
+
+    # assign the simulation to download
+    sim        <- "B10K-K20_CORECFS" 
+    
+    # Let's sample the model years as close to Aug 1 as the model timesteps run:
+    #tr          <- c("-08-1 12:00:00 GMT") 
+    tr          <- substring(M2data$t,5,20)
+    # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
+   
+    # load data from level 2 nc files (grab a coffee, takes a few mins)
+    if(!file.exists(file.path(Rdata_path,fl))){
+      get_l2(
+        ID          = IDin,
+        overwrite   = T,
+        xi_rangeIN  = 99,
+        eta_rangeIN = 62,
+        ds_list     = dl[2],  # must be same length as sub_varlist
+        trIN        = tr,
+        yearsIN     = 2013,
+        sub_varlist = list('Surface 5m' = "temp" ),  
+        sim_list    = c("B10K-H16_CORECFS","B10K-K20_CORECFS" )  )
+    }
+    
+    # load R data file
+    # open a "region" or strata specific nc file
+    sim <- "B10K-H16_CORECFS"
+    fl         <- file.path(main,Rdata_path,sim,"Level2",
+                            paste0(sim,var_use,IDin,".Rdata"))
+    load(fl)   # temp
+    
+    # there are smarter ways to do this;looping because 
+    # we don't want to mess it up but this is slow...
+    i <-1
+    data_long <- data.frame(latitude = as.vector(temp$lat),
+                       longitude = as.vector(temp$lon),
+                       val = as.vector(temp$val[,,i]),
+                       sim  = sim,
+                       time = temp$time[i],
+                       year = substr( temp$time[i],1,4),stringsAsFactors = F
+                       )
+    
+    for(i in 2:dim(temp$val)[3])
+      data_long <- rbind(data_long,
+                          data.frame(latitude = as.vector(temp$lat),
+                           longitude = as.vector(temp$lon),
+                           val = as.vector(temp$val[,,i]),
+                           sim  = sim,
+                           time = temp$time[i],
+                           year = substr( temp$time[i],1,4),stringsAsFactors = F)
+                       )
+    
+    # open a "region" or strata specific nc file
+    sim <- "B10K-K20_CORECFS"
+    fl2         <- file.path(main,Rdata_path,sim,"Level2",
+                            paste0(sim,var_use,IDin,".Rdata"))
+    load(fl2)   # temp
+    for(i in 1:dim(temp$val)[3])
+    data_long <- rbind(data_long,
+                          data.frame(latitude = as.vector(temp$lat),
+                           longitude = as.vector(temp$lon),
+                           val = as.vector(temp$val[,,i]),
+                           sim  = sim,
+                           time = temp$time[i],
+                           year = substr( temp$time[i],1,4),stringsAsFactors = F)
+                       )
+    
+    plotM2_dat        <- M2data%>%dplyr::select(SST = SST..C.,Date = t)
+    plotM2_dat$sim    <- factor("Obs",levels=c("Obs","B10K-H16_CORECFS","B10K-K20_CORECFS"))
+    plotM2_dat        <- plotM2_dat%>%filter(SST>-99)
+    plotroms_dat      <- data_long%>%dplyr::select(SST = val,Date = time,sim)
+    plotroms_dat$sim  <- factor(plotroms_dat$sim,levels=c("Obs","B10K-H16_CORECFS","B10K-K20_CORECFS"))
+    plotdat           <- rbind(plotM2_dat,plotroms_dat)
+   
+    p10_hind     <- ggplot(plotdat) +
+    geom_line(   aes(x=Date,y=SST,color=sim),alpha=.8)+
+    # geom_smooth( aes(x = Date,y = SST,color=sim),
+    #             formula = y ~ x, se = T)+
+    scale_color_viridis_d(begin=.9,end=.2)+
+    ylab(tmp_var$units[1])+
+    ggtitle( "Bering M2 Mooring: 2013 SST")+
+    theme_minimal()
+   
+    # This is slow but it works (repeat dev.new() twice if in Rstudio)...
+    dev.new()
+    p10_hind
+    
+    if(update.figs)  
+    ggsave(file=file.path(main,"Figs/Hind_M2_SST.jpg"),width=8,height=4)
+  
+    # graphics.off()
+    
+    
