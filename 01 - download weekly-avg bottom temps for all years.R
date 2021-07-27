@@ -1,11 +1,14 @@
-  # SETUP WORKSPACE
+# 01 - download weekly-averaged bottom temp data for all years from Bering10K ROMS model
+
+		#### Setup workspace ---------------------------------------------------------------
+		
     # rm(list=ls())
     tmstp  <- format(Sys.time(), "%Y_%m_%d")
     main   <- getwd()  #"~/GitHub_new/ACLIM2
     source("R/make.R")
 
     
-		#### save data file options  ####
+    #### Create dataset options object -------------------------------------------------
     
     # preview the datasets on the server:
     url_list <- tds_list_datasets(thredds_url = ACLIM_data_url)
@@ -26,12 +29,13 @@
     # preview the projection and hindcast data and data catalogs (Level 1, 2, and 3):
     hind_datasets  <- tds_list_datasets(thredds_url = hind_url)
     
-		
+    
+		#### Download data ---------------------------------------------------------------
+    
     # assign the simulation to download
     sim        <- "B10K-K20_CORECFS" 
 
     # create a list of dates for which to extract temp for
-    
     weekly_dates <- seq.Date(as.Date("1970-01-01"), by = "week", length.out = 52)
 
 		# remove the year because to get temp data, years and day/month are separate
@@ -44,9 +48,10 @@
   	
   	dates_times <- sapply(weekly_dates, time_zone_func)
   	
-   # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
-  	### what is this? ###
+    # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
+  	  ### what is this? ###
    
+    # function to create vector of IDs for labeling file names
     ID_func <- function(x){
     	IDin <- paste0(x, "_subgrid")
     	paste0("_", IDin)
@@ -56,36 +61,34 @@
 
     IDs <- sapply(years, ID_func)
     
+    # for file nmae
     var_use    <- "_bottom5m_temp"
     
-    # load weekly-averaged bottom temp data from level 2 nc files for all years 
+    # function to download weekly-averaged bottom temp data from level 2 nc files for all years 
 
-
-    bt_func2 <- function(x, y){
+    bt_func <- function(x, y){
     
-    	
-    # creating a file path to open data later
-    fl        <- file.path(main,Rdata_path,sim,"Level2",
-                            paste0(sim,var_use,x,".Rdata"))
+    	# creating a file path to open data later
+    		fl <- file.path(main,Rdata_path,sim,"Level2", paste0(sim,var_use,x,".Rdata"))
     
-    if(!file.exists(file.path(Rdata_path,fl))){
-      get_l2(
-        ID          = x,
-        overwrite   = T,
-        xi_rangeIN  = seq(1,182,10),
-        eta_rangeIN = seq(1,258,10),
-        ds_list     = "Bottom 5m", # changed from tutorial code b/c we only wnat bottom temmps
-        trIN        = dates_times,
-        yearsIN     = y,
-        sub_varlist = list('Bottom 5m' = "temp" ), # changed from tutorial code b/c we only wnat bottom temmps
-        sim_list    = sim  )
-    	
-    }}
+    	# code to download files from ACLIM tutorial
+    		if(!file.exists(file.path(Rdata_path,fl))){
+    		  get_l2(
+    		    ID          = x,
+    		    overwrite   = T,
+    		    xi_rangeIN  = seq(1,182,10),
+    		    eta_rangeIN = seq(1,258,10),
+    		    ds_list     = "Bottom 5m", # changed from tutorial code b/c we only wnat bottom temmps
+    		    trIN        = dates_times,
+    		    yearsIN     = y,
+    		    sub_varlist = list('Bottom 5m' = "temp" ), # changed from tutorial code b/c we only wnat bottom temmps
+    		    sim_list    = sim  )
+    			
+    		}}
     
     bottom_temp_lists <- mapply(bt_func2, x = IDs, y = years)
 
     # create a list of file paths to subsequently load
-    
     fl_list <- function(x){
     	file.path(main,Rdata_path,sim,"Level2", paste0(sim,var_use,x,".Rdata"))
     }
@@ -93,31 +96,31 @@
     fl_paths <- lapply(IDs, fl_list)
     
     # function to read in file path and transform data
-
   	data_transform <- function(x){
     
-  	load(x)
-    # format data into a tidy dataframe
-     i <-1
-    data_long <- data.frame(latitude = as.vector(temp$lat),
-                       longitude = as.vector(temp$lon),
-                       val = as.vector(temp$val[,,i]),
-                       time = temp$time[i],
-                       year = substr( temp$time[i],1,4),stringsAsFactors = F
-                       )
+  			load(x)
+    	
+  		# format data into a tidy dataframe
+    		i <-1
+    		data_long <- data.frame(latitude = as.vector(temp$lat),
+    		                   longitude = as.vector(temp$lon),
+    		                   val = as.vector(temp$val[,,i]),
+    		                   time = temp$time[i],
+    		                   year = substr( temp$time[i],1,4),stringsAsFactors = F
+    		                   )
+    		
+    		for(i in 2:dim(temp$val)[3])
+    		  data_long <- rbind(data_long,
+    		                      data.frame(latitude = as.vector(temp$lat),
+    		                       longitude = as.vector(temp$lon),
+    		                       val = as.vector(temp$val[,,i]),
+    		                       time = temp$time[i],
+    		                       year = substr( temp$time[i],1,4),stringsAsFactors = F)
+    		  )
     
-    for(i in 2:dim(temp$val)[3])
-      data_long <- rbind(data_long,
-                          data.frame(latitude = as.vector(temp$lat),
-                           longitude = as.vector(temp$lon),
-                           val = as.vector(temp$val[,,i]),
-                           time = temp$time[i],
-                           year = substr( temp$time[i],1,4),stringsAsFactors = F)
-      )
+    		data_long
     
-    data_long
-    
-    }
+    		}
 
 	
   	data_list <- lapply(fl_paths, data_transform)
