@@ -24,7 +24,8 @@
     cat(paste(url_list$dataset,"\n"))
     
     # define the simulation to download:
-    mod  <- "B10K-H16"  # ROMSNPZ model #### B10K-K20 doesn't work here, why? ####
+    mod  <- "B10K-H16"  # ROMSNPZ model 
+    	#### B10K-K20 doesn't work here, why? ####
     hind <- "CORECFS"   # Hindcast
     
     # define the projection simulation:
