@@ -1,6 +1,6 @@
 # 01 -- playing with ROMS output
 
-# goal is to map bottom temperatures for weekly slices of one year 
+		# goal is to map bottom temperatures for weekly slices of one (or more) year(s)
 
 		setwd("~/ACLIM2") 
 		
@@ -18,7 +18,7 @@
     source("R/make.R")
 
     
-		#### Step 1: get data URLs ####
+		#### save data file options  ####
     
     # preview the datasets on the server:
     url_list <- tds_list_datasets(thredds_url = ACLIM_data_url)
@@ -39,21 +39,11 @@
     # preview the projection and hindcast data and data catalogs (Level 1, 2, and 3):
     hind_datasets  <- tds_list_datasets(thredds_url = hind_url)
     
-    # get url for the projection and hindcast Level 2 catalog
-    hind_l2_cat    <- hind_datasets[hind_datasets$dataset == "Level 2/",]$path
-    hind_l2_cat
-
-    # preview hindcast Level 2 datasets:
-    hind_l2_datasets  <- tds_list_datasets(hind_l2_cat)
-    hind_l2_datasets$dataset
+		
     
-    # get url for bottom temperature:
-    hind_l2_BT_url    <- hind_l2_datasets[hind_l2_datasets$dataset == "Bottom 5m",]$path
-    hind_l2_BT_url
-    
-    
-		#### Download bottom temps for eavery year for week of Aug 1 ####
+    #### 1. Download bottom temps for every year for week of Aug 1 ####
    
+    
     # run this line if load_gis is set to F in R/setup.R:
     source("R/sub_scripts/load_maps.R")  #### I get an error here but checked source code and only one function so may not be an issue ####
     
@@ -117,7 +107,9 @@
     unique(data_long$time) # close to Aug 1 of each year
     
     
-    #### Download bottom temps for every week of one year ####
+    
+    #### 2. Download bottom temps for every week of one year ####
+    
     
     # assign the simulation to download
     sim        <- "B10K-K20_CORECFS" 
@@ -192,45 +184,27 @@
     unique(data_long$year) # 1970
     unique(data_long$time) # one weekly-averaged bottom temp data point for each week
     
-    ########### above works to get weekly-averaged temp data for one year ##### (only 50 weeks available for 1970)
+
     
-    #### Download weekly-averaged bottom temp from all years ####
+    #### 3. Download weekly-averaged bottom temp from all years ####
+    
     
     # assign the simulation to download
     sim        <- "B10K-K20_CORECFS" 
 
-    # create lists of dates for which to extract bottom temp data -- we want one data point per week for
-    # years 1970 - 2020 
+    # create a list of dates for which to extract temp for
     
-    year_start_func <- function(x){
-    	paste0(x, "-01-01")
-    }
-   
-    years <- seq(1970, 2020, by = 1)
-    
-    start_dates <- sapply(years, year_start_func)
-    
-  	date_func <- function(x){
-  	seq.Date(as.Date(x), by = "week", length.out = 52)
-  	}
-  
-  	start_dates <- as.Date(start_dates)
-  	
-  	dates_list <- lapply(start_dates,function(x) { 
-    			date_func(x)
-		})
+    weekly_dates <- seq.Date(as.Date("1970-01-01"), by = "week", length.out = 52)
 
-		# extract one list to work from 
+		# remove the year because to get temp data, years and day/month are separate
+  	weekly_dates <- str_remove(weekly_dates, "1970")
   	
-  	dates_list_1970 <- dates_list[[1]]
-  	
-  	dates_list_1970_1 <- str_remove(dates_list_1970, "1970")
-  	
+  	# add a timestamp
   	time_zone_func <- function(x){
   		paste(x, "12:00:00 GMT")
   	}
   	
-  	dates_times <- sapply(dates_list_1970_1, time_zone_func)
+  	dates_times <- sapply(weekly_dates, time_zone_func)
   	
     # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
   	### what is this? ###
@@ -244,13 +218,11 @@
 
     IDs <- sapply(years, ID_func)
     
-    
-   
-    # load bottom temp data from level 2 nc files for all years for august  (yearsIN = NULL by default)
+    # load weekly-averaged bottom temp data from level 2 nc files for all years 
 
     bt_func2 <- function(x, y){
     	
-    	# creating a file path to open data later
+    # creating a file path to open data later
     fl         <- file.path(main,Rdata_path,sim,"Level2",
                             paste0(sim,var_use,x,".Rdata"))
     
@@ -272,6 +244,9 @@
     }
 	  
     bottom_temp_lists <- mapply(bt_func2, x = IDs, y = years)
+    
+    
+    # now need to get the data back into R with a unique file name
     
     # load R data file
     load(fl)   # temp
@@ -305,85 +280,4 @@
     unique(data_long$year) # 1970
     unique(data_long$time) # one weekly-averaged bottom temp data point for each week
     
-    ########### above works to get weekly-averaged temp data for one year ##### (only 50 weeks available for 1970)
-    
-    #### Download weekly-averaged bottom temp from all years ####
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #################################################
-    
-  
-    # assign the simulation to download
-    sim        <- "B10K-K20_CORECFS" 
-
-   
-   # create a list of dates for which to extract bottom temp data (weekly averages)
-    
-    month_function <- function(x){
-    	paste0(x, "-1 12:00:00 GMT")
-    }
-    
-    numList <- seq(1, 12, by = 1)
-    
-    dates_times <- sapply(numList, month_function)
-    
-    # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
-   
-    IDin       <- "_Aug1_subgrid"
-    var_use    <- "_bottom5m_temp"
-    
-    # open a "region" or strata specific nc file -- (creating a file path to open data later)
-    fl         <- file.path(main,Rdata_path,sim,"Level2",
-                            paste0(sim,var_use,IDin,".Rdata"))
-   
-    # load bottom temp data from level 2 nc files for all years for august  (yearsIN = NULL by default)
-    startTime2 = Sys.time()
-    if(!file.exists(file.path(Rdata_path,fl))){
-      get_l2(
-        ID          = IDin,
-        overwrite   = T,
-        xi_rangeIN  = seq(1,182,10),
-        eta_rangeIN = seq(1,258,10),
-        ds_list     = "Bottom 5m", # changed from tutorial code b/c we only wnat bottom temmps
-        trIN        = tr,
-        sub_varlist = list('Bottom 5m' = "temp" ), # changed from tutorial code b/c we only wnat bottom temmps
-        sim_list    = sim  )
-    }
-    endTime2  = Sys.time()
-    endTime2  - startTime2
-    
-    # load R data file
-    load(fl)   # temp
-    
-    # format data into a tidy dataframe
-    
-    i <-1
-    data_long <- data.frame(latitude = as.vector(temp$lat),
-                       longitude = as.vector(temp$lon),
-                       val = as.vector(temp$val[,,i]),
-                       time = temp$time[i],
-                       year = substr( temp$time[i],1,4),stringsAsFactors = F
-                       )
-    
-    for(i in 2:dim(temp$val)[3])
-      data_long <- rbind(data_long,
-                          data.frame(latitude = as.vector(temp$lat),
-                           longitude = as.vector(temp$lon),
-                           val = as.vector(temp$val[,,i]),
-                           time = temp$time[i],
-                           year = substr( temp$time[i],1,4),stringsAsFactors = F)
-                       )
-    
-    unique(data_long$year) # 1970 - 2020
-    unique(data_long$time) # close to Aug 1 of each year
     
