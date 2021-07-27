@@ -1,7 +1,14 @@
 # 01 - download weekly-averaged bottom temp data for all years from Bering10K ROMS model
 
 		#### Setup workspace ---------------------------------------------------------------
+		setwd("~/ACLIM2") 
 		
+		library(devtools)
+		library(ncdf4)
+		library(thredds)
+		library(lubridate)
+		library(stringr)
+
     # rm(list=ls())
     tmstp  <- format(Sys.time(), "%Y_%m_%d")
     main   <- getwd()  #"~/GitHub_new/ACLIM2
