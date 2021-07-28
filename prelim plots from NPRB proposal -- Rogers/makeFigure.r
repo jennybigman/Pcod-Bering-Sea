@@ -263,12 +263,18 @@ print(levelplot(phatchcat~Lon360*Lat|Simulation*Year,data=HatchSim[myinds2,],xla
 
 LL<- expand.grid(lons360, lats) %>%
       rename(lon = Var1, lat = Var2) %>%
-  mutate(marT = as.vector(marT[,,43])) %>% 
+  mutate(marT = as.vector(marT[,,43]))
+
+LL$lon <- as.vector(LLs$lon)
+LL$lat <- as.vector(LLs$lat)
+
+LL <- LL %>% 
   mutate(depth = get.depth(mybathy,lon,lat,locator=FALSE)[,"depth"]) %>%
   filter(depth > -250)
 
+
 ggplot(LL,aes(x = lon, y = lat)) + 
-  #  geom_point(aes(x = lon, y = lat), size = 0.8) + 
+   #geom_point(aes(x = lon, y = lat), size = 0.8) + 
   geom_raster(aes(fill=marT)) +
   scale_fill_viridis_c(name = "Temperature (C)") + 
   theme_void() + 

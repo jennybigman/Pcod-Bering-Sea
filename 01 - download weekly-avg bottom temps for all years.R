@@ -138,5 +138,6 @@
     
     # check to make sure all data is there
     unique(all_temp_dat$year)
-		unique(all_temp_dat$time)    
+		unique(all_temp_dat$time)  
+	
 		
