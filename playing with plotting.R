@@ -15,6 +15,8 @@
 		library(data.table)
     library(tidyverse)
 		all_temp_dat <- fread( "./data/all_temp_dat.csv")
+		
+		# did 
     
 		# add two columns: one with the date in Date format and one for just the month number
 		all_temp_dat$date <- as.Date(all_temp_dat$time)
