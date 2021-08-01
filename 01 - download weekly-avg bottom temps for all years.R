@@ -1,7 +1,11 @@
 # 01 - download weekly-averaged bottom temp data for all years from Bering10K ROMS model
 
-## read
-
+		#### load data resulting from below code
+    library(data.table)
+    library(tidyverse)
+    setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea")
+		all_temp_dat <- fread( "./data/all_temp_dat.csv")
+    
 		#### Setup workspace ---------------------------------------------------------------
 		setwd("~/ACLIM2") 
 		
@@ -86,17 +90,17 @@
     		  get_l2(
     		    ID          = x,
     		    overwrite   = T,
-    		    xi_rangeIN  = seq(1,182,10),
-    		    eta_rangeIN = seq(1,258,10),
-    		    ds_list     = "Bottom 5m", # changed from tutorial code b/c we only wnat bottom temmps
+    		    #xi_rangeIN  = seq(1,182,10),
+    		    #eta_rangeIN = seq(1,258,10),
+    		    ds_list     = "Bottom 5m", # changed from tutorial code b/c we only want bottom temps
     		    trIN        = dates_times,
     		    yearsIN     = y,
-    		    sub_varlist = list('Bottom 5m' = "temp" ), # changed from tutorial code b/c we only wnat bottom temmps
+    		    sub_varlist = list('Bottom 5m' = "temp" ), # changed from tutorial code b/c we only want bottom temps
     		    sim_list    = sim  )
     			
     		}}
     
-    bottom_temp_lists <- mapply(bt_func2, x = IDs, y = years)
+    bottom_temp_lists <- mapply(bt_func, x = IDs, y = years)
 
     # create a list of file paths to subsequently load
     fl_list <- function(x){
@@ -138,8 +142,12 @@
   	# combine all temps from all years
     all_temp_dat <- bind_rows(data_list)
     
+    
     # check to make sure all data is there
     unique(all_temp_dat$year)
 		unique(all_temp_dat$time)  
 	
+		# write to csv
+		setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea")
+		fwrite(all_temp_dat, "./data/all_temp_dat.csv")
 		

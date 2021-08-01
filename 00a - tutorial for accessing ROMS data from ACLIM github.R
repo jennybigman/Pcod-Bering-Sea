@@ -724,8 +724,8 @@ library(thredds)
       get_l2(
         ID          = "_1990_subgrid",
         overwrite   = T,
-        xi_rangeIN  = seq(1,182,10),
-        eta_rangeIN = seq(1,258,10),
+        #xi_rangeIN  = seq(1,182,10),
+        #eta_rangeIN = seq(1,258,10),
         ds_list     = dl[1],  # must be same length as sub_varlist
         trIN        = tr,
         yearsIN     = 1990,
