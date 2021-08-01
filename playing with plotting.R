@@ -1,23 +1,23 @@
 # 02 - plot bottom temps
 
-		setwd("~/ACLIM2") 
+		setwd("/Users/jenniferbigman/ACLIM2") 
 		
 		library(devtools)
 		library(ncdf4)
 		library(thredds)
 		library(lubridate)
 		library(stringr)
+		
+		main   <- getwd()  #"~/GitHub_new/ACLIM2
 
     source("R/make.R")
     source("R/sub_scripts/load_maps.R") 
 
-    setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea")
+    setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
 		library(data.table)
     library(tidyverse)
 		all_temp_dat <- fread( "./data/all_temp_dat.csv")
 		
-		# did 
-    
 		# add two columns: one with the date in Date format and one for just the month number
 		all_temp_dat$date <- as.Date(all_temp_dat$time)
 		

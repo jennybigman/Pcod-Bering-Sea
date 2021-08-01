@@ -3,7 +3,7 @@
 		#### load data resulting from below code
     library(data.table)
     library(tidyverse)
-    setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea")
+    setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
 		all_temp_dat <- fread( "./data/all_temp_dat.csv")
     
 		#### Setup workspace ---------------------------------------------------------------
