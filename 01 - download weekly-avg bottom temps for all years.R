@@ -148,6 +148,6 @@
 		unique(all_temp_dat$time)  
 	
 		# write to csv
-		setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea")
+		setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
 		fwrite(all_temp_dat, "./data/all_temp_dat.csv")
 		

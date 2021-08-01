@@ -16,7 +16,8 @@
     setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
 		library(data.table)
     library(tidyverse)
-		all_temp_dat <- fread( "./data/all_temp_dat.csv")
+		all_temp_dat <- fread("./data/all_temp_dat.csv")
+		test_sf <- fread("./data/test_sf.csv")
 		
 		# add two columns: one with the date in Date format and one for just the month number
 		all_temp_dat$date <- as.Date(all_temp_dat$time)
@@ -42,8 +43,11 @@
     coord_quickmap() 
 
 	 # convert to shape format for plotting
-   test_sf <- convert2shp(data_long_sum)
+   #test_sf <- convert2shp(data_long_sum)
    
+   #setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
+	 #fwrite(test_sf, "./data/test_sf.csv")
+	
    # plot using ACLIM function
    bottomT_aclim_func_plot <- plot_stations_basemap(sfIN = test_sf,fillIN = "mean_temp",
    																								 colorIN = "mean_temp", 
