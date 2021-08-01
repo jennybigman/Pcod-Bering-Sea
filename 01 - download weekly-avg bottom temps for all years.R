@@ -1,5 +1,7 @@
 # 01 - download weekly-averaged bottom temp data for all years from Bering10K ROMS model
 
+## read
+
 		#### Setup workspace ---------------------------------------------------------------
 		setwd("~/ACLIM2") 
 		
