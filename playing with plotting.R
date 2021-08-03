@@ -1,4 +1,4 @@
-# 02 - plot bottom temps
+# playing with plotting
 
 		setwd("/Users/jenniferbigman/ACLIM2") 
 		
@@ -17,15 +17,23 @@
 		library(data.table)
     library(tidyverse)
 		all_temp_dat <- fread("./data/all_temp_dat.csv")
+		all_temp_dat_NA <- na.omit(all_temp_dat)
+		
 		test_sf <- fread("./data/test_sf.csv")
 		
-		# add two columns: one with the date in Date format and one for just the month number
-		all_temp_dat$date <- as.Date(all_temp_dat$time)
+		# add columns
+		all_temp_dat$date <- as.Date(all_temp_dat$time) # date in Date format
 		
-		all_temp_dat$month <- month(all_temp_dat$date)
+		all_temp_dat$month <- month(all_temp_dat$date) # month of year
 		
-		all_temp_dat$day <- day(all_temp_dat$date)
+		all_temp_dat$day <- day(all_temp_dat$date) # day of year
 
+	  all_temp_dat$week <- week(all_temp_dat$date) # week of year
+	  
+		# convert to shape file
+	  
+	  temp_dat_1970 <- all_temp_dat %>% filter(year == 1970)
+	  temp_dat_1970_sf <- convert2shp(temp_dat_1970)
     #### make summaries of data to test plots -----------------------
     
     # all data
@@ -34,20 +42,24 @@
     								 summarise(mean_temp = mean(val)) 
     
     data_long_sum_NA <- na.omit(data_long_sum)
-    	
+    
 	 # does not project properly
-	  ggplot(data_long_sum, aes(x = longitude, y = latitude)) + 
-    geom_tile(aes(fill=mean_temp)) +
-    scale_fill_viridis_c(name = "Temperature (C)") + 
-    theme_void() + 
-    coord_quickmap() 
+	  # ggplot(data_long_sum, aes(x = longitude, y = latitude)) + 
+    # geom_tile(aes(fill=mean_temp)) +
+    # scale_fill_viridis_c(name = "Temperature (C)") + 
+    # theme_void() + 
+    # coord_quickmap() 
 
 	 # convert to shape format for plotting
-   #test_sf <- convert2shp(data_long_sum)
+   test_sf <- convert2shp(data_long_sum)
    
    #setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
-	 #fwrite(test_sf, "./data/test_sf.csv")
+	 #fwrite(test_sf, "./data/test_sf_try.csv")
 	
+   st_write(test_sf, "./data/test_sf.shp")
+   filename <- system.file("./data/test_sf.shp", package = "sf")
+   test_sf <- st_read(filename())
+
    # plot using ACLIM function
    bottomT_aclim_func_plot <- plot_stations_basemap(sfIN = test_sf,fillIN = "mean_temp",
    																								 colorIN = "mean_temp", 
@@ -63,18 +75,42 @@
 
    
    # build ggplot from scratch
+   
+   test_sf_NA <- na.omit(test_sf)
+   
    bottomT_ggplot_plot <- ggplot() +
-  												geom_sf(data = test_sf, aes(fill = mean_temp, color = mean_temp)) +
-  												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="white", # this is the part I need to figure out
-  																color="black",lwd=0.5) +
-  												coord_sf(crs = crs_bering) +
-  												     scale_color_viridis_c() +
-  												     scale_fill_viridis_c() 
+  												geom_sf(data = test_sf_NA, aes(color = mean_temp)) + 
+  												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
+  																color="black",lwd=0.25) +
+                        	xlab("Longitude") + ylab("Latitude") +
+  										  	coord_sf(crs = crs_bering) +
+   												scale_x_continuous(
+  													breaks = c(160, 170, 180, 190, 200, 210),
+   												) +
+  												scale_color_viridis_c() +
+   												labs(colour = "Bottom temperature (˚C)") +
+   												theme_bw() 
    
     ggsave(file = ("./output/plots/bottomT_ggplot_plot.pdf"),
    			  plot = bottomT_ggplot_plot,
 					height = 7.5, width = 12, units = "in")
 
+
+    ## add bathymetry
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
   
    # lat range 52 - 70, long range 180 -210 (resolution of land shape)
    
@@ -110,4 +146,8 @@
 					height = 7.5, width = 12, units = "in")
 
     	
- 
+	#### plot by week and year ####
+    
+	# first try with all weeks of one year
+    
+    
