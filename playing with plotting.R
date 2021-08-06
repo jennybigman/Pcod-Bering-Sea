@@ -30,10 +30,18 @@
 
 	  all_temp_dat$week <- week(all_temp_dat$date) # week of year
 	  
+	  # restrict dataset to months of spawning Jan - June
+	  months_spawn <- c("January", "February", "March", "April", "May", "June")
+	  months_spawn_num <- c(1:6)
+	  
+	  spawn_dates_temp_dat <- filter(all_temp_dat, month %in% months_spawn_num)
+	  
+	  temp_dat_sf <- convert2shp(spawn_dates_temp_dat)
+	  
 		# convert to shape file
 	  
-	  temp_dat_1970 <- all_temp_dat %>% filter(year == 1970)
-	  temp_dat_1970_sf <- convert2shp(temp_dat_1970)
+	  #temp_dat_1970 <- all_temp_dat %>% filter(year == 1970)
+	  #temp_dat_1970_sf <- convert2shp(temp_dat_1970)
     #### make summaries of data to test plots -----------------------
     
     # all data
@@ -100,12 +108,35 @@
     
     
     
+    ## multiply by hatch success model
+    hatch_success <- function(x){
+    H <- (0.453 / (1 + 
+    		(((x - 4.192)/2.125))^2)
+    	) 
+    	
+    }
     
     
+    test_sf_hatch <- test_sf %>%
+    								 mutate(hatch_succ = sapply(mean_temp, hatch_success))
     
-    
-    
-    
+    hatch_success_ggplot_plot <- ggplot() +
+  												geom_sf(data = test_sf_hatch, aes(color = hatch_succ)) + 
+  												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
+  																color="black",lwd=0.25) +
+                        	xlab("Longitude") + ylab("Latitude") +
+  										  	coord_sf(crs = crs_bering) +
+   												scale_x_continuous(
+  													breaks = c(160, 170, 180, 190, 200, 210),
+   												) +
+  												scale_color_viridis_c() +
+   												labs(colour = "Proportion hatch success") +
+   												theme_bw() 
+   
+    ggsave(file = ("./Pcod-Bering-Sea/output/plots/hatch_success_ggplot_plot.png"),
+   			  plot = hatch_success_ggplot_plot,
+					height = 7.5, width = 12, units = "in")
+
     
     
     
