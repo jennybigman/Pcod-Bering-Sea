@@ -4,7 +4,7 @@
     library(data.table)
     library(tidyverse)
     setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
-		all_temp_dat <- fread( "./data/all_temp_dat.csv")
+		#all_temp_dat <- fread( "./data/all_temp_dat.csv")
     
 		#### Setup workspace ---------------------------------------------------------------
 		setwd("~/ACLIM2") 

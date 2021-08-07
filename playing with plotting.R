@@ -16,10 +16,11 @@
     setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
 		library(data.table)
     library(tidyverse)
+    library(sf)
 		all_temp_dat <- fread("./data/all_temp_dat.csv")
 		all_temp_dat_NA <- na.omit(all_temp_dat)
 		
-		test_sf <- fread("./data/test_sf.csv")
+		test_sf <- st_read("./data/test_sf.shp")
 		
 		# add columns
 		all_temp_dat$date <- as.Date(all_temp_dat$time) # date in Date format
@@ -109,19 +110,25 @@
     
     
     ## multiply by hatch success model
-    hatch_success <- function(x){
-    H <- (0.453 / (1 + 
-    		(((x - 4.192)/2.125))^2)
-    	) 
-    	
+    hatch_success_cauchy_func <- function(x, k = 0.453, mu = 4.192, sigma = 2.125 ){
+     (k / (1 + (((x - mu)/sigma))^2)) 
     }
     
     
-    test_sf_hatch <- test_sf %>%
-    								 mutate(hatch_succ = sapply(mean_temp, hatch_success))
+    hatch_success_gaus_func <- function(x, k = 0.395, mu = 4.50, sigma = 2.58){
+    	k * exp(-1/2 * (x - mu)^2/sigma^2)
+    } 
     
-    hatch_success_ggplot_plot <- ggplot() +
-  												geom_sf(data = test_sf_hatch, aes(color = hatch_succ)) + 
+    test_sf_hatch <- test_sf %>%
+    								 mutate(hatch_success_cauchy = sapply(mean_temp, 
+    								 																		 hatch_success_cauchy_func)) %>%
+    								 mutate(hatch_success_gaus = sapply(mean_temp,
+    								 																			hatch_success_gaus_func))
+    
+    test_sf_hatch <- na.omit(test_sf_hatch)
+    
+    hatch_success_ggplot_plot_cauchy <- ggplot() +
+  												geom_sf(data = test_sf_hatch, aes(color = hatch_success_cauchy)) + 
   												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
   																color="black",lwd=0.25) +
                         	xlab("Longitude") + ylab("Latitude") +
@@ -132,17 +139,85 @@
   												scale_color_viridis_c() +
    												labs(colour = "Proportion hatch success") +
    												theme_bw() 
-   
-    ggsave(file = ("./Pcod-Bering-Sea/output/plots/hatch_success_ggplot_plot.png"),
-   			  plot = hatch_success_ggplot_plot,
+        ggsave(file = ("./Pcod-Bering-Sea/output/plots/hatch_success_ggplot_plot.png"),
+   			  plot = hatch_success_ggplot_plot_cauchy,
 					height = 7.5, width = 12, units = "in")
+        
+    # with no legend
+      hatch_success_ggplot_plot_cauchy <- ggplot() +
+  												geom_sf(data = test_sf_hatch, aes(color = hatch_success_cauchy)) + 
+  												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
+  																color="black",lwd=0.25) +
+                        	xlab("Longitude") + ylab("Latitude") +
+  										  	coord_sf(crs = crs_bering) +
+   												scale_x_continuous(
+  													breaks = c(160, 170, 180, 190, 200, 210),
+   												) +
+  												scale_color_viridis_c() +
+   												theme_bw() +
+      										theme(legend.position = "none")
+        
 
+
+    hatch_success_ggplot_plot_gaus <- ggplot() +
+  												geom_sf(data = test_sf_hatch, aes(color = hatch_success_gaus)) + 
+  												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
+  																color="black",lwd=0.25) +
+                        	xlab("Longitude") + ylab("Latitude") +
+  										  	coord_sf(crs = crs_bering) +
+   												scale_x_continuous(
+  													breaks = c(160, 170, 180, 190, 200, 210),
+   												) +
+  												scale_color_viridis_c() +
+   												labs(colour = "Proportion hatch success") +
+   												theme_bw() 
+    
+    # with no y-axis
+    hatch_success_ggplot_plot_gaus <- ggplot() +
+  												geom_sf(data = test_sf_hatch, aes(color = hatch_success_gaus)) + 
+  												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
+  																color="black",lwd=0.25) +
+                        	xlab("Longitude") + ylab("Latitude") +
+  										  	coord_sf(crs = crs_bering) +
+   												scale_x_continuous(
+  													breaks = c(160, 170, 180, 190, 200, 210),
+   												) +
+  												scale_color_viridis_c() +
+   												labs(colour = "Proportion hatch success") +
+   												theme_bw() +
+    										  theme(
+    										  	axis.text.y = element_blank(),
+    										  	axis.ticks.y = element_blank(),
+    										  	axis.title.y = element_blank()
+    										  )
+    
+
+    # plot side-by-side
+    library(patchwork)
     
     
-    
-    
-    
-  
+   plot1 <- hatch_success_ggplot_plot_cauchy + 
+   	        theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in")) +
+   	        ggtitle("Cauchy") +
+   	        theme(plot.title = element_text(size = 12, hjust = 0.5,  face = "bold"))
+   
+   plot2 <- hatch_success_ggplot_plot_gaus + 
+   	        theme(plot.margin = unit(c(0.2, 0.2, 0.2, -0.05), "in")) +
+   	        ggtitle("Gaussian") +
+   	        theme(plot.title = element_text(size = 12, hjust = 0.5,  face = "bold"))
+
+	 sum_hatch_success <- plot1 + plot2 + plot_layout(ncol = 2)
+
+	 ggsave(file = ("./Pcod-Bering-Sea/output/plots/sum_hatch_success.png"),
+   			   plot = sum_hatch_success,
+					 height = 7.5, width = 12, units = "in")
+
+
+	 
+	 
+	 
+	 
+	 
    # lat range 52 - 70, long range 180 -210 (resolution of land shape)
    
    data_long_sum2 <-data_long_sum %>% 
