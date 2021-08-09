@@ -17,7 +17,7 @@
     	paste0("_", IDin)
     }
     
-    years <- seq(1970, 1972, by = 1)
+    years <- seq(1970, 2020, by = 1) 
 
     IDs <- sapply(years, ID_func)
     
@@ -33,7 +33,7 @@
     
 	# function to read in file path and transform data
 
-    data_transform <- function(x){
+    data_transform <- function(x){ #### this function takes forever if running it over all years at once ####
     
   			load(x)
     	
@@ -143,7 +143,7 @@
         # save plots
         setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots")
        
-        years <- c(1970:1972)
+        years <- c(1970:2020)
         
         mo_name_func <- function(x){
         	year_month <- paste0(x, "_bottom_temp_monthly")
@@ -187,7 +187,7 @@
         # save plots
         setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/weekly plots")
        
-        years <- c(1970:1972)
+        years <- c(1970:2020)
         
         week_name_func <- function(x){
         	year_month <- paste0(x, "_bottom_temp_weekly")
@@ -232,7 +232,7 @@
         
         setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots")
        
-        years <- c(1970:1972)
+        years <- c(1970:2020)
         
         mo_name_func <- function(x){
         	year_month <- paste0(x, "_hatch_success_monthly")
@@ -277,7 +277,7 @@
 
         setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/weekly plots")
        
-        years <- c(1970:1972)
+        years <- c(1970:2020)
         
         week_name_func <- function(x){
         	year_month <- paste0(x, "_hatch_success_weekly")
