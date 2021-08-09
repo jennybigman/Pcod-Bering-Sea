@@ -277,7 +277,7 @@
 
         setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/weekly plots")
        
-        years <- c(1970:2020)
+        years <- c(1970:2020) 
         
         week_name_func <- function(x){
         	year_month <- paste0(x, "_hatch_success_weekly")
