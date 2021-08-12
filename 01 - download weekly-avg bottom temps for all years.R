@@ -7,8 +7,8 @@
 		#all_temp_dat <- fread( "./data/all_temp_dat.csv")
     
 		#### Setup workspace ---------------------------------------------------------------
-		setwd("~/ACLIM2") 
-		
+		setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/ACLIM2-main")
+    
 		library(devtools)
 		library(ncdf4)
 		library(thredds)
@@ -61,9 +61,7 @@
   	}
   	
   	dates_times <- sapply(weekly_dates, time_zone_func)
-  	
-    # the full grid is large and takes a longtime to plot, so let's subsample the grid every 4 cells
-  	  ### what is this? ###
+  
    
     # function to create vector of IDs for labeling file names
     ID_func <- function(x){
@@ -90,8 +88,8 @@
     		  get_l2(
     		    ID          = x,
     		    overwrite   = T,
-    		    #xi_rangeIN  = seq(1,182,10),
-    		    #eta_rangeIN = seq(1,258,10),
+    		    xi_rangeIN  = seq(1,182),
+    		    eta_rangeIN = seq(1,258),
     		    ds_list     = "Bottom 5m", # changed from tutorial code b/c we only want bottom temps
     		    trIN        = dates_times,
     		    yearsIN     = y,
@@ -109,45 +107,49 @@
     
     fl_paths <- lapply(IDs, fl_list)
     
-    # function to read in file path and transform data
-  	data_transform <- function(x){
+    #### only use below if want to combine all data into one file ####
     
-  			load(x)
-    	
-  		# format data into a tidy dataframe
-    		i <-1
-    		data_long <- data.frame(latitude = as.vector(temp$lat),
-    		                   longitude = as.vector(temp$lon),
-    		                   val = as.vector(temp$val[,,i]),
-    		                   time = temp$time[i],
-    		                   year = substr( temp$time[i],1,4),stringsAsFactors = F
-    		                   )
-    		
-    		for(i in 2:dim(temp$val)[3])
-    		  data_long <- rbind(data_long,
-    		                      data.frame(latitude = as.vector(temp$lat),
-    		                       longitude = as.vector(temp$lon),
-    		                       val = as.vector(temp$val[,,i]),
-    		                       time = temp$time[i],
-    		                       year = substr( temp$time[i],1,4),stringsAsFactors = F)
-    		  )
-    
-    		data_long
-    
-    		}
-
-	
-  	data_list <- lapply(fl_paths, data_transform)
-
-  	# combine all temps from all years
-    all_temp_dat <- bind_rows(data_list)
-    
-    
-    # check to make sure all data is there
-    unique(all_temp_dat$year)
-		unique(all_temp_dat$time)  
-	
-		# write to csv
-		setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
-		fwrite(all_temp_dat, "./data/all_temp_dat.csv")
-		
+ #   # function to read in file path and transform data
+ # 	data_transform <- function(x){
+ #   
+ # 			load(x)
+ #   	
+ # 		# format data into a tidy dataframe
+ #   		i <-1
+ #   		data_long <- data.frame(latitude = as.vector(temp$lat),
+ #   		                   longitude = as.vector(temp$lon),
+ #   		                   val = as.vector(temp$val[,,i]),
+ #   		                   time = temp$time[i],
+ #   		                   year = substr( temp$time[i],1,4),stringsAsFactors = F
+ #   		                   )
+ #   		
+ #   		for(i in 2:dim(temp$val)[3])
+ #   		  data_long <- rbind(data_long,
+ #   		                      data.frame(latitude = as.vector(temp$lat),
+ #   		                       longitude = as.vector(temp$lon),
+ #   		                       val = as.vector(temp$val[,,i]),
+ #   		                       time = temp$time[i],
+ #   		                       year = substr( temp$time[i],1,4),stringsAsFactors = F)
+ #   		  )
+ #   
+ #   		data_long
+ #   
+ #   		}
+#
+#	
+ # 	data_list <- lapply(fl_paths, data_transform)
+#
+ # 	# combine all temps from all years
+ #   all_temp_dat <- bind_rows(data_list)
+ #   all_temp_dat <- na.omit(all_temp_dat)
+ #   all_temp_dat <- all_temp_dat %>% distinct(across(everything()))
+ #   
+#
+ #   # check to make sure all data is there
+ #   unique(all_temp_dat$year)
+#		unique(all_temp_dat$time)  
+#	
+#		# write to csv
+#		setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
+#		fwrite(all_temp_dat, "./data/all_temp_dat.csv")
+#		#
