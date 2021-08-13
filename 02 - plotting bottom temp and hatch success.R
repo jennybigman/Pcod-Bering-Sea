@@ -1,11 +1,11 @@
 # 02 - plotting weekly-averaged bottom temps and hatch success
 
 	#### load and transform data ####
-
+    library(lubridate)
 	
 	# load list of files from Bering 10K
 	
-	  setwd("~/ACLIM2") 
+	  setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/ACLIM2-main")
     main   <- getwd()  #"~/GitHub_new/ACLIM2
     source("R/make.R")
     source("R/sub_scripts/load_maps.R") 
@@ -17,7 +17,7 @@
     	paste0("_", IDin)
     }
     
-    years <- seq(1970, 2020, by = 1) 
+    years <- seq(1970, 1970, by = 1) 
 
     IDs <- sapply(years, ID_func)
     
@@ -33,11 +33,11 @@
     
 	# function to read in file path and transform data
 
-    data_transform <- function(x){ #### this function takes forever if running it over all years at once ####
+		data_transform <- function(x){ #### this function takes forever if running it over all years at once ####
     
   			load(x)
     	
-  		# format data into a tidy dataframe
+  			# format data into a tidy dataframe
     		i <-1
     		data_long <- data.frame(latitude = as.vector(temp$lat),
     		                   longitude = as.vector(temp$lon),
@@ -54,64 +54,70 @@
     		                       time = temp$time[i],
     		                       year = substr( temp$time[i],1,4),stringsAsFactors = F)
     		  )
+    		
+    		# omit NAs and any duplicate rows
+        data_long <- na.omit(data_long)
+    		data_long <- data_long %>% distinct(across(everything()))
     
-
-    		 # add date, month, day, week
-  			 data_long$date <- as.Date(data_long$time) # date in Date format
-				 data_long$month <- month(data_long$date) # month of year
-				 data_long$day <- day(data_long$date) # day of year
-				 data_long$week <- week(data_long$date) # week of year
+    		# add date, month, day, week
+  			data_long$date <- as.Date(data_long$time) # date in Date format
+				data_long$month <- month(data_long$date) # month of year
+				data_long$day <- day(data_long$date) # day of year
+				data_long$week <- week(data_long$date) # week of year
 	      
-				 # add name of month for plotting
-				 data_long$month_name <- NA
-         
-         data_long$month_name[data_long$month == 1] <- "January"
-         data_long$month_name[data_long$month == 2] <- "February"
-		     data_long$month_name[data_long$month == 3] <- "March"
-		     data_long$month_name[data_long$month == 4] <- "April"
-		     data_long$month_name[data_long$month == 5] <- "May"
-		     data_long$month_name[data_long$month == 6] <- "June"
-		     data_long$month_name[data_long$month == 7] <- "July"
-		     data_long$month_name[data_long$month == 8] <- "August"
-		     data_long$month_name[data_long$month == 9] <- "September"
-		     data_long$month_name[data_long$month == 10] <- "October"
-		     data_long$month_name[data_long$month == 11] <- "November"
-		     data_long$month_name[data_long$month == 12] <- "December"
+				# add name of month for plotting
+				data_long$month_name <- NA
+        
+        data_long$month_name[data_long$month == 1] <- "January"
+        data_long$month_name[data_long$month == 2] <- "February"
+		    data_long$month_name[data_long$month == 3] <- "March"
+		    data_long$month_name[data_long$month == 4] <- "April"
+		    data_long$month_name[data_long$month == 5] <- "May"
+		    data_long$month_name[data_long$month == 6] <- "June"
+		    data_long$month_name[data_long$month == 7] <- "July"
+		    data_long$month_name[data_long$month == 8] <- "August"
+		    data_long$month_name[data_long$month == 9] <- "September"
+		    data_long$month_name[data_long$month == 10] <- "October"
+		    data_long$month_name[data_long$month == 11] <- "November"
+		    data_long$month_name[data_long$month == 12] <- "December"
 		
-	       # reorder for plotting
-				 data_long$month_name <- factor(data_long$month_name)
-  			 data_long$month_name <- fct_reorder(data_long$month_name, data_long$month)
+	      # reorder for plotting
+				data_long$month_name <- factor(data_long$month_name)
+  			data_long$month_name <- fct_reorder(data_long$month_name, data_long$month)
   			 
-  			 # calculate hatch success for both cauchy and gaussian distributions
-  			 hatch_success_cauchy_func <- function(x, k = 0.453, mu = 4.192, sigma = 2.125 ){
-         
-  			 		(k / (1 + (((x - mu)/sigma))^2)) 
-         }
+  			# calculate hatch success for both cauchy and gaussian distributions
+  			hatch_success_cauchy_func <- function(x, k = 0.453, mu = 4.192, sigma = 2.125 ){
+        
+  					(k / (1 + (((x - mu)/sigma))^2)) 
+        }
     
     
         hatch_success_gaus_func <- function(x, k = 0.395, mu = 4.50, sigma = 2.58){
-    	  
-        	k * exp(-1/2 * (x - mu)^2/sigma^2)
+    	 
+       	k * exp(-1/2 * (x - mu)^2/sigma^2)
         } 
     
         data_long <- data_long %>%
-    								 mutate(hatch_success_cauchy = sapply(val, 
-    								 																		 hatch_success_cauchy_func)) %>%
-    								 mutate(hatch_success_gaus = sapply(val,
-    								 																			hatch_success_gaus_func))
-    	  # omit NAs for plotting
-        data_long <- na.omit(data_long)
+    							  mutate(hatch_success_cauchy = sapply(val, hatch_success_cauchy_func)) %>%
+    							  mutate(hatch_success_gaus = sapply(val, hatch_success_gaus_func))
+    	 
+    		}
+    
+	data_long_list <- lapply(fl_paths, data_transform)
+
     
 	 	    # convert to shapefile
-        df_sf <- convert2shp(data_long)
-         
+        sf_func <- function(df){ 
+        
+         	df_sf <- createSF_points(df)
          
     		}
 
     
     # create list of shapefiles for each year
-    sf_file_list <- lapply(fl_paths, data_transform)
+    sf_file_list <- lapply(data_long_list, sf_func)
     
+    df <- sf_file_list[[1]]
     
     #### function to plot -- bottom temp ####
     
@@ -137,13 +143,12 @@
             
     }
     
-        
-        bottom_temp_monthly_plot_list <- lapply(sf_file_list, bottom_temp_monthly_plot_func)
+        bottom_temp_monthly_plot_list <- sapply(sf_file_list, bottom_temp_monthly_plot_func)
 
         # save plots
         setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots")
        
-        years <- c(1970:2020)
+        years <- c(1970:1970)
         
         mo_name_func <- function(x){
         	year_month <- paste0(x, "_bottom_temp_monthly")
