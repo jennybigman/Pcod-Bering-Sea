@@ -177,18 +177,18 @@
   monthly_plot <- function(df){
   	
  	plot <- ggplot() +
-  geom_sf(data = df_sf, aes(fill = val, color = val)) +
- 	geom_sf(data=sf_obj,fill="lightgrey", color="black",lwd=0.25) +
-  facet_wrap(~ month, ncol = 4, nrow = 3)  +
- 	coord_sf(crs = crs_bering) +
-  scale_color_viridis_c() +
-  scale_fill_viridis_c() +
- 	xlab("Longitude") + ylab("Latitude") +
-  scale_x_continuous(
-   breaks = c(170, 180, -170)) +
-  labs(colour = "˚C") +
-  theme_bw() +
-  theme(legend.title = element_text(size = 10))
+  						 geom_sf(data = df, aes(color = val)) +
+  						 geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", 
+  										 color="black",lwd=0.25) +
+  						 facet_wrap(~ month, ncol = 4, nrow = 3) +
+               xlab("Longitude") + ylab("Latitude") +
+  						 coord_sf(crs = crs_bering) +
+  					   scale_x_continuous(
+   						 breaks = c(170, 180, -170)) +
+  						 scale_color_viridis_c() +
+   						 labs(colour = "˚C") +
+   						 theme_bw() +
+  						 theme(legend.title = element_text(size = 10))
  	
   }
   
@@ -218,18 +218,18 @@
   weekly_plot <- function(df){
 
   weekly_plot <- ggplot() +
-  geom_sf(data = df_sf, aes(fill = val, color = val)) +
-  geom_sf(data=sf_obj,fill="lightgrey", color="black",lwd=0.25) +
-  facet_wrap(~ week, ncol = 8, nrow = 8)  +
- 	coord_sf(crs = crs_bering) +
-  scale_color_viridis_c() +
-  scale_fill_viridis_c() +
- 	xlab("Longitude") + ylab("Latitude") +
-  scale_x_continuous(
-   breaks = c(170, 180, -170)) +
-  labs(colour = "˚C") +
-  theme_bw() +
-  theme(legend.title = element_text(size = 10))
+  						 geom_sf(data = df, aes(color = val)) +
+  						 geom_sf(data= sf_obj,fill="lightgrey", 
+  										 color="black",lwd=0.25) +
+  						 facet_wrap(~ week, ncol = 8, nrow = 8) +
+               xlab("Longitude") + ylab("Latitude") +
+  						 coord_sf(crs = crs_bering) +
+  					   scale_x_continuous(
+   						 breaks = c(170, 180, -170)) +
+  						 scale_color_viridis_c() +
+   						 labs(colour = "˚C") +
+   						 theme_bw() +
+  						 theme(legend.title = element_text(size = 10))
   }
  
  weekly_plot_list <- lapply(df_sf_list, weekly_plot)
@@ -244,8 +244,14 @@
    }
         
    week_names <- sapply(years, wk_name_func)
+   
+   	ggsave_func2 <- function(x,y){
+  						ggsave(plot = x,
+        			file = paste(y,".png",sep=""),
+        			width = 15, height = 15, units = "in")
+				}
 
-   mapply(ggsave_func, x = weekly_plot_list, y = week_names)
+   mapply(ggsave_func2, x = weekly_plot_list, y = week_names)
 
    
    #### hatch success
@@ -253,18 +259,18 @@
   monthly_plot_hs <- function(df){
   	
  	plot <- ggplot() +
-  geom_sf(data = df_sf2, aes(fill = hatch_success_cauchy, color = hatch_success_cauchy)) +
- 	geom_sf(data=sf_obj,fill="lightgrey", color="black",lwd=0.25) +
-  facet_wrap(~ month, ncol = 4, nrow = 3)  +
- 	coord_sf(crs = crs_bering) +
-  scale_color_viridis_c() +
-  scale_fill_viridis_c() +
- 	xlab("Longitude") + ylab("Latitude") +
-  scale_x_continuous(
-   breaks = c(170, 180, -170)) +
-  labs(colour = "˚C") +
-  theme_bw() +
-  theme(legend.title = element_text(size = 10))
+  						 geom_sf(data = df, aes(color = hatch_success_cauchy)) +
+  						 geom_sf(data= sf_obj,fill="lightgrey", 
+  										 color="black",lwd=0.25) +
+  						 facet_wrap(~ month, ncol = 4, nrow = 3) +
+               xlab("Longitude") + ylab("Latitude") +
+  						 coord_sf(crs = crs_bering) +
+  					   scale_x_continuous(
+   						 breaks = c(170, 180, -170)) +
+  						 scale_color_viridis_c() +
+   						 labs(colour = "Proportion hatch success") +
+   						 theme_bw() +
+  						 theme(legend.title = element_text(size = 10))
  	
   }
   
@@ -287,18 +293,18 @@
   weekly_plot_hs <- function(df){
 
   weekly_plot <- ggplot() +
-  geom_sf(data = df_sf, aes(fill = val, color = val)) +
-  geom_sf(data=sf_obj,fill="lightgrey", color="black",lwd=0.25) +
-  facet_wrap(~ week, ncol = 8, nrow = 8)  +
- 	coord_sf(crs = crs_bering) +
-  scale_color_viridis_c() +
-  scale_fill_viridis_c() +
- 	xlab("Longitude") + ylab("Latitude") +
-  scale_x_continuous(
-   breaks = c(170, 180, -170)) +
-  labs(colour = "˚C") +
-  theme_bw() +
-  theme(legend.title = element_text(size = 10))
+  						 geom_sf(data = df, aes(color = hatch_success_cauchy)) +
+  						 geom_sf(data= sf_obj,fill="lightgrey", 
+  										 color="black",lwd=0.25) +
+  						 facet_wrap(~ week, ncol = 8, nrow = 8) +
+               xlab("Longitude") + ylab("Latitude") +
+  						 coord_sf(crs = crs_bering) +
+  					   scale_x_continuous(
+   						 breaks = c(170, 180, -170)) +
+  						 scale_color_viridis_c() +
+   						 labs(colour = "Proportion hatch success") +
+   						 theme_bw() +
+  						 theme(legend.title = element_text(size = 10))
   }
  
  weekly_plot_hs_list <- lapply(df_sf_list, weekly_plot_hs)
@@ -314,4 +320,7 @@
         
    week_names <- sapply(years, wk_name_func)
 
-		mapply(ggsave_func, x = weekly_hs_plot_list, y = week_names)
+		mapply(ggsave_func2, x = weekly_hs_plot_list, y = week_names)
+
+		
+		##### NEXT TRY WITH FULL RES ####
