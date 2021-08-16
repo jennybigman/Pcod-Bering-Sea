@@ -320,7 +320,7 @@
         
    week_names <- sapply(years, wk_name_func)
 
-		mapply(ggsave_func2, x = weekly_hs_plot_list, y = week_names)
+		mapply(ggsave_func2, x = weekly_plot_hs_list, y = week_names)
 
 		
 		##### NEXT TRY WITH FULL RES ####
