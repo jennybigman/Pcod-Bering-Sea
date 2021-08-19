@@ -62,6 +62,9 @@
 	 # convert to shape format for plotting
    test_sf <- convert2shp(data_long_sum)
    
+   # try without built in ACLIM function
+   test_sf <- st_as_sf(data_long_sum, coords = c("latitude", "longitude"), crs = crs)
+   
    #setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
 	 #fwrite(test_sf, "./data/test_sf_try.csv")
 	
@@ -70,15 +73,15 @@
    test_sf <- st_read(filename())
 
    # plot using ACLIM function
-   bottomT_aclim_func_plot <- plot_stations_basemap(sfIN = test_sf,fillIN = "mean_temp",
-   																								 colorIN = "mean_temp", 
+   bottomT_aclim_func_plot <- plot_stations_basemap(sfIN = df_sf,fillIN = "val",
+   																								 colorIN = "val", 
    																								 sizeIN = 0.6) + 
   														scale_color_viridis_c() +
   														scale_fill_viridis_c() 
    														
 
    
-   ggsave(file = ("./output/plots/bottomT_aclim_func_plot.pdf"),
+   ggsave(file = ("./output/plots/test_aclim_func.png"),
    			  plot = bottomT_aclim_func_plot,
 					height = 7.5, width = 12, units = "in")
 
@@ -88,7 +91,7 @@
    test_sf_NA <- na.omit(test_sf)
    
    bottomT_ggplot_plot <- ggplot() +
-  												geom_sf(data = test_sf_NA, aes(color = mean_temp)) + 
+  												geom_sf(data = df_sf, aes(color = val)) + 
   												geom_sf(data=st_transform(bering_sf,crs=crs_bering),fill="lightgrey", # this is the part I need to figure out
   																color="black",lwd=0.25) +
                         	xlab("Longitude") + ylab("Latitude") +
@@ -252,8 +255,6 @@
 					height = 7.5, width = 12, units = "in")
 
     	
-	#### plot by week and year ####
+#### plotting every 5th grid ####
     
-	# first try with all weeks of one year
-    
-    
+  
