@@ -1,7 +1,13 @@
 #LR code to access NetCDF files without ACLIM functions, create dataframe.
 
 library(lattice)
-
+library(devtools)
+library(ncdf4)
+library(thredds)
+library(lubridate)
+library(stringr)
+library(dplyr)
+library(data.table)
 
 url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
 opendap  <- "dodsC/Level2/B10K-K20_CORECFS_bottom5m.nc"
@@ -55,6 +61,7 @@ temp_df$DateTime<- as.POSIXct(temp_df$Time, origin = "1900-01-01", tz = "GMT")
 temp_df$Lon <- lons[cbind(temp_df$Xi,temp_df$Eta)]
 temp_df$Lat <- lats[cbind(temp_df$Xi,temp_df$Eta)]
 
+
 #could save this dataframe for later use...
 
 
@@ -69,6 +76,9 @@ nc_close(nc) #close the connection with the remote netCDF file.
 temp_df <- na.omit(temp_df)
 
 temp_df <- temp_df %>% distinct(across(everything()))
+
+setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability")
+fwrite(temp_df, "./data/ROMS_all_temp.csv")
 
 # compare to my df
 

@@ -134,7 +134,7 @@
 
  	data_list <- lapply(fl_paths, data_transform)
  	
- 	# do some wenagling
+ 	# do some wrangling
  	
  	data_wrangle <- function(df){
  	
