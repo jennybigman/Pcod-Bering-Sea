@@ -93,10 +93,13 @@
     		    ds_list     = "Bottom 5m", # changed from tutorial code b/c we only want bottom temps
     		    trIN        = dates_times,
     		    yearsIN     = y,
-    		    sub_varlist = list('Bottom 5m' = "temp" ), # changed from tutorial code b/c we only want bottom temps
+    		    sub_varlist = list('Bottom 5m' = "temp",
+    		    									 ), # changed from tutorial code b/c we only want bottom temps
     		    sim_list    = sim  )
     			
     		}}
+    
+      
     
     bottom_temp_lists <- mapply(bt_func, x = IDs, y = years)
 
