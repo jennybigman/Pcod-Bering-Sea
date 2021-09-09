@@ -130,7 +130,7 @@
 				
 	mapply(ggsave_func, x = monthly_plot_list, y = month_names)
 
-  ## spawning habitat suitability = 0.1 colored dark blue
+  ## spawning habitat suitability > 0.1 < 0.9 colored dark blue
 
 		hab_suit_monthly_plot_func <- function(x){
 		
@@ -141,9 +141,10 @@
 					geom_sf(data = dat1970, aes(color = sp_hab_suit))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
-					scale_color_gradientn(colors = c("#B3E5FC", "#01579B",
-																					 "#B3E5FC","#B3E5FC"),
-																values = c(0, 0.1, 0.2, 1),
+					scale_color_gradientn(colors = c("#B3E5FC","#B3E5FC",
+																					 "#01579B","#01579B",
+																					 "#00345C","#00345C"),
+																values = c(0, 0.099, 0.1, 0.89, 0.9, 1),
 																breaks = c(0.1, 0.5, 0.9)) +
     	  	facet_wrap(~ month_name, ncol = 3, nrow = 3) +
  					scale_x_continuous(
@@ -177,7 +178,7 @@
   setwd("~/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability")
         
   mo_name_func <- function(x){
-  	year_month <- paste0(x, "_habitat_suitability_90")
+  	year_month <- paste0(x, "_habitat_suitability_1090")
   }
    
   month_names <- sapply(years, mo_name_func)
@@ -189,3 +190,6 @@
 	}
 				
 	mapply(ggsave_func, x = monthly_plot_list, y = month_names)
+
+	
+	## index of s
