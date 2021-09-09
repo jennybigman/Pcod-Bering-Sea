@@ -4,10 +4,12 @@ This repo houses code for the EBS Pacific Cod habitat suitability project
 
 key to files:
 
-"00a - tutorial for accessing ROMS data from ACLIM github": tutorial for working with ACLIM data in R (in "practice code")
+00a - download and transform level 2 ROMS bottom temp data
 
-"00b - learning how to play with weekly slices of ROMS bottom temp data": me playing around with learning how to download weekly and yearly data (in "practice code")
+00b - calculating hatch success based on Laurel & Rogers 2020 CJFAS and ROMS bottom temp
 
-"01 - download weekly-avg bottom temps for all years": code to download weekly-averaged bottom temp data
+00c - trim data by depth (keep anything < 250m) and region (keep data on Bering Shelf based on Ortiz Regions)
 
-"02 - plotting bottom temp and hatch success": code to load in yearly bottom temp data and create plots of bottom temps by week and month and plots of hatch success by week and month for each year
+01 - run this script to load libraries, helpful functions, data (hatch success and habitat suitability)
+
+02 - code for mapping monthly-averaged habitat suitability for each year 
