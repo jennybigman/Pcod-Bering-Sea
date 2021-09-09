@@ -50,7 +50,8 @@
 	# add domain # 15 back into BS regions and check to make sure all polygons are there
 	bsregions.df_add <- bind_rows(bsregions.df_rm, bsregions.df_15_2)
 	 
-	ggplot() +
+	BS_regions <-
+		ggplot() +
   	geom_polygon(data = reg, aes(x = long, y = lat, group = group), 
   	             fill = "darkgrey", color = NA) + 
   	geom_polygon(data = bsregions.df_add, aes(long, lat, group=group), 
@@ -60,7 +61,10 @@
   	xlab("Longitude")+
   	ylab("Latitude")
 	 
-	 
+	 	ggsave("./Pcod-Bering-Sea/output/plots/BS_regions.png",
+			 BS_regions,
+			 width = 10, height = 10, units = "in")
+
 
 
 
