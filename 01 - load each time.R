@@ -10,6 +10,7 @@
 	library(forcats)
 	library(lubridate)
 	library(patchwork)
+	library(raster)
 	
 	symbol<-"\u2265"
 
