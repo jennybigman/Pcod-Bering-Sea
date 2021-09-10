@@ -11,7 +11,13 @@
 	library(lubridate)
 	library(patchwork)
 	library(raster)
+	library(rgdal)
+	library(stars)
 	
+	# turn off spherical geometry
+	sf_use_s2(FALSE)
+	
+	# create object for greater than or equal to symbol
 	symbol<-"\u2265"
 
 	#### load and transform data ####

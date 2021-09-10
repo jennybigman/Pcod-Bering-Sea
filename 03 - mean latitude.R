@@ -63,4 +63,36 @@
 			 width = 10, height = 7, units = "in")
 
 	
+	# try with map
+	
+	geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+    	  	facet_wrap(~ month_name, ncol = 3, nrow = 3) +
+ 					scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 12),	
+  					axis.title = element_text(size = 14),
+  					legend.title.align=0.5)
+	
 	
