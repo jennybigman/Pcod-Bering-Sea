@@ -11,6 +11,8 @@
 	library(lubridate)
 	library(patchwork)
 	
+	symbol<-"\u2265"
+
 	#### load and transform data ####
 	
 	sm_temp_hind_df <- fread( "./data/sm_temp_df_poly_depth.csv")
