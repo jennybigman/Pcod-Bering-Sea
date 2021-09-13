@@ -24,10 +24,12 @@
 	
 	mean_lats <- merge(mean_lats_0.5, mean_lats_0.9, by = "year") 
 	
+	mean_lats_2021 <- mean_lats %>% filter(., year != 2021)
+	
 	# one plot
 	
 	mean_lat_yearly_plot <-    
-   	ggplot(data = mean_lats) +
+   	ggplot(data = mean_lats_2021) +
    	geom_line(aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
 		#geom_point(aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
 		geom_line(aes(x = year, y = mean_lat_0.9), alpha = 0.7, color = "#00345C", size = 1) +

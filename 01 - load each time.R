@@ -4,6 +4,7 @@
 	library(here)
 	library(rnaturalearth)
 	library(dplyr)
+	library(tidyverse)
 	library(ggplot2)
 	library(data.table)
 	library(sf)
@@ -40,4 +41,9 @@
 	#### load map ####
 	world_map_data <- ne_countries(scale = "medium", returnclass = "sf") 
 	
-	
+	#### plotting function ####
+  ggsave_func <- function(x,y){
+  	ggsave(plot = x,
+    file = paste(y,".png",sep=""),
+    width = 10, height = 10, units = "in")
+	}
