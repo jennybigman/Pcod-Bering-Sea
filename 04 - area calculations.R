@@ -20,6 +20,7 @@
 	 ggplot() +
 	 	geom_raster(data = dat1970_df, aes(x = x, y = y))	 
 	 
+	 dat_raster <- rasterize(dat1970_sf)
 	 
 	 
 	 library(dplyr)

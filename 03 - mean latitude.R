@@ -2,7 +2,7 @@
 
 	mean_lat_function <- function(x){
 		
-		new_dat <- sm_temp_hind_df %>%
+		new_dat <- ROMS_dat_hind_trim %>%
 			filter(., sp_hab_suit >= x)
 		
 		new_dat_sum <- new_dat %>%

@@ -60,7 +60,7 @@
 
 	hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- sm_temp_hind_df_sf %>% filter(., year == x)
+		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -122,7 +122,7 @@
 
 		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- sm_temp_hind_df_sf %>% filter(., year == x)
+		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -184,7 +184,7 @@
 	
 		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- sm_temp_df_poly_depth_sf %>% filter(., year == x)
+		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -254,7 +254,7 @@
 	
 		histo_plot_func <- function(x){
 		
-		    new_dat <- sm_temp_df_poly_depth_sf %>% filter(., year == x)
+		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
 		    
 		    new_dat <- new_dat %>%
 					mutate(group = case_when(
@@ -321,7 +321,7 @@
 	
 	#### index of suitable spawning habitat ####
 	
-	yearly_hab_dat <- sm_temp_hind_df %>%
+	yearly_hab_dat <- ROMS_dat_hind_trim_sf %>%
    								  group_by(year) %>%
    								  summarise(annual_hatch_success_cauchy = mean(hatch_success_cauchy),
    								 					  annual_hatch_success_gaussian = mean(hatch_success_gaus),
@@ -364,7 +364,7 @@
 	
 	years_keep <- c(2000:2020)
   	
-  sm_temp_hind_df_sub <- sm_temp_hind_df %>% filter(., year %in% years_keep)
+  ROMS_dat_hind_trim_sf_sub <- ROMS_dat_hind_trim_sf %>% filter(., year %in% years_keep)
   
 
 	# create a list of year bins
@@ -374,7 +374,7 @@
 	# create a list of dfs summarized by year bins
 	sum_yr_bin <- function(x){
  
-		df <- sm_temp_hind_df_sub %>%
+		df <- ROMS_dat_hind_trim_sf_sub %>%
 		filter(year %in% x) %>%
 		group_by(longitude, latitude) %>%
 		summarise(mean_hs = mean(hatch_success_cauchy),
