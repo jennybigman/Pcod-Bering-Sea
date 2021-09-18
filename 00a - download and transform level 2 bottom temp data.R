@@ -4,12 +4,13 @@
 	library(thredds)
 	library(reshape2)
 	library(here)
+	library(data.table)
 
 	# set up download from server 
 	url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
 	opendap  <- "dodsC/Level2/B10K-K20_CORECFS_bottom5m.nc"
 	
-	nc <- nc_open(paste(url_base,opendap,sep=""))
+	nc <- nc_open(paste(url_base, opendap, sep = ""))
 
 	# create objects for known lats and longs and xi and eta axes
   lats <- ncvar_get(nc,"lat_rho")
@@ -23,7 +24,7 @@
 	time_axis <- as.POSIXct(t_axis, origin = "1900-01-01", tz = "GMT") 
 
 	# download temp array -- for some reason, only works without last two time steps
-	temp_array<- ncvar_get(nc,"temp",start=c(1,1,1),count=c(182,258,2662)) 
+	temp_array <- ncvar_get(nc, "temp", start = c(1,1,1), count = c(182,258,2662)) 
 
   # name the dimensions
 	dim(temp_array)
@@ -37,9 +38,9 @@
 														value.name = "temp")
 
 	# translate to lat/lon and time
-	temp_df$DateTime<- as.POSIXct(temp_df$Time, origin = "1900-01-01", tz = "GMT")
-	temp_df$Lon <- lons[cbind(temp_df$Xi,temp_df$Eta)]
-	temp_df$Lat <- lats[cbind(temp_df$Xi,temp_df$Eta)]
+	temp_df$DateTime <- as.POSIXct(temp_df$Time, origin = "1900-01-01", tz = "GMT")
+	temp_df$longitude <- lons[cbind(temp_df$Xi, temp_df$Eta)]
+	temp_df$latitude <- lats[cbind(temp_df$Xi, temp_df$Eta)]
 
 	# close the connection with the remote netCDF file
 	nc_close(nc)
