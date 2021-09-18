@@ -4,12 +4,20 @@ This repo houses code for the EBS Pacific Cod habitat suitability project
 
 key to files:
 
-00a - download and transform level 2 ROMS bottom temp data
+preprocessing -- do not need to run
 
-00b - calculating hatch success based on Laurel & Rogers 2020 CJFAS and ROMS bottom temp
+00a - download and transform level 2 bottom temp data
 
-00c - trim data by depth (keep anything < 250m) and region (keep data on Bering Shelf based on Ortiz Regions)
+00b - accessing area of ROMS grid cells
+
+00c - merge area and bottom temp dfs and trim by shelf region and depth
+
+00d -  calculate hatch success
+
+start with these files:
 
 01 - run this script to load libraries, helpful functions, data (hatch success and habitat suitability)
 
 02 - code for mapping monthly-averaged habitat suitability for each year 
+
+03 - estimating and plotting mean latitude 
