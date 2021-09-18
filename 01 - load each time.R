@@ -22,20 +22,15 @@
 	symbol<-"\u2265"
 
 	#### load and transform data ####
+	ROMS_dat_hind_trim <-	fread(file = "./data/SpawnMonths_ROMS_dat_hind_trim.csv")
 	
-	sm_temp_hind_df <- fread( "./data/sm_temp_df_poly_depth.csv")
-	
-  # standardize hatch success (calculating spawning habitat suitability)
-  sm_temp_hind_df <- sm_temp_hind_df %>%
-  	mutate(sp_hab_suit = hatch_success_cauchy/max(hatch_success_cauchy))
-  
-  # reorder for plotting
-	sm_temp_hind_df$month_name <- factor(sm_temp_hind_df$month_name)
-  sm_temp_hind_df$month_name <- fct_reorder(sm_temp_hind_df$month_name, 
-  																		sm_temp_hind_df$month)
-  
+	 # reorder for plotting
+	ROMS_dat_hind_trim$month_name <- factor(ROMS_dat_hind_trim$month_name)
+  ROMS_dat_hind_trim$month_name <- fct_reorder(ROMS_dat_hind_trim$month_name, 
+  																		ROMS_dat_hind_trim$month)
+
   # convert to a shapefile
-  sm_temp_hind_df_sf <- sm_temp_hind_df %>%
+  ROMS_dat_hind_trim_sf <- ROMS_dat_hind_trim %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
 	
 	#### load map ####
@@ -46,4 +41,6 @@
   	ggsave(plot = x,
     file = paste(y,".png",sep=""),
     width = 10, height = 10, units = "in")
-	}
+  }
+  
+ 

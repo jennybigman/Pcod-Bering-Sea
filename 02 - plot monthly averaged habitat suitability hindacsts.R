@@ -1,21 +1,10 @@
 	# map monthly-averaged spawning habitat suitability 
 
-
-  #### ggsave function ####
-  
-  # function to save plots
-  
-  ggsave_func <- function(x,y){
-  	ggsave(plot = x,
-    file = paste(y,".png",sep=""),
-    width = 10, height = 10, units = "in")
-	}
-  
   #### map with a color gradient for spawning habitat suitability  ####
   
-	hab_suit_monthly_plot_func <- function(x){
+		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- sm_temp_hind_df_sf %>% filter(., year == x)
+		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -53,7 +42,7 @@
 	monthly_plot_list <- lapply(years, hab_suit_monthly_plot_func)
   
   mo_name_func_year <- function(x){
-  	year_month <- paste0(x, "_habitat_suitability_gradient")
+  	year_month <- paste0(x, "_habitat_suitability_gradient_check")
   }
    
   month_names_year <- sapply(years, mo_name_func_year)
