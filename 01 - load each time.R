@@ -24,7 +24,7 @@
 	#### load and transform data ####
 	ROMS_dat_hind_trim <-	fread(file = "./data/SpawnMonths_ROMS_dat_hind_trim.csv")
 	
-	 # reorder for plotting
+	# reorder for plotting
 	ROMS_dat_hind_trim$month_name <- factor(ROMS_dat_hind_trim$month_name)
   ROMS_dat_hind_trim$month_name <- fct_reorder(ROMS_dat_hind_trim$month_name, 
   																		ROMS_dat_hind_trim$month)
