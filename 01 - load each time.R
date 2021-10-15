@@ -14,6 +14,7 @@
 	library(raster)
 	library(rgdal)
 	library(stars)
+	library(marmap)
 	
 	# turn off spherical geometry
 	sf_use_s2(FALSE)
@@ -22,7 +23,7 @@
 	symbol<-"\u2265"
 
 	#### load and transform data ####
-	ROMS_dat_hind_trim <-	fread(file = "./data/SpawnMonths_ROMS_dat_hind_trim.csv")
+	ROMS_dat_hind_trim <-	fread(file = here("data", "SpawnMonths_ROMS_dat_hind_trim.csv"))
 	
 	# reorder for plotting
 	ROMS_dat_hind_trim$month_name <- factor(ROMS_dat_hind_trim$month_name)
@@ -44,4 +45,6 @@
   }
   
 
-  
+  # remove data in June 
+  ROMS_dat_hind_JM <-	ROMS_dat_hind_trim %>%
+  	filter(., month_name != "June")
