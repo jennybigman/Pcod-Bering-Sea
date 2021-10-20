@@ -24,7 +24,32 @@
 	mean_lats_yr_0.9 <- mean_lats_yr[[2]]	%>%
 		rename(mean_lat_0.9 = mean_lat)
 	
-	mean_lats_yr_df <- merge(mean_lats_yr_0.5, mean_lats_yr_0.9, by = "year") 
+	# all habitat sum by year
+	
+	sum_all_hab <- function(x) {
+		new_dat <- ROMS_dat_hind_trim %>%
+			filter(., year == x)
+		
+		new_dat_sum <- new_dat %>%
+			summarise(mean_lat_all = mean(latitude))
+		
+		new_dat_sum
+	}
+	
+	years <- c(1970:2020)
+	
+	mean_lat_all_df <- sapply(years, sum_all_hab) 
+	mean_lat_all_df <- bind_rows(mean_lat_all_df)
+		
+	sum_all_hab <- 	ROMS_dat_hind_trim  %>%
+			group_by(year) %>%
+			summarise(mean_lat_all = mean(latitude)) 
+	
+	
+	
+	
+	mean_lats_yr_df <- merge(mean_lats_yr_all, mean_lats_yr_0.5, by = "year") %>%
+		merge(., mean_lats_yr_0.9, by = "year")
 	
 	mean_lats_yr_df <- mean_lats_yr_df %>% filter(., year != 2021)
 	
@@ -32,10 +57,9 @@
 	
 	mean_lat_yearly_plot <-    
    	ggplot(data = mean_lats_yr_df) +
+		geom_line(aes(x = year, y = mean_lat_all), alpha = 0.7, color = "black", size = 1) +
    	geom_line(aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
-		#geom_point(aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
 		geom_line(aes(x = year, y = mean_lat_0.9), alpha = 0.7, color = "#00345C", size = 1) +
-		#geom_point(aes(x = year, y = mean_lat_0.9), alpha = 0.7, color = "#00345C", size = 1) +
    	xlab("Year") + 
 	  scale_y_continuous(
 	  	name = "Mean\nlatitude",
@@ -137,8 +161,10 @@
   
   	mean_lat_mo_plot <-    
    	ggplot(data = mean_lats_mo_df) +
-   	geom_line(aes(x = month_name, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
-		geom_line(aes(x = year, y = mean_lat_0.9), alpha = 0.7, color = "#00345C", size = 1) +
+   	geom_line(aes(x = year, y = mean_lat_0.5), 
+   						alpha = 0.7, color = "#7f7fbf", size = 1) +
+		geom_line(aes(x = year, y = mean_lat_0.9), 
+							alpha = 0.7, color = "#00345C", size = 1) +
   	facet_wrap(~ month_name) +
    	xlab("Year") + 
 	  scale_y_continuous(
@@ -158,7 +184,10 @@
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
   	
-  	
+  		ggsave(here("./data Jan - May/plots/mean_lat_mo_plot.png"),
+			 mean_lat_mo_plot,
+			 width = 10, height = 7, units = "in")
+
 	#### moving window analysis ####
 
   # year
@@ -220,4 +249,28 @@
 		
 	plot.ts(mean_lat_yr0.9_trend)
 	
+	
+	#### differencing ####
+	
+	# mean lat 0.5
+	
+	diff_mean_lat_05 <- diff(mean_lats_yr_0.5$mean_lat_0.5)
+	
+	yrs <- 1:51
+	
+	diff_meanlat05 <- data.frame(yrs, diff_mean_lat_05)
+
+	ggplot(diff_meanlat05) +
+		geom_line(aes(x = yrs, y =  diff_mean_lat_05))
+	
+	# mean lat 0.9
+	
+	diff_mean_lat_09 <- diff(mean_lats_yr_0.9$mean_lat_0.9)
+	
+	yrs <- 1:51
+	
+	diff_meanlat09 <- data.frame(yrs, diff_mean_lat_09)
+
+	ggplot(diff_meanlat09) +
+		geom_line(aes(x = yrs, y =  diff_mean_lat_09))
 	
