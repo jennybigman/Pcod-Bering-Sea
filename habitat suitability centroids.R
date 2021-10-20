@@ -1,7 +1,6 @@
-# centroids
+# latitudinal and longitudinal habitat suitability centroids for habitat where suitability 
+# >= 0.5 and 0.9
 
-# (probably need to do this with actual grid cells that are scaled to the 
-# correct size)
 
 	#### centroid per year ####
 
@@ -201,7 +200,7 @@
 	long_centroid05_mo <- function(x){
 		
 		new_dat <- ROMS_dat_hind_trim %>% 
-			filter(., sp_hab_suit >= 0.9) %>%
+			filter(., sp_hab_suit >= 0.5) %>%
 			filter(., year == x)
 		
 		new_dat <- new_dat %>%
@@ -411,6 +410,8 @@
    	xlim(1970, 2020) +
    	theme_bw() +
   	theme(
+  		strip.background = element_blank(),
+  		strip.text = element_text(face = "bold", size= 12),
   	  axis.text=element_text(size=12, colour = "grey50"),
   	  axis.ticks = element_line(colour = "grey50"),
   	  axis.line = element_line(colour = "grey50"),
@@ -422,3 +423,88 @@
 		ggsave("./output/plots/long_centroid_mo_plot.png",
 			 long_centroid_mo_plot,
 			 width = 10, height = 7, units = "in")
+
+	#### mapping centroids ####
+		
+	# 0.5
+		
+	yr_centroid05_df$lat <- yr_centroid05_df$lat_centroid
+	yr_centroid05_df$long <- yr_centroid05_df$long_centroid
+		
+	yr_centroid05_df <- yr_centroid05_df %>%
+		mutate(long_not_360 = case_when(
+				long >= 180 ~ long - 360,
+				long < 180 ~ long
+		))
+	
+	yr_centroid05_df_sf <- st_as_sf(yr_centroid05_df,
+		coords = c("long_not_360", "lat"), crs = 4326)
+		
+	map_yrcentroids_05 <- 
+		 	ggplot(yr_centroid05_df_sf) +
+			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+			coord_sf(crs = 3338) +
+ 			scale_x_continuous(
+ 				breaks = c(-175, -170, -165, -160),
+ 				labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 				name = "Longitude",
+ 				limits = c(-1400000, -150000)
+ 			) +
+ 			scale_y_continuous(
+ 				breaks = c(55, 60),
+ 				limits = c(470000, 1900000),
+ 				name = "Latitude",
+ 			) +
+  		geom_point(aes(geometry = geometry),
+    		stat = "sf_coordinates")
+	
+	ggsave("./output/plots/map_yrcentroids_05.png",
+			 map_yrcentroids_05,
+			 width = 10, height = 7, units = "in")
+	
+	# 0.9
+	
+	yr_centroid09_df$lat <- yr_centroid09_df$lat_centroid
+	yr_centroid09_df$long <- yr_centroid09_df$long_centroid
+		
+	yr_centroid09_df <- yr_centroid09_df %>%
+		mutate(long_not_360 = case_when(
+				long >= 180 ~ long - 360,
+				long < 180 ~ long
+		))
+	
+	yr_centroid09_df_sf <- st_as_sf(yr_centroid09_df,
+		coords = c("long_not_360", "lat"), crs = 4326)
+		
+	map_yrcentroids_09 <- 
+		 	ggplot(yr_centroid09_df_sf) +
+			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+			coord_sf(crs = 3338) +
+ 			scale_x_continuous(
+ 				breaks = c(-175, -170, -165, -160),
+ 				labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 				name = "Longitude",
+ 				limits = c(-1400000, -150000)
+ 			) +
+ 			scale_y_continuous(
+ 				breaks = c(55, 60),
+ 				limits = c(470000, 1900000),
+ 				name = "Latitude",
+ 			) +
+  		geom_point(aes(geometry = geometry),
+    		stat = "sf_coordinates")
+	
+	ggsave("./output/plots/map_yrcentroids_09.png",
+			 map_yrcentroids_09,
+			 width = 10, height = 7, units = "in")
+
+
+	
+	#################
+	
+ggplot(yr_centroid05_df_sf) +
+  geom_sf() +
+  stat_sf_coordinates()
+
+
+	 
