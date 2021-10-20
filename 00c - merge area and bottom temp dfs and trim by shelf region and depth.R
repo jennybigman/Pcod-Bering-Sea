@@ -38,9 +38,14 @@
 				longitude < 180 ~ longitude
 	))
 	
+	
+	ROMS_dat_hind_sum$lats <- ROMS_dat_hind_sum$latitude
+	ROMS_dat_hind_sum$longs_not_360 <- ROMS_dat_hind_sum$long_not_360
+	
 	# convert to shapefile for intersection function
 	ROMS_dat_hind_sum_sf <- st_as_sf(ROMS_dat_hind_sum,
 		coords = c("long_not_360", "latitude"), crs = 4326)
+	
 
 	###############	 	
 	# remove points not on Bering Sea Shelf ####
@@ -124,14 +129,9 @@
 	
  	## filter full dataframe by lats/longs in polygon
 	
-	# decompose geometry back into lat/long
-	int_pts_sum_ll <- int_pts_sum %>%
-			mutate(longitude_not_360 = sf::st_coordinates(.)[, 1],
-					   latitude =  sf::st_coordinates(.)[, 2])
-	
 	ROMS_dat_hind_poly <- ROMS_dat_hind %>% 
-		filter(., long_not_360 %in% int_pts_sum_ll$longitude_not_360) %>%
-		filter(., latitude %in% int_pts_sum_ll$latitude)
+		filter(., long_not_360 %in% int_pts_sum$longs_not_360) %>%
+		filter(., latitude %in% int_pts_sum$lats)
 	 
 	###############	 	
 	# restrict to depths < 250 m ####
