@@ -6,8 +6,58 @@
   library(thredds)   
   library(reshape2)
   library(data.table)
+<<<<<<< HEAD
+
+	#### NOAA bathy ####
+
+	NOAA_bathy <- getNOAA.bathy(lon1 = 156.4388, lon2 = -144.8651, lat1 = 45.00381, 
+															lat2 = 69.69127, resolution = 1, antimeridian = TRUE,
+														  keep = TRUE) # coords match full ROMS coords
+	
+	# trim bathy to only those coords of study region
+	
+	# coords of study region
+	longslats <- ROMS_dat_hind_trim %>% 
+		dplyr::select(longitude, latitude) %>%
+		distinct(across(everything())) 
+	
+	depths <- get.depth(NOAA_bathy, longslats, locator = FALSE)
+	
+	NOAA_bathy_depths <- depths %>%
+		rename(latitude = lat,
+					 longitude = lon)
+
+  #### NOAA bathy plot ####
+  
+  # convert to sf
+  NOAA_bathy_depths$lats <- NOAA_bathy_depths$latitude
+  
+  NOAA_bathy_depths_sf <- NOAA_bathy_depths %>% 
+  	mutate(long_not_360 = case_when(
+  			longitude >= 180 ~ longitude - 360,
+				longitude < 180 ~ longitude)) %>%
+  	st_as_sf(coords = c("long_not_360", "lats"), crs = 4326)
+  
+  NOAA_bathy_plot <- 
+  	ggplot() +
+  	geom_point(data = NOAA_bathy_depths, aes(x = longitude, y = latitude, color = depth))
+  
+  ggsave("./output/plots/NOAA_bathy_plot.png",
+		NOAA_bathy_plot,
+		width = 10, height = 7, units = "in")
+  
+  NOAA_bathy_plot_sf <- 
+  	ggplot() +
+  	geom_sf(data = NOAA_bathy_depths_sf, aes(color = depth))  +
+  	coord_sf(crs = 3338) 
+  
+  ggsave("./output/plots/NOAA_bathy_plot_sf.png",
+		NOAA_bathy_plot_sf,
+		width = 10, height = 7, units = "in")
+=======
 	library(scales)
 
+>>>>>>> f545ca04b272d73d72bec7347995d58a36e6b703
 
 	#### ROMS bathy ####
   		
@@ -101,6 +151,34 @@
 	
 	# find intersection of points in df and polygon
 	ROMS_fbathy_df_sf <- ROMS_fbathy_df %>% 
+<<<<<<< HEAD
+  	mutate(long_not_360 = case_when(
+  			longitude >= 180 ~ longitude - 360,
+				longitude < 180 ~ longitude)) %>%
+  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+	
+	ROMS_fbathy_df_sf <- st_intersection(ROMS_fbathy_df_sf, full_poly) 
+	
+	#### plot ROMS bathy ####
+	
+	ROMS_fbathy_df_sf$depth2 <- ROMS_fbathy_df_sf$depth * -1
+	
+  ROMS_fbathy_sf_plot <-
+  	ggplot() +
+  	geom_sf(data = ROMS_fbathy_df_sf, aes(color = depth2)) +
+  	coord_sf(crs = 3338) 
+  
+  	ggsave("./output/plots/ROMS_fbathy_sf_plot.png",
+			 ROMS_fbathy_sf_plot,
+			 width = 10, height = 7, units = "in")
+
+	#### length of dfs ####
+  nrow(NOAA_bathy_depths_sf)	
+  nrow(ROMS_fbathy_df_sf)
+  
+  ## still a discrepancy of ~ 800 ! 
+  	
+=======
   	mutate(lats = latitude,
   		long_not_360 = case_when(
   			longitude >= 180 ~ longitude - 360,
@@ -302,3 +380,4 @@
 		bathy_diff_shallow_plot,
 		width = 10, height = 7, units = "in")
   
+>>>>>>> f545ca04b272d73d72bec7347995d58a36e6b703
