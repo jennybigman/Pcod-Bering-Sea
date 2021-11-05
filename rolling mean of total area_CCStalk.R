@@ -1,22 +1,26 @@
 # trying to recreate Fig 2 Litzow et al 2018 PRSB with relevant metrics
 
-	library(zoo)
+	#### spawning habitat suitability ####
 	
 	# year ####
 	
 	# summarize spawning habitat suitability by year 
-	yr_stats <- ROMS_dat_hind_trim %>%
-		group_by(year) %>%
+	mo_yr_stats <- ROMS_dat_hind_trim %>%
+		group_by(month_name, year) %>%
 		filter(year != 2021) %>%
-		summarise(mean_sp_hab_suit = mean(sp_hab_suit),
-							sd_sp_hab_suit = sd(sp_hab_suit))
+		summarise(total_area = sum(area_km2))
+	
+	yr_stats <- mo_yr_stats %>%
+		group_by(year) %>%
+		summarise(mean_area = mean(total_area),
+							sd_area = sd(total_area))
 	
 	# calculate rolling mean of mean and sd
-	roll_yr_mean <- rollmean(yr_stats$mean_sp_hab_suit, 11, fill = NA)
-	roll_yr_sd <- rollmean(yr_stats$sd_sp_hab_suit, 11, fill = NA)
+	roll_yr_mean_area <- rollmean(yr_stats$mean_area, 11, fill = NA)
+	roll_yr_sd_area <- rollmean(yr_stats$sd_area, 11, fill = NA)
 	years <- c(1970:2020)
 
-	rolling_stats <- data.frame(years, roll_yr_mean, roll_yr_sd) %>%
+	rolling_stats <- data.frame(years, roll_yr_mean_area, roll_yr_sd_area) %>%
 		na.omit()
 
 	# plots
@@ -24,7 +28,7 @@
 	# mean 
 	rolling_mean_plot <- 
 		ggplot(rolling_stats) +
-		geom_line(aes(x = years, y = roll_yr_mean)) +
+		geom_line(aes(x = years, y = roll_yr_mean_area)) +
 		xlab("Year") +
 		ylab("11-year rolling mean") +
 		pos1r1_theme()
@@ -32,7 +36,7 @@
   # sd
 	rolling_sd_plot <- 
 		ggplot(rolling_stats) +
-		geom_line(aes(x = years, y = roll_yr_sd)) +
+		geom_line(aes(x = years, y = roll_yr_sd_area)) +
 		xlab("Year") +
 		ylab("11-year rolling\nstandard deviation") +
 		pos1r2_theme()
@@ -185,6 +189,13 @@
 	# combine both into one df
 	mo_stats_4plot <- merge(mo_means, mo_sds, by = c("month", "year")) %>%
  		na.omit()
+	
+	mo_stats_4plot$month_no[mo_stats_4plot$month == "January"] <- 1
+  mo_stats_4plot$month_no[mo_stats_4plot$month ==  "February"] <- 2
+	mo_stats_4plot$month_no[mo_stats_4plot$month == "March"] <- 3
+	mo_stats_4plot$month_no[mo_stats_4plot$month == "April"] <- 4
+	mo_stats_4plot$month_no[mo_stats_4plot$month == "May"] <- 5
+	mo_stats_4plot$month_no[mo_stats_4plot$month == "June"] <- 6
 
 	# reorder for plotting
 	mo_stats_4plot$month <- factor(mo_stats_4plot$month)
@@ -377,5 +388,10 @@
   ggsave("./output/plots/sd_vary_win_plots.png",
 		roll_sd_v_win,
 		width = 20, height = 10, units = "in")
+<<<<<<< HEAD
+=======
 
  
+  
+ 
+>>>>>>> f545ca04b272d73d72bec7347995d58a36e6b703
