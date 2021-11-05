@@ -1,4 +1,4 @@
-# Pcod-Bering-Sea ### TEST ####
+# Pcod-Bering-Sea ## YEAHHHHH
 
 This repo houses code for the EBS Pacific Cod habitat suitability project
 
