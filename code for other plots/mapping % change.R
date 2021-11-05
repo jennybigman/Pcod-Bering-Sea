@@ -5,7 +5,7 @@
 	# first try 10-yr bins
 	# remove 2020 and 2021
 	
-	sm_temp_hind_df_rmyrs <- sm_temp_hind_df %>%
+	ROMS_dat_hind_trim_rmyrs <- ROMS_dat_hind_trim %>%
 		filter(., year != 2020) %>%
 		filter(., year != 2021)
 
@@ -21,7 +21,7 @@
 	# create a list of dfs summarized by year bins
 	sum_yr_bin <- function(x){
  
-		df <- sm_temp_hind_df_rmyrs %>%
+		df <- ROMS_dat_hind_trim_rmyrs %>%
 		filter(year %in% x) %>%
 		group_by(longitude, latitude) %>%
 		summarise(mean_hs = mean(hatch_success_cauchy),
@@ -38,7 +38,7 @@
 	df_list_tp <- mapply(cbind, df_list, "time_period"= names(year_bins), SIMPLIFY = FALSE)
 
 	# bind all rows of all dfs together and add a column for longitude not on 360 scale
-	sm_temp_hind_df_yr_sum <- bind_rows(df_list_tp) %>% 
+	ROMS_dat_hind_trim_rmyrs_sum <- bind_rows(df_list_tp) %>% 
   	dplyr::select(latitude, longitude, mean_sphabsuit, time_period)
  
   year_list  <- list('1970_1979',
@@ -50,7 +50,7 @@
 
 	reshape_func <- function(x){
 		
-		new_dat <- sm_temp_hind_df_yr_sum %>% filter(., time_period == x)
+		new_dat <- ROMS_dat_hind_trim_rmyrs_sum %>% filter(., time_period == x)
 
   	new_dat <- new_dat %>% 
   		rename(!!paste0("mean_sphabsuit_", x) := mean_sphabsuit) %>%
@@ -88,10 +88,11 @@
   	pct_change3 = '1990s to 2000s',
   	pct_change4 = '2000s to 2010s'
   )
-  
-    names_facets <- as.data.frame(
-    	time_period = c("pct_change1", "pct_change2", "pct_change3", "pct_change4"),
-    	label = c("1970s to 1980s",'1980s to 1990s','1990s to 2000s','2000s to 2010s'))
+ 
+   time_period = c("pct_change1", "pct_change2", "pct_change3", "pct_change4")
+   label = c("1970s to 1980s",'1980s to 1990s','1990s to 2000s','2000s to 2010s')
+
+  names_facets <- data.frame(time_period, label)
   
   sp_yr_sum <- sp_yr_sum %>%
   	dplyr::select(- contains("mean_sphabsuit"))
