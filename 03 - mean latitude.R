@@ -184,7 +184,11 @@
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
   	
+<<<<<<< HEAD
+  		ggsave("./output/plots/mean_lat_mo_plot.png",
+=======
   		ggsave(here("./data Jan - May/plots/mean_lat_mo_plot.png"),
+>>>>>>> f545ca04b272d73d72bec7347995d58a36e6b703
 			 mean_lat_mo_plot,
 			 width = 10, height = 7, units = "in")
 

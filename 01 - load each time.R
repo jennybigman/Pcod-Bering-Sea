@@ -1,4 +1,4 @@
-	# load each time 
+	# load each time #### TEST
 
 	#### libraries ####
 	library(here)
@@ -15,6 +15,7 @@
 	library(rgdal)
 	library(stars)
 	library(marmap)
+	library(zoo)
 	
 	# turn off spherical geometry
 	sf_use_s2(FALSE)
