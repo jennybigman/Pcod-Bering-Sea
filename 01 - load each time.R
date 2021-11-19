@@ -49,3 +49,5 @@
   # remove data in June 
   ROMS_dat_hind_JM_sf <-	ROMS_dat_hind_trim_sf %>%
   	filter(., month_name != "June")
+
+  
