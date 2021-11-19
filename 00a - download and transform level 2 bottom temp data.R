@@ -10,6 +10,10 @@
 	url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
 	opendap  <- "dodsC/Level2/B10K-K20_CORECFS_bottom5m.nc"
 	
+	# test_path <- paste0(url_base, opendap)
+	
+	# tidy_temps <- tidync(file.path(test_path)) %>% hyper_tibble()
+	
 	nc <- nc_open(paste(url_base, opendap, sep = ""))
 
 	# create objects for known lats and longs and xi and eta axes

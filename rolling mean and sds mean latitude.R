@@ -24,35 +24,168 @@
 					 mean_lat_all = "mean_lat...2",
 					 mean_lat_0.5 = "mean_lat...4",
 					 mean_lat_0.9 = "mean_lat...6") %>%
-		dplyr::select( - year...3, - year...5)
+		dplyr::select( - year...3, - year...5) %>%
+		filter(year != 2021)
+	
+ # remove June
+	
+	mean_lat_mo <- function(x){
+		
+		new_dat <- ROMS_dat_hind_trim %>%
+			filter(., sp_hab_suit >= x)
+		
+		new_dat_sum <- new_dat %>%
+			group_by(year, month_name, month) %>%
+			summarise(mean_lat = mean(latitude)) 
+
+		new_dat_sum		
+	}
+	
+	sp_hab_thresholds <- c(0.5, 0.9)
+	
+	mean_lats_mo <- lapply(sp_hab_thresholds, mean_lat_mo)
+	
+	mean_lats_mo_0.5 <- mean_lats_mo[[1]] %>%
+		rename(mean_lat_0.5 = mean_lat)
+	
+	mean_lats_mo_0.9 <- mean_lats_mo[[2]]	%>%
+		rename(mean_lat_0.9 = mean_lat)
+	
+	mean_lats_mo_df <- merge(mean_lats_mo_0.5, mean_lats_mo_0.9, 
+													 by = c("year", "month_name", "month")) 
+	
+	mean_lats_mo_df <- mean_lats_mo_df %>% filter(., year != 2021)
+	
 	
 
 	# calculate rolling mean of mean for varying window lengths
-  roll_mean_yr_func <- function(x) {
-  		roll_yr_mean <- rollmean(yr_stats$mean_sp_hab_suit, x, fill = NA)
-			roll_yr_mean
-  }
+  roll_mean_lat09_yr_func <- function(x) {
+  		roll_yr_mean09 <- rollmean(mean_lats_yr$mean_lat_0.9, x, fill = NA)
+  } 
+  
+  roll_mean_lat05_yr_func <- function(x) {
+  		roll_yr_mean05 <- rollmean(mean_lats_yr$mean_lat_0.5, x, fill = NA)
+  } 
+
   
   window_widths <- c(3, 5, 7, 9, 11, 13, 15)
   
-  roll_means <- sapply(window_widths, roll_mean_yr_func) %>%
+  roll_mean_lats09 <- sapply(window_widths, roll_mean_lat09_yr_func) %>%
   	as.data.frame() %>%
   	set_names(window_widths) %>%
   	gather("window_width") %>%
   	rename(mean = value) %>%
   	mutate(year = rep((1970:2020), 7)) %>%
-  	na.omit()
+  	na.omit() %>%
+  	mutate(threshold = "0.9")
+  
+   roll_mean_lats05 <- sapply(window_widths, roll_mean_lat05_yr_func) %>%
+  	as.data.frame() %>%
+  	set_names(window_widths) %>%
+  	gather("window_width") %>%
+  	rename(mean = value) %>%
+  	mutate(year = rep((1970:2020), 7)) %>%
+  	na.omit() %>%
+  	mutate(threshold = "0.5")
+   
+   roll_mean_lats <- rbind(roll_mean_lats05, roll_mean_lats09)
+   
   
   # plot
-  roll_means$window_width <- as.numeric(roll_means$window_width)
+  roll_mean_lats$window_width <- as.numeric(roll_mean_lats$window_width)
   
-  mean_vary_win <- ggplot(roll_means) +
+  mean_vary_win <- ggplot(roll_mean_lats) +
   	geom_line(aes(x = year, y = mean)) +
-  	facet_wrap(~ window_width, nrow = 4) +
+  	facet_grid(threshold ~ window_width) +
+  	scale_x_continuous(
+  		breaks = c(1975, 1995, 2015),
+  		labels = c(1975, 1995, 2015)
+  	) +
   	facet_theme() +
-  	ggtitle("all data")
+  	ggtitle("all data - mean latitude")
   
-	# without June
+	ggsave("./output/plots/mean_lat_vary_win.png",
+		mean_vary_win,
+		width = 15, height = 10, units = "in")
+	
+	
+	# rolling standard deviation ####
+  roll_sd_lat09_yr_func <- function(x) {
+  			
+  	sd_lat09 <- NA
+  
+  	for(i in 6:47){
+  	win <- (i - 5):(i + x)
+  	sd_lat09[i] <- sd(mean_lats_yr$mean_lat_0.9[win])
+  	}
+  
+		sd_lat09
+  }
+  
+  nums <- c(-3, -1, 1, 3, 5, 7, 9)
+  
+    
+  roll_sd_lat09 <- sapply(nums, roll_sd_yr_func) %>%
+  	as.data.frame() %>%
+  	set_names(window_widths) %>%
+  	gather("window_width") %>%
+  	rename(sd = value) %>%
+  	mutate(year = rep((1970:2016), 7)) %>%
+  	na.omit() %>%
+  	mutate(threshold = "0.9")
+
+  
+  roll_sd_lat05_yr_func <- function(x) {
+  			
+  	sd_lat05 <- NA
+  
+  	for(i in 6:47){
+  	win <- (i - 5):(i + x)
+  	sd_lat05[i] <- sd(mean_lats_yr$mean_lat_0.5[win])
+  	}
+  
+		sd_lat05
+  }
+  
+  nums <- c(-3, -1, 1, 3, 5, 7, 9)
+  
+  roll_sd_lat05 <- sapply(nums, roll_sd_yr_func) %>%
+  	as.data.frame() %>%
+  	set_names(window_widths) %>%
+  	gather("window_width") %>%
+  	rename(sd = value) %>%
+  	mutate(year = rep((1970:2016), 7)) %>%
+  	na.omit() %>%
+  	mutate(threshold = "0.5")
+
+	roll_sd_lats <- rbind(roll_sd_lat05, roll_sd_lat09)
+  
+	# plot
+  roll_sd_lats$window_width <- as.numeric(roll_sd_lats$window_width)
+
+  sd_vary_win <- ggplot(roll_sd_lats) +
+  	geom_line(aes(x = year, y = sd)) +
+  	facet_grid(threshold ~ window_width) +
+  	scale_x_continuous(
+  		breaks = c(1975, 1995, 2015),
+  		labels = c(1975, 1995, 2015)
+  	) +
+  	facet_theme() +
+  	ggtitle("all data - sd of mean latitude")
+  
+	ggsave("./output/plots/sd_lat_vary_win.png",
+		sd_vary_win,
+		width = 15, height = 10, units = "in")
+  
+	
+	
+	
+	
+	
+	
+	##### start with changing above to remove JUNE & MAY & JUNE ####
+  
+  	# without June
   roll_mean_yr_J_func <- function(x) {
   		roll_yr_mean <- rollmean(yr_stats_J$mean_sp_hab_suit, x, fill = NA)
 			roll_yr_mean

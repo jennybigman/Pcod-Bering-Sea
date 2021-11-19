@@ -64,7 +64,20 @@ area_df_sf <- area_df %>%
 	
 ggplot() +
 	geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-	geom_sf(data = area_df_sf, aes(color = area_km2)) 
+	geom_sf(data = area_df_sf, aes(color = area_km2)) +
+	  coord_sf(crs=3338)+
+
+		scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					)
 
 ggplot()+
 	geom_sf(data = area_df_sf, aes(color = area_km2)) +

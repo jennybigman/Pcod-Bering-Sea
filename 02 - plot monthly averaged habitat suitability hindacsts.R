@@ -4,7 +4,7 @@
   
 		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
+		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == 1970)
     
     	  plot <- 
     	  	ggplot() +
