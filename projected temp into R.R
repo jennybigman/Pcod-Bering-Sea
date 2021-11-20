@@ -5,6 +5,12 @@
 	library(tidync)
 	require(tidyverse)
 	
+	## read in data so can skip below
+	
+	cesm_dfs_trim <- fread(file = here("data", "cesm_dfs_trim.csv"))
+	gfdl_dfs_trim <- fread(file = here("data", "gfdl_dfs_trim.csv"))
+	miroc_dfs_trim <- fread(file = here("data", "miroc_dfs_trim.csv"))
+
 	# set up lat/lons from area grid file
 
 	# download from server
@@ -17,101 +23,75 @@
   lats <- ncvar_get(nc,"lat_rho")
   lons <- ncvar_get(nc,"lon_rho")
  
+	nc_close(nc)
 
   # CESM simulations ####
   
   # read in files
   cesm_file_list <- list.files(path = paste0(here(), ("/data/CMIP6_bottom_temp/cesm")))
+ 
+  # ssp 126 projection ####
+	
+	cesm_ssp126_file_list <- cesm_file_list[str_detect(cesm_file_list, "ssp126")]
+	
+	prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/cesm/"))
   
-  prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/cesm/"))
+  cesm_ssp126_dat_list <- list()
   
-  cesm_dat_list <- list()
-  
-  for(i in cesm_file_list){
-  	cesm_dat_list[[i]] <- paste0(prestring, i)
-  	cesm_dat_list
+  for(i in cesm_ssp126_file_list){
+  	cesm_ssp126_dat_list[[i]] <- paste0(prestring, i)
+  	cesm_ssp126_dat_list
   }
 
-	cesm_df_list <- list()
-  	for(i in cesm_dat_list){
-  		cesm_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
-  		cesm_df_list
+	cesm_ssp126_df_list <- list()
+  	for(i in cesm_ssp126_dat_list){
+  		cesm_ssp126_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
+  		cesm_ssp126_df_list
   }
   
-  cesm_dfs <- bind_rows(cesm_df_list)
+  cesm_ssp126_dfs <- bind_rows(cesm_ssp126_df_list)
   
   # add in lat/longs matched to xi/eta 
-	cesm_dfs$Lon <- lons[cbind(cesm_dfs$xi_rho, cesm_dfs$eta_rho)]
-	cesm_dfs$Lat <- lats[cbind(cesm_dfs$xi_rho, cesm_dfs$eta_rho)]
+	cesm_ssp126_dfs$Lon <- lons[cbind(cesm_ssp126_dfs$xi_rho, cesm_ssp126_dfs$eta_rho)]
+	cesm_ssp126_dfs$Lat <- lats[cbind(cesm_ssp126_dfs$xi_rho, cesm_ssp126_dfs$eta_rho)]
 
 	# create object for time axis
-	cesm_dfs$DateTime <- as.POSIXct(cesm_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+	cesm_ssp126_dfs$DateTime <- as.POSIXct(cesm_ssp126_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
 
+ # ssp585 projection ####
+	
+	cesm_ssp585_file_list <- cesm_file_list[str_detect(cesm_file_list, "ssp585")]
 
-	# GFDL simulations ####
+	prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/cesm/"))
   
-  # read in files
-  gfdl_file_list <- list.files(path = paste0(here(), ("/data/CMIP6_bottom_temp/gfdl")))
+  cesm_ssp585_dat_list <- list()
   
-  prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/gfdl/"))
-  
-  gfdl_dat_list <- list()
-  
-  for(i in gfdl_file_list){
-  	gfdl_dat_list[[i]] <- paste0(prestring, i)
-  	gfdl_dat_list
+  for(i in cesm_ssp585_file_list){
+  	cesm_ssp585_dat_list[[i]] <- paste0(prestring, i)
+  	cesm_ssp585_dat_list
   }
 
-	gfdl_df_list <- list()
-  	for(i in gfdl_dat_list){
-  		gfdl_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
-  		gfdl_df_list
+	cesm_ssp585_df_list <- list()
+  	for(i in cesm_ssp585_dat_list){
+  		cesm_ssp585_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
+  		cesm_ssp585_df_list
   }
   
-  gfdl_dfs <- bind_rows(gfdl_df_list)
+  cesm_ssp585_dfs <- bind_rows(cesm_ssp585_df_list)
   
   # add in lat/longs matched to xi/eta 
-	gfdl_dfs$Lon <- lons[cbind(gfdl_dfs$xi_rho, gfdl_dfs$eta_rho)]
-	gfdl_dfs$Lat <- lats[cbind(gfdl_dfs$xi_rho, gfdl_dfs$eta_rho)]
+	cesm_ssp585_dfs$Lon <- lons[cbind(cesm_ssp585_dfs$xi_rho, cesm_ssp585_dfs$eta_rho)]
+	cesm_ssp585_dfs$Lat <- lats[cbind(cesm_ssp585_dfs$xi_rho, cesm_ssp585_dfs$eta_rho)]
 
 	# create object for time axis
-	gfdl_dfs$DateTime <- as.POSIXct(gfdl_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+	cesm_ssp585_dfs$DateTime <- as.POSIXct(cesm_ssp585_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
 	
+	# join together
+	cesm_ssp126_dfs$projection <- "ssp126"
+	cesm_ssp585_dfs$projection <- "ssp585"
 	
-	# MIROC simulations ####
-  
-  # read in files
-  miroc_file_list <- list.files(path = paste0(here(), ("/data/CMIP6_bottom_temp/miroc")))
-  
-  prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/miroc/"))
-  
-  miroc_dat_list <- list()
-  
-  for(i in miroc_file_list){
-  	miroc_dat_list[[i]] <- paste0(prestring, i)
-  	miroc_dat_list
-  }
+	cesm_dfs <- bind_rows(cesm_ssp126_dfs, cesm_ssp585_dfs)
 
-	miroc_df_list <- list()
-  	for(i in miroc_dat_list){
-  		miroc_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
-  		miroc_df_list
-  }
-  
-  miroc_dfs <- bind_rows(miroc_df_list)
-  
-  # add in lat/longs matched to xi/eta 
-	miroc_dfs$Lon <- lons[cbind(miroc_dfs$xi_rho, miroc_dfs$eta_rho)]
-	miroc_dfs$Lat <- lats[cbind(miroc_dfs$xi_rho, miroc_dfs$eta_rho)]
-
-	# create object for time axis
-	miroc_dfs$DateTime <- as.POSIXct(miroc_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
-
-
-	#### plots ####
-	
-	## CESM projection temps ####
-	
 	# separate date column into components
 	cesm_dfs$date <- as.Date(cesm_dfs$DateTime) # date in Date format
 	cesm_dfs$month <- month(cesm_dfs$date) # month of year
@@ -123,14 +103,17 @@
 	
 	cesm_dfs_trim <- cesm_dfs %>%
 		filter(., month %in% months)
+	
+	# write to file
+	fwrite(cesm_dfs_trim, "./data/cesm_dfs_trim.csv")
 
-  # plot for each year
-
+	
   # summarize by year
   cesm_dfs_trim_sum <- cesm_dfs_trim %>%
-		group_by(Lat, Lon, year) %>%
+		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
-
+ 
+  # convert to sf object
   cesm_dfs_trim_sum_sf <- cesm_dfs_trim_sum %>% 
 			mutate(latitude = Lat,
 				long_not_360 = case_when(
@@ -138,7 +121,9 @@
 					Lon < 180 ~ Lon)) %>%
   		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
   		
+  # plots ####
   
+  # yearly plot
   cesm_yr_plot_func <- function(x){
 		
 				new_dat <- cesm_dfs_trim_sum_sf %>% filter(., year == x)
@@ -147,6 +132,7 @@
     	  	ggplot() +
 					geom_sf(data = new_dat, aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+  				facet_wrap(~ projection) +
 					coord_sf(crs = 3338) +
 					scale_color_viridis_c() +
  					scale_x_continuous(
@@ -190,9 +176,9 @@
 	plot_list <- mapply(ggsave_func, x = yr_plot_list, y = yearly_names)
 
 	
-	# summary by decade
+	# plot: summary by decade
 
-	cesm_dfs_trim_decade_sf <- cesm_dfs_trim_sf %>%
+	cesm_dfs_trim_decade_sf <- cesm_dfs_trim_sum_sf %>%
 		mutate(decade = case_when(
 			between(year, 1980, 1989) ~ "1980s",
 			between(year, 1990, 1999) ~ "1990s",
@@ -213,7 +199,7 @@
 									aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
-  		    facet_wrap(~ decade, nrow = 3) +
+  		    facet_grid(projection ~ decade) +
 					scale_color_viridis_c() +
  					scale_x_continuous(
  						breaks = c(-175, -170, -165, -160),
@@ -242,8 +228,85 @@
 			width = 15, height = 10, units = "in")
 	
 		
-	## GFDL projection temps ####
+
 	
+	# GFDL simulations ####
+  
+  # read in files
+  gfdl_file_list <- list.files(path = paste0(here(), ("/data/CMIP6_bottom_temp/gfdl")))
+  
+  prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/gfdl/"))
+  
+  # ssp 126 projection ####
+	
+	gfdl_ssp126_file_list <- gfdl_file_list[str_detect(gfdl_file_list, "ssp126")]
+	
+	prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/gfdl/"))
+  
+  gfdl_ssp126_dat_list <- list()
+  
+  for(i in gfdl_ssp126_file_list){
+  	gfdl_ssp126_dat_list[[i]] <- paste0(prestring, i)
+  	gfdl_ssp126_dat_list
+  }
+
+	gfdl_ssp126_df_list <- list()
+  	for(i in gfdl_ssp126_dat_list){
+  		gfdl_ssp126_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
+  		gfdl_ssp126_df_list
+  }
+  
+  gfdl_ssp126_dfs <- bind_rows(gfdl_ssp126_df_list)
+  
+  # add in lat/longs matched to xi/eta 
+	gfdl_ssp126_dfs$Lon <- lons[cbind(gfdl_ssp126_dfs$xi_rho, gfdl_ssp126_dfs$eta_rho)]
+	gfdl_ssp126_dfs$Lat <- lats[cbind(gfdl_ssp126_dfs$xi_rho, gfdl_ssp126_dfs$eta_rho)]
+
+	# create object for time axis
+	gfdl_ssp126_dfs$DateTime <- as.POSIXct(gfdl_ssp126_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+
+ # ssp585 projection ####
+	
+	gfdl_ssp585_file_list <- gfdl_file_list[str_detect(gfdl_file_list, "ssp585")]
+
+	prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/gfdl/"))
+  
+  gfdl_ssp585_dat_list <- list()
+  
+  for(i in gfdl_ssp585_file_list){
+  	gfdl_ssp585_dat_list[[i]] <- paste0(prestring, i)
+  	gfdl_ssp585_dat_list
+  }
+
+	gfdl_ssp585_df_list <- list()
+  	for(i in gfdl_ssp585_dat_list){
+  		gfdl_ssp585_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
+  		gfdl_ssp585_df_list
+  }
+  
+  gfdl_ssp585_dfs <- bind_rows(gfdl_ssp585_df_list)
+  
+  # add in lat/longs matched to xi/eta 
+	gfdl_ssp585_dfs$Lon <- lons[cbind(gfdl_ssp585_dfs$xi_rho, gfdl_ssp585_dfs$eta_rho)]
+	gfdl_ssp585_dfs$Lat <- lats[cbind(gfdl_ssp585_dfs$xi_rho, gfdl_ssp585_dfs$eta_rho)]
+
+	# create object for time axis
+	gfdl_ssp585_dfs$DateTime <- as.POSIXct(gfdl_ssp585_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+	
+	# join together
+	gfdl_ssp126_dfs$projection <- "ssp126"
+	gfdl_ssp585_dfs$projection <- "ssp585"
+	
+	gfdl_dfs <- bind_rows(gfdl_ssp126_dfs, gfdl_ssp585_dfs)
+
+  # add in lat/longs matched to xi/eta 
+	gfdl_dfs$Lon <- lons[cbind(gfdl_dfs$xi_rho, gfdl_dfs$eta_rho)]
+	gfdl_dfs$Lat <- lats[cbind(gfdl_dfs$xi_rho, gfdl_dfs$eta_rho)]
+
+	# create object for time axis
+	gfdl_dfs$DateTime <- as.POSIXct(gfdl_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+	
+
 	# separate date column into components
 	gfdl_dfs$date <- as.Date(gfdl_dfs$DateTime) # date in Date format
 	gfdl_dfs$month <- month(gfdl_dfs$date) # month of year
@@ -255,21 +318,27 @@
 	
 	gfdl_dfs_trim <- gfdl_dfs %>%
 		filter(., month %in% months)
-
-  # plot for each year
+	
+	# write to file
+	fwrite(gfdl_dfs_trim, "./data/gfdl_dfs_trim.csv")
 
   # summarize by year
   gfdl_dfs_trim_sum <- gfdl_dfs_trim %>%
-		group_by(Lat, Lon, year) %>%
+		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
+  # convert to sf object
   gfdl_dfs_trim_sum_sf <- gfdl_dfs_trim_sum %>% 
 			mutate(latitude = Lat,
 				long_not_360 = case_when(
 					Lon >= 180 ~ Lon - 360,
 					Lon < 180 ~ Lon)) %>%
   		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  		
+  	
+  	
+  # plots ####
+  
+  # yearly plots
   
   gfdl_yr_plot_func <- function(x){
 		
@@ -279,6 +348,7 @@
     	  	ggplot() +
 					geom_sf(data = new_dat, aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+    	  	facet_grid(~ projection) +
 					coord_sf(crs = 3338) +
 					scale_color_viridis_c() +
  					scale_x_continuous(
@@ -321,8 +391,7 @@
 
 	plot_list <- mapply(ggsave_func, x = yr_plot_list, y = yearly_names)
 
-	
-	# summary by decade
+	# plot: summary by decade
 
 	gfdl_dfs_trim_sum_decade_sf <- gfdl_dfs_trim_sum_sf %>%
 		mutate(decade = case_when(
@@ -345,7 +414,7 @@
 									aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
-  		    facet_wrap(~ decade, nrow = 3) +
+  		    facet_grid(projection ~ decade) +
 					scale_color_viridis_c() +
  					scale_x_continuous(
  						breaks = c(-175, -170, -165, -160),
@@ -373,9 +442,84 @@
 			plot_gfdl_decade,
 			width = 15, height = 10, units = "in")
 	
-		
-	## MIROC projection temps ####
 	
+	# MIROC simulations ####
+
+  # read in files
+  miroc_file_list <- list.files(path = paste0(here(), ("/data/CMIP6_bottom_temp/miroc")))
+  
+  prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/miroc/"))
+  
+  # ssp 126 projection ####
+	
+	miroc_ssp126_file_list <- miroc_file_list[str_detect(miroc_file_list, "ssp126")]
+	
+	prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/miroc/"))
+  
+  miroc_ssp126_dat_list <- list()
+  
+  for(i in miroc_ssp126_file_list){
+  	miroc_ssp126_dat_list[[i]] <- paste0(prestring, i)
+  	miroc_ssp126_dat_list
+  }
+
+	miroc_ssp126_df_list <- list()
+  	for(i in miroc_ssp126_dat_list){
+  		miroc_ssp126_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
+  		miroc_ssp126_df_list
+  }
+  
+  miroc_ssp126_dfs <- bind_rows(miroc_ssp126_df_list)
+  
+  # add in lat/longs matched to xi/eta 
+	miroc_ssp126_dfs$Lon <- lons[cbind(miroc_ssp126_dfs$xi_rho, miroc_ssp126_dfs$eta_rho)]
+	miroc_ssp126_dfs$Lat <- lats[cbind(miroc_ssp126_dfs$xi_rho, miroc_ssp126_dfs$eta_rho)]
+
+	# create object for time axis
+	miroc_ssp126_dfs$DateTime <- as.POSIXct(miroc_ssp126_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+
+ # ssp585 projection ####
+	
+	miroc_ssp585_file_list <- miroc_file_list[str_detect(miroc_file_list, "ssp585")]
+
+	prestring <- paste0(here(), ("/data/CMIP6_bottom_temp/miroc/"))
+  
+  miroc_ssp585_dat_list <- list()
+  
+  for(i in miroc_ssp585_file_list){
+  	miroc_ssp585_dat_list[[i]] <- paste0(prestring, i)
+  	miroc_ssp585_dat_list
+  }
+
+	miroc_ssp585_df_list <- list()
+  	for(i in miroc_ssp585_dat_list){
+  		miroc_ssp585_df_list[[i]] <- tidync(i) %>% hyper_tibble(select_var = "temp")
+  		miroc_ssp585_df_list
+  }
+  
+  miroc_ssp585_dfs <- bind_rows(miroc_ssp585_df_list)
+  
+  # add in lat/longs matched to xi/eta 
+	miroc_ssp585_dfs$Lon <- lons[cbind(miroc_ssp585_dfs$xi_rho, miroc_ssp585_dfs$eta_rho)]
+	miroc_ssp585_dfs$Lat <- lats[cbind(miroc_ssp585_dfs$xi_rho, miroc_ssp585_dfs$eta_rho)]
+
+	# create object for time axis
+	miroc_ssp585_dfs$DateTime <- as.POSIXct(miroc_ssp585_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+	
+	# join together
+	miroc_ssp126_dfs$projection <- "ssp126"
+	miroc_ssp585_dfs$projection <- "ssp585"
+	
+	miroc_dfs <- bind_rows(miroc_ssp126_dfs, miroc_ssp585_dfs)
+
+  # add in lat/longs matched to xi/eta 
+	miroc_dfs$Lon <- lons[cbind(miroc_dfs$xi_rho, miroc_dfs$eta_rho)]
+	miroc_dfs$Lat <- lats[cbind(miroc_dfs$xi_rho, miroc_dfs$eta_rho)]
+
+	# create object for time axis
+	miroc_dfs$DateTime <- as.POSIXct(miroc_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
+	
+
 	# separate date column into components
 	miroc_dfs$date <- as.Date(miroc_dfs$DateTime) # date in Date format
 	miroc_dfs$month <- month(miroc_dfs$date) # month of year
@@ -387,21 +531,27 @@
 	
 	miroc_dfs_trim <- miroc_dfs %>%
 		filter(., month %in% months)
-
-  # plot for each year
+	
+	# write to file
+	fwrite(miroc_dfs_trim, "./data/miroc_dfs_trim.csv")
 
   # summarize by year
   miroc_dfs_trim_sum <- miroc_dfs_trim %>%
-		group_by(Lat, Lon, year) %>%
+		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
+  # convert to sf object
   miroc_dfs_trim_sum_sf <- miroc_dfs_trim_sum %>% 
 			mutate(latitude = Lat,
 				long_not_360 = case_when(
 					Lon >= 180 ~ Lon - 360,
 					Lon < 180 ~ Lon)) %>%
   		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  		
+  	
+  	
+  # plots ####
+  
+  # yearly plots
   
   miroc_yr_plot_func <- function(x){
 		
@@ -411,6 +561,7 @@
     	  	ggplot() +
 					geom_sf(data = new_dat, aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+    	  	facet_grid(~ projection) +
 					coord_sf(crs = 3338) +
 					scale_color_viridis_c() +
  					scale_x_continuous(
@@ -453,10 +604,9 @@
 
 	plot_list <- mapply(ggsave_func, x = yr_plot_list, y = yearly_names)
 
-	
-	# summary by decade
+	# plot: summary by decade
 
-	miroc_dfs_trim_decade_sf <- miroc_dfs_trim_sf %>%
+	miroc_dfs_trim_sum_decade_sf <- miroc_dfs_trim_sum_sf %>%
 		mutate(decade = case_when(
 			between(year, 1980, 1989) ~ "1980s",
 			between(year, 1990, 1999) ~ "1990s",
@@ -473,11 +623,11 @@
 	
 	plot_miroc_decade <- 
   		ggplot() +
-					geom_sf(data = miroc_dfs_trim_decade_sf, 
+					geom_sf(data = miroc_dfs_trim_sum_decade_sf, 
 									aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
-  		    facet_wrap(~ decade, nrow = 3) +
+  		    facet_grid(projection ~ decade) +
 					scale_color_viridis_c() +
  					scale_x_continuous(
  						breaks = c(-175, -170, -165, -160),
@@ -504,4 +654,3 @@
 		ggsave("./output/plots/plot_miroc_decade.png",
 			plot_miroc_decade,
 			width = 15, height = 10, units = "in")
-	
