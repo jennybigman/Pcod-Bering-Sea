@@ -24,15 +24,15 @@
 	symbol<-"\u2265"
 
 	#### load and transform data ####
-	ROMS_dat_hind_trim <-	fread(file = here("data", "SpawnMonths_ROMS_dat_hind_trim.csv"))
+	ROMS_hind_dat <- fread(file = here("data", "ROMS_hindcast_temp_spawnhb_dat.csv"))
 	
 	# reorder for plotting
-	ROMS_dat_hind_trim$month_name <- factor(ROMS_dat_hind_trim$month_name)
-  ROMS_dat_hind_trim$month_name <- fct_reorder(ROMS_dat_hind_trim$month_name, 
-  																		ROMS_dat_hind_trim$month)
+	ROMS_hind_dat$month_name <- factor(ROMS_hind_dat$month_name)
+  ROMS_hind_dat$month_name <- fct_reorder(ROMS_hind_dat$month_name, 
+  																		ROMS_hind_dat$month)
 
   # convert to a shapefile
-  ROMS_dat_hind_trim_sf <- ROMS_dat_hind_trim %>%
+  ROMS_hind_dat_sf <- ROMS_hind_dat %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
 	
 	#### load map ####
@@ -46,8 +46,3 @@
   }
   
 
-  # remove data in June 
-  ROMS_dat_hind_JM_sf <-	ROMS_dat_hind_trim_sf %>%
-  	filter(., month_name != "June")
-
-  
