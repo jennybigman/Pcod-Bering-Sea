@@ -6,7 +6,6 @@
   library(thredds)   
   library(reshape2)
   library(data.table)
-<<<<<<< HEAD
 
 	#### NOAA bathy ####
 
@@ -54,10 +53,9 @@
   ggsave("./output/plots/NOAA_bathy_plot_sf.png",
 		NOAA_bathy_plot_sf,
 		width = 10, height = 7, units = "in")
-=======
-	library(scales)
 
->>>>>>> f545ca04b272d73d72bec7347995d58a36e6b703
+  	library(scales)
+
 
 	#### ROMS bathy ####
   		
@@ -151,7 +149,6 @@
 	
 	# find intersection of points in df and polygon
 	ROMS_fbathy_df_sf <- ROMS_fbathy_df %>% 
-<<<<<<< HEAD
   	mutate(long_not_360 = case_when(
   			longitude >= 180 ~ longitude - 360,
 				longitude < 180 ~ longitude)) %>%
@@ -178,7 +175,6 @@
   
   ## still a discrepancy of ~ 800 ! 
   	
-=======
   	mutate(lats = latitude,
   		long_not_360 = case_when(
   			longitude >= 180 ~ longitude - 360,
