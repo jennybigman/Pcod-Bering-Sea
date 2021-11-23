@@ -4,7 +4,7 @@
 	
 	mean_lat_yr <- function(x){
 		
-		new_dat <- ROMS_dat_hind_trim %>%
+		new_dat <- ROMS_hindcast_dat %>%
 			filter(., sp_hab_suit >= x)
 		
 		new_dat_sum <- new_dat %>%
@@ -24,32 +24,7 @@
 	mean_lats_yr_0.9 <- mean_lats_yr[[2]]	%>%
 		rename(mean_lat_0.9 = mean_lat)
 	
-	# all habitat sum by year
-	
-	sum_all_hab <- function(x) {
-		new_dat <- ROMS_dat_hind_trim %>%
-			filter(., year == x)
-		
-		new_dat_sum <- new_dat %>%
-			summarise(mean_lat_all = mean(latitude))
-		
-		new_dat_sum
-	}
-	
-	years <- c(1970:2020)
-	
-	mean_lat_all_df <- sapply(years, sum_all_hab) 
-	mean_lat_all_df <- bind_rows(mean_lat_all_df)
-		
-	sum_all_hab <- 	ROMS_dat_hind_trim  %>%
-			group_by(year) %>%
-			summarise(mean_lat_all = mean(latitude)) 
-	
-	
-	
-	
-	mean_lats_yr_df <- merge(mean_lats_yr_all, mean_lats_yr_0.5, by = "year") %>%
-		merge(., mean_lats_yr_0.9, by = "year")
+	mean_lats_yr_df <- merge(mean_lats_yr_0.9, mean_lats_yr_0.5, by = "year") 
 	
 	mean_lats_yr_df <- mean_lats_yr_df %>% filter(., year != 2021)
 	
@@ -57,7 +32,6 @@
 	
 	mean_lat_yearly_plot <-    
    	ggplot(data = mean_lats_yr_df) +
-		geom_line(aes(x = year, y = mean_lat_all), alpha = 0.7, color = "black", size = 1) +
    	geom_line(aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
 		geom_line(aes(x = year, y = mean_lat_0.9), alpha = 0.7, color = "#00345C", size = 1) +
    	xlab("Year") + 
@@ -127,7 +101,7 @@
 
 	mean_lat_mo <- function(x){
 		
-		new_dat <- ROMS_dat_hind_trim %>%
+		new_dat <- ROMS_hindcast_dat %>%
 			filter(., sp_hab_suit >= x)
 		
 		new_dat_sum <- new_dat %>%
@@ -184,11 +158,7 @@
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
   	
-<<<<<<< HEAD
   		ggsave("./output/plots/mean_lat_mo_plot.png",
-=======
-  		ggsave(here("./data Jan - May/plots/mean_lat_mo_plot.png"),
->>>>>>> f545ca04b272d73d72bec7347995d58a36e6b703
 			 mean_lat_mo_plot,
 			 width = 10, height = 7, units = "in")
 

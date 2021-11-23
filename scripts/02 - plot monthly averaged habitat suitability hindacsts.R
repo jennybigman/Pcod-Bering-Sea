@@ -4,7 +4,7 @@
   
 		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == 1970)
+		    new_dat <- ROMS_hindcast_dat_sf %>% filter(., year == 1970)
     
     	  plot <- 
     	  	ggplot() +
@@ -60,7 +60,7 @@
 
 	hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
+		    new_dat <- ROMS_hindcast_dat_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -122,7 +122,7 @@
 
 		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
+		    new_dat <- ROMS_hindcast_dat_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -184,7 +184,7 @@
 	
 		hab_suit_monthly_plot_func <- function(x){
 		
-		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
+		    new_dat <- ROMS_hindcast_dat_sf %>% filter(., year == x)
     
     	  plot <- 
     	  	ggplot() +
@@ -242,86 +242,10 @@
 	plot_list <- mapply(ggsave_func, x = monthly_plot_list, y = month_names)
 
 	
-	#### plot frequency histograms for each month for each year #### NOT COMPLETE
-	
-	dat_1970 <- dat_1970 %>%
-		mutate(group1 = case_when(
-			between(sp_hab_suit, 0, 0.1) ~ "A",
-			between(sp_hab_suit, 0.1, 0.9) ~ "B",
-			sp_hab_suit >= 0.9 ~ "C"
-		))
-	
-	
-		histo_plot_func <- function(x){
-		
-		    new_dat <- ROMS_dat_hind_trim_sf %>% filter(., year == x)
-		    
-		    new_dat <- new_dat %>%
-					mutate(group = case_when(
-						between(sp_hab_suit, 0, 0.1) ~ "A",
-						between(sp_hab_suit, 0.1, 0.9) ~ "B",
-						sp_hab_suit >= 0.9 ~ "C"))
-    
-    	  plot <- 
-    	  	ggplot(new_dat, aes(sp_hab_suit, fill = group)) +
-    	  	geom_histogram(bins = 10, color = "black") +
-    	  	scale_fill_manual(values = c("#B3E5FC", "#01579B","#00345C"),
-    	  										breaks = unique(new_dat$group1)) +
-    	  	xlab("Spawning habitat suitability") +
-    	  	geom_vline(xintercept = 0.1, color = "lightgrey") +
-    	  	geom_vline(xintercept = 0.5, color = "grey") +
-    	  	geom_vline(xintercept = 0.9, color = "darkgrey") +
-    	  	facet_wrap(~ month_name, ncol = 3, nrow = 3) +
-    	  	scale_x_continuous(
-    	  		breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0),
-    	  		labels =format(c(0, 0.2, 0.4, 0.6, 0.8, 1.0))) +
-				  scale_y_continuous(
-				  	name = "Count",
-        		breaks = c(0, 5000, 10000),
-    				labels = format(c(0, 5000, 10000))) +
-					theme_bw() +
- 					theme(
- 						strip.text = element_text(size = 14, face = "bold"),
- 						strip.background = element_blank(),
-    				axis.text = element_text(size=12, colour = "grey50"),
-    				axis.ticks  = element_line(colour = "grey50"),
-    				axis.line = element_line(colour = "grey50"),
-    				axis.title = element_text(size=14, color = "grey30"),
-    				panel.grid.major = element_blank(),
-    				panel.grid.minor = element_blank(),
-    				panel.border = element_rect(fill = NA, color = "grey50")
- 					)
-    	  
-    	  plot
-
-		}
-	
-	monthly_plot_list <- lapply(years, histo_plot_func)
-  
-  mo_name_func_year <- function(x){
-  	year_month <- paste0(x, "_hist_sp_hab_suit")
-  }
-   
-  month_names_year <- sapply(years, mo_name_func_year)
-  
-	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/Google Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/histograms/", x)
-  }
-   
-  month_names <- sapply(month_names_year, mo_name_func_file)
-	
-   ggsave_func2 <- function(x,y){
-  	ggsave(plot = x,
-    file = paste(y,".png",sep=""),
-    width = 15, height = 10, units = "in")
-	}
-  
-	plot_list <- mapply(ggsave_func2, x = monthly_plot_list, y = month_names)
-
 	
 	#### index of suitable spawning habitat ####
 	
-	yearly_hab_dat <- ROMS_dat_hind_trim_sf %>%
+	yearly_hab_dat <- ROMS_hindcast_dat %>%
    								  group_by(year) %>%
    								  summarise(annual_hatch_success_cauchy = mean(hatch_success_cauchy),
    								 					  annual_hatch_success_gaussian = mean(hatch_success_gaus),
@@ -364,7 +288,7 @@
 	
 	years_keep <- c(2000:2020)
   	
-  ROMS_dat_hind_trim_sf_sub <- ROMS_dat_hind_trim_sf %>% filter(., year %in% years_keep)
+  ROMS_hindcast_dat_sub <- ROMS_hindcast_dat_sf %>% filter(., year %in% years_keep)
   
 
 	# create a list of year bins
@@ -374,7 +298,7 @@
 	# create a list of dfs summarized by year bins
 	sum_yr_bin <- function(x){
  
-		df <- ROMS_dat_hind_trim_sf_sub %>%
+		df <- ROMS_hindcast_dat_sub %>%
 		filter(year %in% x) %>%
 		group_by(longitude, latitude) %>%
 		summarise(mean_hs = mean(hatch_success_cauchy),

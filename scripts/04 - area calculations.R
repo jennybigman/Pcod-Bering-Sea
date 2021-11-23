@@ -2,7 +2,7 @@
 
 #### by year ####
 
-core_area_dat <- ROMS_dat_hind_trim %>%
+core_area_dat <- ROMS_hindcast_dat %>%
 	filter(sp_hab_suit >= 0.9) %>%
 	filter(year != 2021)
 
@@ -13,7 +13,7 @@ core_area_dat_sum_yr <- core_area_dat %>%
 
 # potential habitat = sum of area where sps >= 0.5
 
-pot_area_dat <- ROMS_dat_hind_trim %>%
+pot_area_dat <- ROMS_hindcast_dat %>%
 	filter(sp_hab_suit >= 0.5) %>%
 	filter(year != 2021)
 
@@ -56,9 +56,7 @@ plot <-
 	
 	years <- c(1995:2010)
 	
-	yr_start <- 
-	yr_end <-
-	
+
 	temp_index <- c("cold", "average", "cold", "warm", "cold", "average", "warm", 
 									"warm", "warm", "warm", "warm", "average", "cold", "cold", 
 									"cold", "cold")
@@ -71,12 +69,14 @@ plot <-
 	
 	yr_stanzas <- merge(yr_stanzas, color_key, by = "temp_index")
 	
+	##### fix this #### 
+	
 	plot <-    
    	ggplot(data = core_area_dat_sum_yr) +
    	geom_line(aes(x = year, y = total_core_area), color = "#00345C", size = 1) +
 	  geom_line(data = pot_area_dat_sum_yr, aes(x = year, y = total_pot_area), 
 	  					color = "#01579B", size = 1) +
-		geom_rect(data = yr_stanzas, aes(xmin = years, ))
+		geom_rect(data = yr_stanzas, aes(xmin = years)) +
    	xlab("Year") + 
 	  scale_y_continuous(
 	  	name = expression(paste("Total area", ' '(km^{2}))),
@@ -114,9 +114,9 @@ pot_area_dat_sum_mo <- pot_area_dat %>%
 # plot
 
 plot <-    
-   	ggplot(data = core_area_dat_sum) +
+   	ggplot(data = core_area_dat_sum_mo) +
    	geom_line(aes(x = year, y = total_core_area), color = "#00345C", size = 1) +
-	  geom_line(data = pot_area_dat_sum, aes(x = year, y = total_pot_area), 
+	  geom_line(data = pot_area_dat_sum_mo, aes(x = year, y = total_pot_area), 
 	  					color = "#01579B", size = 1) +
 		facet_wrap(~ month_name) +
    	xlab("Year") + 
@@ -189,7 +189,7 @@ plot <-
 
 	######### playing with sf functions
 	
-	grid_test <- st_make_grid(ROMS_dat_hind_trim_sf) 
+	grid_test <- st_make_grid(ROMS_hindcast_dat_sf) 
 
 		ggplot() +
 					geom_sf(data = grid_test)  +

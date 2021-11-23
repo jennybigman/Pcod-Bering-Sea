@@ -23,10 +23,10 @@
   	mutate(sp_hab_suit = hatch_success_cauchy/max(hatch_success_cauchy))
   
   
-	ROMS_hindcast_temp_spawnhb_dat <- ROMS_hindcast_temp_dat %>%
+	ROMS_hindcast_dat <- ROMS_hindcast_temp_dat %>%
 		rename(Xi = Xi.x,
 					 Eta = Eta.x) %>%
 		dplyr::select(-Xi.y, -Eta.y)
 	
-	fwrite(ROMS_hindcast_temp_spawnhb_dat, file = "./data/ROMS_hindcast_temp_spawnhb_dat.csv")
+	fwrite(ROMS_hindcast_dat, file = "./data/ROMS_hindcast_dat.csv")
 	

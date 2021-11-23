@@ -24,15 +24,15 @@
 	symbol<-"\u2265"
 
 	#### load and transform data ####
-	ROMS_hind_dat <- fread(file = here("data", "ROMS_hindcast_temp_spawnhb_dat.csv"))
+	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv")
 	
 	# reorder for plotting
-	ROMS_hind_dat$month_name <- factor(ROMS_hind_dat$month_name)
-  ROMS_hind_dat$month_name <- fct_reorder(ROMS_hind_dat$month_name, 
-  																		ROMS_hind_dat$month)
+	ROMS_hindcast_dat$month_name <- factor(ROMS_hindcast_dat$month_name)
+  ROMS_hindcast_dat$month_name <- fct_reorder(ROMS_hindcast_dat$month_name, 
+  																		ROMS_hindcast_dat$month)
 
   # convert to a shapefile
-  ROMS_hind_dat_sf <- ROMS_hind_dat %>%
+  ROMS_hindcast_dat_sf <- ROMS_hindcast_dat %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
 	
 	#### load map ####

@@ -77,7 +77,7 @@
 	###############
 	
 	# load Ortiz Bering Sea regions and convert to sf object
-	bsregions <- readOGR("./Mapping Code - Bigman/Ortiz Regions", layer="BSIERP_regions_2012")
+	bsregions <- readOGR("./other:older code/Mapping Code - Bigman/Ortiz Regions", layer="BSIERP_regions_2012")
 	bsregions <- spTransform(bsregions, CRS("+init=epsg:4326"))
 	bsregions_sf <- st_as_sf(bsregions)
 	bsregions_no_15 <-bsregions[bsregions@data$DOMAIN != 15, ] # remove domain 15 
@@ -113,7 +113,7 @@
 
 	plot(polygon_bsregion15)
 
-	# add back into polygin
+	# add back into polygon
 	full_poly <-  st_union(polygon_bsregion15, poly_bsregions_no_15_sf)
 	
 	plot(full_poly$geometry)
