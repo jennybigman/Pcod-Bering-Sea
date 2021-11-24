@@ -82,13 +82,13 @@
 	bsregions_sf <- st_as_sf(bsregions)
 	bsregions_no_15 <-bsregions[bsregions@data$DOMAIN != 15, ] # remove domain 15 
 
-	#plot(bsregions_no_15)
+	plot(bsregions_no_15)
 	
 	bsregions_no_15_sf <- bsregions_no_15 %>% 	  
 		st_as_sf(coords = c("long", "lat"), crs = 4326) 
 	poly_bsregions_no_15_sf <- st_union(bsregions_no_15_sf)
 	
-	#plot(poly_bsregions_no_15_sf)
+	plot(poly_bsregions_no_15_sf)
 
 	# remove domain 15 to fix it
 	bsregions15 <-bsregions[bsregions@data$DOMAIN == 15, ] 
