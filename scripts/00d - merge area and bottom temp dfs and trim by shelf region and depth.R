@@ -85,7 +85,7 @@
 	plot(bsregions_no_15)
 	
 	bsregions_no_15_sf <- bsregions_no_15 %>% 	  
-		st_as_sf(coords = c("long", "lat"), crs = 4326) 
+		st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
 	poly_bsregions_no_15_sf <- st_union(bsregions_no_15_sf)
 	
 	plot(poly_bsregions_no_15_sf)
@@ -108,6 +108,7 @@
 	polygon_bsregion15 <- 
   	bsregions15_df %>%
 	  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+		group_by(DOMAIN) %>%
 	  summarise(geometry = st_combine(geometry)) %>%
 	  st_cast("POLYGON") 
 
