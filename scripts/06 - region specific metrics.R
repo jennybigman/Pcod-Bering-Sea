@@ -1,9 +1,6 @@
 # 06 - metrics by region
 
 	sf_use_s2(FALSE)
-
-
-	#### inner shelf ####
 	
 	# load Ortiz Bering Sea regions and convert to sf object
 	bsregions <- readOGR("./other:older code/Mapping Code - Bigman/Ortiz Regions", layer="BSIERP_regions_2012")
@@ -69,7 +66,8 @@
 	outer_domains <- c(8, 15, 16)
 	
 	inner_domain <- bsregions_df %>%
-		filter(., DOMAIN %in% inner_domains)
+		filter(., DOMAIN %in% inner_domains) %>%
+		mutate(latitude = lat)
 	
 	middle_domain <- bsregions_df %>%
 		filter(., DOMAIN %in% middle_domains)
@@ -111,6 +109,39 @@
 
 	plot(outer_poly)
 	
+	
+	### plot
+	
+		 plot <- 
+    	  	ggplot() +
+	 	 			geom_sf(data = inner_poly, color = "salmon", fill = "salmon", alpha = 0.5) +
+	 	 		 	geom_sf(data = middle_poly, color = "mediumpurple", fill = "mediumpurple", alpha = 0.5) +
+	 	 			geom_sf(data = outer_poly, color = "dodgerblue", fill = "dodgerblue", alpha = 0.5) +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_viridis_c(breaks = c(0, 0.50, 1.0), limits = c(0,1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+					theme_bw() +
+ 					theme(
+ 						axis.text = element_text(size = 16),	
+  					axis.title = element_text(size = 18),
+  					legend.title.align=0.5)
+    	   
+	 	ggsave("./output/plots/BS_regions_IMO.png",
+			 plot,
+			 width = 10, height = 10, units = "in")
+
+
 	
 	# create smaller dataframe for intersection function
 	ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
@@ -165,7 +196,8 @@
  	## filter full df by lats/longs in polygon
 	inner_domain_df <- ROMS_hindcast_dat %>% 
 		filter(., long_not_360 %in% inner_domain_overlap$longs_not_360) %>%
-		filter(., latitude %in% inner_domain_overlap$lats) 
+		filter(., latitude %in% inner_domain_overlap$lats) %>%
+		mutate(lats = latitude) 
 	
 	inner_domain_sf <- inner_domain_df %>%
 		  st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
@@ -242,7 +274,8 @@
 		filter(., latitude %in% outer_domain_overlap$lats)
 	 
 	outer_domain_sf <- outer_domain_df %>%
-		  st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+			mutate(lats = latitude) %>%
+		  st_as_sf(coords = c("long_not_360", "lats"), crs = 4326)
 	
 	
 	# combine into one df
@@ -310,4 +343,67 @@
 
 	# standardized by area ####
 	
-
+	reg_df_sum <- reg_df %>% 
+		st_drop_geometry() %>%
+		mutate(latitude = lats) %>%
+		group_by(region, latitude, longitude) %>%
+		summarise(mean_area = mean(area_km2))
+	
+	area_sum <- reg_df_sum %>%
+		group_by(region) %>%
+		summarize(total_area = sum(mean_area))
+	
+	inner_area <- as.numeric(area_sum[1,2])
+	mid_area <- as.numeric(area_sum[2,2])
+	out_area <- as.numeric(area_sum[3,2])
+	
+	yr_hab_dat_std <- yr_hab_dat %>%
+		mutate(std_sphabsuit = case_when(
+			region == "inner" ~ annual_spawning_hab_suit/inner_area,
+			region == "middle" ~ annual_spawning_hab_suit/mid_area,
+			region == "outer" ~ annual_spawning_hab_suit/out_area
+		))
+					 
+	# plot
+	
+		yrly_std_sphab_region_plot <-    
+   	ggplot(data = yr_hab_dat_std) +
+	 	geom_line(aes(year, std_sphabsuit, group = region, colour = region),
+            data = . %>% filter(region == "inner"), color = "red") +
+	  geom_line(aes(year, std_sphabsuit, group = region, colour = region),
+            data = . %>% filter(region == "middle"), color = "blue") +
+	 	geom_line(aes(year, std_sphabsuit, group = region, colour = region),
+            data = . %>% filter(region == "outer"), color = "black") +
+   	xlab("Year") + 
+	  scale_y_continuous(
+	  	name = "Spawning habitat suitability/area",
+	  	breaks = c(0, 0.0000025, 0.000005, 0.0000075, 0.00001),
+	  	labels = c("0", "0.0000025", "0.000005", "0.0000075", "0.00001")
+	  ) +
+   	xlim(1970, 2035) +
+   	theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+  	  axis.text.x =element_text(size=18, colour = "grey50"),
+  	  axis.text.y =element_text(size=10, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+  	  axis.title= element_text(size=20, color = "grey30"),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
+   
+   yrly_std_sphab_region_plot_text <- yrly_std_sphab_region_plot +
+		annotate(geom = "text", x = 2028, y = 0.0000075,
+           label = "outer shelf",
+           color = "#000000", size = 6) +
+		annotate(geom = "text", x = 2028, y = 0.0000012,
+           label = "middle shelf",
+           color = "blue", size = 6) +
+		annotate(geom = "text", x = 2027.5, y = 0.0000007,
+           label = "inner shelf",
+           color = "red", size = 6)
+ 
+	ggsave("./output/plots/yrly_std_sphab_region_plot.png",
+			 yrly_std_sphab_region_plot_text,
+			 width = 10, height = 7, units = "in")

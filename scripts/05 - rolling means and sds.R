@@ -112,16 +112,14 @@
 		ylab("CV")
 	
  ### fix this #### 
-	plot1 <- rolling_mean_plot + theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in")) 
+	plot1 <- rolling_mean_plot + theme(plot.margin = unit(c(0.2, 0, 0, 0.2), "in")) 
 
-	plot2 <- rolling_sd_plot + theme(plot.margin = unit(c(0.2, 0.2, 0.2, -0.05), "in"))
+	plot2 <- rolling_sd_plot + theme(plot.margin = unit(c(-0.05, 0.2, 0.2, 0.2), "in"))
  
-	plot <- plot1 + plot2 + plot_layout(widths = c(1.1, 1))
+	plot <- plot1 / plot2 #+ plot_layout(widths = c(1.1, 1))
 
-	rolling_stats_plot <- plot_top + plot_bottom
-	
 	ggsave("./output/plots/rolling_stats_plot.png",
-		rolling_stats_plot,
+		plot,
 		width = 15, height = 10, units = "in")
 
 
@@ -141,6 +139,7 @@
 	mo_stats$month_name[mo_stats$month == 3] <- "March"
 	mo_stats$month_name[mo_stats$month == 4] <- "April"
 	
+	
 	# calculate rolling mean of mean over 11-yr window and turn into df
 	roll_mean_func <- function(x){
  	
@@ -150,16 +149,24 @@
   
 	}
  
-	months <- as.character(unique(mo_stats$month_name))
-	month_no <- 1:4
+	month_names <- as.character(unique(mo_stats$month_name))
+	month <- 1:4
  
-	mo_mean_dfs <- lapply(months, roll_mean_func) %>% set_names(months)
+	mo_mean_dfs <- lapply(month_names, roll_mean_func) %>% set_names(month_names)
 
 	mo_means <- bind_rows(mo_mean_dfs) %>%
- 		gather(key = "month") %>%
+ 		gather(key = "month_name") %>%
  		mutate(year = rep(1970:2020, 4)) %>%
  		rename(roll_mean = value) %>%
 		na.omit()
+	
+	# add month names
+  mo_means$month <- NA
+  mo_means$month[mo_means$month_name == "January"] <- 1
+  mo_means$month[mo_means$month_name == "February"] <- 2
+	mo_means$month[mo_means$month_name == "March"] <- 3
+	mo_means$month[mo_means$month_name == "April"] <- 4
+
 
 	# calculate rolling mean of sd over 11-yr window and turn into df
 	roll_sd_func <- function(x){
@@ -176,24 +183,31 @@
 		sds_mo
 		}
  
-	mo_sd_lists <- lapply(months, roll_sd_func) %>% 
-		set_names(months) 
+	mo_sd_lists <- lapply(month_names, roll_sd_func) %>% 
+		set_names(month_names) 
 
 	mo_sds <- bind_rows(mo_sd_lists) %>%
-		gather(key = "month") %>%
+		gather(key = "month_name") %>%
 		na.omit() %>%
-		mutate(year = rep(1975:2015, 4),
-					 month_no = rep(1:4, 41)) %>%
+		mutate(year = rep(1975:2015, 4)) %>%
 		rename(roll_sd = value)
+	
+	# add month names
+  mo_sds$month <- NA
+  mo_sds$month[mo_sds$month_name == "January"] <- 1
+  mo_sds$month[mo_sds$month_name == "February"] <- 2
+	mo_sds$month[mo_sds$month_name == "March"] <- 3
+	mo_sds$month[mo_sds$month_name == "April"] <- 4
+
  
 	# combine both into one df
-	mo_stats_4plot <- merge(mo_means, mo_sds, by = c("month", "year")) %>%
+	mo_stats <- merge(mo_means, mo_sds, by = c("month", "month_name", "year")) %>%
  		na.omit()
 
 	# reorder for plotting
-	mo_stats_4plot$month <- factor(mo_stats_4plot$month)
-  mo_stats_4plot$month <- fct_reorder(mo_stats_4plot$month, 
-  																		mo_stats_4plot$month_no)
+	mo_stats$month_name <- factor(mo_stats$month_name)
+  mo_stats$month_name <- fct_reorder(mo_stats$month_name, 
+  																	 mo_stats$month)
 
  # plots 
  
@@ -202,29 +216,29 @@
   #### fix order ####
   
   rolling_mean_plot_mo <- 
-		ggplot(mo_stats_4plot) +
+		ggplot(mo_stats) +
 		geom_line(aes(x = year, y = roll_mean)) +
-  	facet_wrap(~ month, ncol = 2, nrow = 2) +
+  	facet_wrap(~ month_name, ncol = 2, nrow = 2) +
 		xlab("Year") +
 		ylab("11-year rolling mean") +
   	facet_theme()
     	  
   ggsave("./output/plots/rolling_mean_plot_mo.png",
 		rolling_mean_plot_mo,
-		width = 15, height = 10, units = "in")
+		width = 6, height = 6, units = "in")
 
 	# sd
 	rolling_sd_plot_mo <- 
-		ggplot(mo_stats_4plot) +
+		ggplot(mo_stats) +
 		geom_line(aes(x = year, y = roll_sd)) +
-  	facet_wrap(~ month, ncol = 2, nrow = 2) +
+  	facet_wrap(~ month_name, ncol = 2, nrow = 2) +
 		xlab("Year") +
 		ylab("11-year rolling sd") +
 	  facet_theme()
 
   ggsave("./output/plots/rolling_sd_plot_mo.png",
 		rolling_sd_plot_mo,
-		width = 15, height = 10, units = "in")
+		width = 6, height = 6, units = "in")
 
   
 	# other window lengths ####
@@ -254,6 +268,11 @@
   	geom_line(aes(x = year, y = mean)) +
   	facet_wrap(~ window_width, nrow = 4) +
   	facet_theme()
+  
+  ggsave("./output/plots/mean_vary_win.png",
+		mean_vary_win,
+		width = 6, height = 6, units = "in")
+
   
   # calculate rolling mean of sd 
   roll_sd_yr_func <- function(x) {
@@ -288,11 +307,13 @@
   sd_vary_win <- ggplot(roll_sds) +
   	geom_line(aes(x = year, y = sd)) +
   	facet_wrap(~ window_width, nrow = 4) +
-  	facet_theme() +
-  	ggtitle("all data") 
-  
-	
- 
+  	facet_theme()
+
+  ggsave("./output/plots/sd_vary_win.png",
+		sd_vary_win,
+		width = 6, height = 6, units = "in")
+
+
  ##### rolling mean and sd of latitude #####
   
 	# year ####
@@ -408,7 +429,7 @@
   
 	ggsave("./output/plots/mean_lat_vary_win.png",
 		mean_vary_win,
-		width = 15, height = 10, units = "in")
+		width = 13, height = 7.5, units = "in")
 	
 	
 	# rolling standard deviation ####
@@ -477,7 +498,7 @@
   
 	ggsave("./output/plots/sd_lat_vary_win.png",
 		sd_vary_win,
-		width = 15, height = 10, units = "in")
+		width = 13, height = 7.5, units = "in")
   
 	
   # calculate rolling mean of sd 

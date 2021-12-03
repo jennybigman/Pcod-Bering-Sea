@@ -40,7 +40,7 @@
 	  	breaks = c(56, 57),
 	  	labels = c("56˚N", "57˚N")
 	  ) +
-   	xlim(1970, 2025) +
+   	xlim(1970, 2030) +
    	theme_bw() +
   	theme(
   	  axis.text=element_text(size=12, colour = "grey50"),
@@ -62,7 +62,7 @@
    	
 	ggsave("./output/plots/mean_lat_yearly_plot.png",
 			 mean_lat_yearly_plot_text,
-			 width = 10, height = 7, units = "in")
+			 width = 12, height = 7, units = "in")
 
 	
 	# try with map

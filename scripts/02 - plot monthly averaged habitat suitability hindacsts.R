@@ -256,11 +256,11 @@
 	 annual_hatch_success_2020_cauchy <-    
    	ggplot(data = yearly_hab_dat_no_2021) +
    	geom_line(aes(x = year, y = annual_spawning_hab_suit), color = "black", size = 1) +
-   	geom_point(aes(x = year, y = annual_spawning_hab_suit), color = "black", size  = 4) +
+   	#geom_point(aes(x = year, y = annual_spawning_hab_suit), color = "black", size  = 4) +
    	xlab("Year") + 
 	  scale_y_continuous(
 	  	name = "Spawning habitat suitability",
-	  	breaks = c(0.30, 0.40, 0.50),
+	  	breaks = c(0.20, 0.30, 0.40 ),
 	  ) +
    	xlim(1970, 2022) +
    	theme_bw() +
@@ -276,13 +276,54 @@
   	  panel.border = element_rect(fill = NA, color = "grey50"))
    
    annual_hatch_success_2020_cauchy_txt <- annual_hatch_success_2020_cauchy +
-		annotate(geom = "text", x = 1983, y = 0.55,
+		annotate(geom = "text", x = 1983, y = 0.45,
            label = "Average annual spawning habitat suitability",
            color = "#000000", size = 6)
  
 	ggsave("./output/plots/annual_hatch_success_2020_cauchy.png",
 			 annual_hatch_success_2020_cauchy_txt,
-			 width = 10, height = 7, units = "in")
+			 width = 12, height = 7, units = "in")
+
+	## monthly
+	
+	yearly_hab_dat <- ROMS_hindcast_dat %>%
+   								  group_by(year) %>%
+   								  summarise(annual_hatch_success_cauchy = mean(hatch_success_cauchy),
+   								 					  annual_hatch_success_gaussian = mean(hatch_success_gaus),
+   								  					annual_spawning_hab_suit = mean(sp_hab_suit))
+	
+	yearly_hab_dat_no_2021 <- yearly_hab_dat %>% filter(year != 2021)
+ 
+	 annual_hatch_success_2020_cauchy <-    
+   	ggplot(data = yearly_hab_dat_no_2021) +
+   	geom_line(aes(x = year, y = annual_spawning_hab_suit), color = "black", size = 1) +
+   	#geom_point(aes(x = year, y = annual_spawning_hab_suit), color = "black", size  = 4) +
+   	xlab("Year") + 
+	  scale_y_continuous(
+	  	name = "Spawning habitat suitability",
+	  	breaks = c(0.20, 0.30, 0.40 ),
+	  ) +
+   	xlim(1970, 2022) +
+   	theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+  	  axis.text=element_text(size=20, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+  	  axis.text.x = element_text(size = 18),
+  	  axis.title= element_text(size=20, color = "grey30"),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
+   
+   annual_hatch_success_2020_cauchy_txt <- annual_hatch_success_2020_cauchy +
+		annotate(geom = "text", x = 1983, y = 0.45,
+           label = "Average annual spawning habitat suitability",
+           color = "#000000", size = 6)
+ 
+	ggsave("./output/plots/annual_hatch_success_2020_cauchy.png",
+			 annual_hatch_success_2020_cauchy_txt,
+			 width = 12, height = 7, units = "in")
 
 	#### comparing year bins: 2000 - 2014 vs. 2015 - 2020 ####
 	
