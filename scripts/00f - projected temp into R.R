@@ -167,6 +167,21 @@
   # plots ####
   
   # yearly plot
+	
+		# summarize by year
+  cesm_dat_trim_sum <- cesm_dat_trim %>%
+		group_by(projection, Lat, Lon, year) %>%
+		summarise(mean_temp = mean(temp))
+
+  # convert to sf object
+  cesm_dat_trim_sum_sf <- cesm_dat_trim_sum %>% 
+			mutate(latitude = Lat,
+				long_not_360 = case_when(
+					Lon >= 180 ~ Lon - 360,
+					Lon < 180 ~ Lon)) %>%
+  		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+  	
+
   cesm_yr_plot_func <- function(x){
 		
 				new_dat <- cesm_dfs_trim_sum_sf %>% filter(., year == x)
@@ -221,11 +236,8 @@
 	
 	# plot: summary by decade
 
-	cesm_dfs_trim_decade_sf <- cesm_dfs_trim_sum_sf %>%
+	cesm_dat_trim_sum_decade_sf <- cesm_dat_trim_sum_sf %>%
 		mutate(decade = case_when(
-			between(year, 1980, 1989) ~ "1980s",
-			between(year, 1990, 1999) ~ "1990s",
-			between(year, 2000, 2009) ~ "2000s",
 			between(year, 2010, 2019) ~ "2010s",
 			between(year, 2020, 2029) ~ "2020s",
 			between(year, 2030, 2039) ~ "2030s",
@@ -235,10 +247,10 @@
 			between(year, 2070, 2079) ~ "2070s",
 			between(year, 2080, 2089) ~ "2080s",
 			between(year, 2090, 2099) ~ "2090s"))
-	
+
 	plot_cesm_decade <- 
   		ggplot() +
-					geom_sf(data = cesm_dfs_trim_decade_sf, 
+					geom_sf(data = cesm_dat_trim_sum_decade_sf, 
 									aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
@@ -422,12 +434,12 @@
 	fwrite(gfdl_dat_trim, "./data/gfdl_dat_trim.csv")
 
   # summarize by year
-  gfdl_dfs_trim_sum <- gfdl_dfs_trim %>%
+  gfdl_dat_trim_sum <- gfdl_dat_trim %>%
 		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
   # convert to sf object
-  gfdl_dfs_trim_sum_sf <- gfdl_dfs_trim_sum %>% 
+  gfdl_dat_trim_sum_sf <- gfdl_dat_trim_sum %>% 
 			mutate(latitude = Lat,
 				long_not_360 = case_when(
 					Lon >= 180 ~ Lon - 360,
@@ -492,7 +504,7 @@
 
 	# plot: summary by decade
 
-	gfdl_dfs_trim_sum_decade_sf <- gfdl_dfs_trim_sum_sf %>%
+	gfdl_dat_trim_sum_decade_sf <- gfdl_dat_trim_sum_sf %>%
 		mutate(decade = case_when(
 			between(year, 1980, 1989) ~ "1980s",
 			between(year, 1990, 1999) ~ "1990s",
@@ -509,7 +521,7 @@
 	
 	plot_gfdl_decade <- 
   		ggplot() +
-					geom_sf(data = gfdl_dfs_trim_sum_decade_sf, 
+					geom_sf(data = gfdl_dat_trim_sum_decade_sf, 
 									aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
@@ -687,12 +699,12 @@
 	fwrite(miroc_dat_trim, "./data/miroc_dat_trim.csv")
 
   # summarize by year
-  miroc_dfs_trim_sum <- miroc_dfs_trim %>%
+  miroc_dat_trim_sum <- miroc_dat_trim %>%
 		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
   # convert to sf object
-  miroc_dfs_trim_sum_sf <- miroc_dfs_trim_sum %>% 
+  miroc_dat_trim_sum_sf <- miroc_dat_trim_sum %>% 
 			mutate(latitude = Lat,
 				long_not_360 = case_when(
 					Lon >= 180 ~ Lon - 360,
@@ -757,7 +769,7 @@
 
 	# plot: summary by decade
 
-	miroc_dfs_trim_sum_decade_sf <- miroc_dfs_trim_sum_sf %>%
+	miroc_dat_trim_sum_decade_sf <- miroc_dat_trim_sum_sf %>%
 		mutate(decade = case_when(
 			between(year, 1980, 1989) ~ "1980s",
 			between(year, 1990, 1999) ~ "1990s",
@@ -774,7 +786,7 @@
 	
 	plot_miroc_decade <- 
   		ggplot() +
-					geom_sf(data = miroc_dfs_trim_sum_decade_sf, 
+					geom_sf(data = miroc_dat_trim_sum_decade_sf, 
 									aes(color = mean_temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
