@@ -170,6 +170,7 @@
 	
 		# summarize by year
   cesm_dat_trim_sum <- cesm_dat_trim %>%
+		filter(., projection != "historical") %>%
 		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
@@ -435,6 +436,7 @@
 
   # summarize by year
   gfdl_dat_trim_sum <- gfdl_dat_trim %>%
+  	filter(., projection != "historical") %>%
 		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
@@ -506,9 +508,6 @@
 
 	gfdl_dat_trim_sum_decade_sf <- gfdl_dat_trim_sum_sf %>%
 		mutate(decade = case_when(
-			between(year, 1980, 1989) ~ "1980s",
-			between(year, 1990, 1999) ~ "1990s",
-			between(year, 2000, 2009) ~ "2000s",
 			between(year, 2010, 2019) ~ "2010s",
 			between(year, 2020, 2029) ~ "2020s",
 			between(year, 2030, 2039) ~ "2030s",
@@ -700,6 +699,7 @@
 
   # summarize by year
   miroc_dat_trim_sum <- miroc_dat_trim %>%
+  	filter(., projection != "historical") %>%
 		group_by(projection, Lat, Lon, year) %>%
 		summarise(mean_temp = mean(temp))
 
@@ -771,9 +771,6 @@
 
 	miroc_dat_trim_sum_decade_sf <- miroc_dat_trim_sum_sf %>%
 		mutate(decade = case_when(
-			between(year, 1980, 1989) ~ "1980s",
-			between(year, 1990, 1999) ~ "1990s",
-			between(year, 2000, 2009) ~ "2000s",
 			between(year, 2010, 2019) ~ "2010s",
 			between(year, 2020, 2029) ~ "2020s",
 			between(year, 2030, 2039) ~ "2030s",
