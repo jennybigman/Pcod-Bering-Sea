@@ -2,7 +2,9 @@
 
 	#### year ####
 	
-	mean_lat_yr <- function(x){
+	#### hindcasts ####
+	
+	hind_mean_lat_yr <- function(x){
 		
 		new_dat <- ROMS_hindcast_dat %>%
 			filter(., sp_hab_suit >= x)
@@ -16,31 +18,78 @@
 	
 	sp_hab_thresholds <- c(0.5, 0.9)
 	
-	mean_lats_yr <- lapply(sp_hab_thresholds, mean_lat_yr)
+	hind_mean_lats_yr <- lapply(sp_hab_thresholds, hind_mean_lat_yr)
 	
-	mean_lats_yr_0.5 <- mean_lats_yr[[1]] %>%
-		rename(mean_lat_0.5 = mean_lat)
+	hind_mean_lats_yr_0.5 <- hind_mean_lats_yr[[1]] %>%
+		mutate(sp_hab_threshold = 0.5)
+
+	hind_mean_lats_yr_0.9 <- hind_mean_lats_yr[[2]]	%>%
+		mutate(sp_hab_threshold = 0.9)
 	
-	mean_lats_yr_0.9 <- mean_lats_yr[[2]]	%>%
-		rename(mean_lat_0.9 = mean_lat)
+	hind_mean_lats_yr_df <- bind_rows(hind_mean_lats_yr_0.9, hind_mean_lats_yr_0.5) 
 	
-	mean_lats_yr_df <- merge(mean_lats_yr_0.9, mean_lats_yr_0.5, by = "year") 
+	#### projections ####
 	
-	mean_lats_yr_df <- mean_lats_yr_df %>% filter(., year != 2021)
+	proj_mean_lat_yr <- function(x){
+		
+		new_dat <- ROMS_projected_dat %>%
+			filter(., sp_hab_suit >= x)
+		
+		new_dat_sum <- new_dat %>%
+			group_by(simulation, projection, year) %>%
+			summarise(mean_lat = mean(latitude)) 
+
+		new_dat_sum		
+	}
 	
-	# one plot
+	sp_hab_thresholds <- c(0.5, 0.9)
 	
+	proj_mean_lats_yr <- lapply(sp_hab_thresholds, proj_mean_lat_yr)
+	
+	proj_mean_lats_yr_0.5 <- proj_mean_lats_yr[[1]] %>%
+		mutate(sp_hab_threshold = 0.5)
+	
+	proj_mean_lats_yr_0.9 <- proj_mean_lats_yr[[2]]	%>%
+		mutate(sp_hab_threshold = 0.5)
+	
+	proj_mean_lats_yr_df <- bind_rows(proj_mean_lats_yr_0.9, proj_mean_lats_yr_0.5)
+																
+	
+	proj_mean_lats_yr_df <- tidyr::unite(proj_mean_lats_yr_df,"sim_proj",
+																			 simulation,projection,remove = F)
+	
+	
+	hind_mean_lats_yr_df <- hind_mean_lats_yr_df %>%
+		mutate(sim_proj = "historical",
+					 simulation = "historical",
+					 projection = "historical")
+
+	mean_lats_df <- bind_rows(hind_mean_lats_yr_df, proj_mean_lats_yr_df)
+
+
+	# one plot --- #### fix colors ####
+	
+	
+	
+	
+	
+	
+	
+	# mean lat 0.5
 	mean_lat_yearly_plot <-    
-   	ggplot(data = mean_lats_yr_df) +
-   	geom_line(aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "#7f7fbf", size = 1) +
-		geom_line(aes(x = year, y = mean_lat_0.9), alpha = 0.7, color = "#00345C", size = 1) +
-   	xlab("Year") + 
+   	ggplot() +
+   	geom_line(data = hind_mean_lats_yr_df, 
+   						aes(x = year, y = mean_lat_0.5), alpha = 0.7, color = "grey", size = 1) +
+		geom_path(data = proj_mean_lats_yr_df_plot, 
+							aes(year, mean_lat_0.5, color = sim_proj)) + 
+		geom_vline(aes(xintercept = 2020.5)) +
+		xlab("Year") + 
 	  scale_y_continuous(
 	  	name = "Mean\nlatitude",
-	  	breaks = c(56, 57),
-	  	labels = c("56˚N", "57˚N")
+	  	breaks = c(56, 58, 60),
+	  	labels = c("56˚N", "58˚N", "60˚N")
 	  ) +
-   	xlim(1970, 2030) +
+   	xlim(1970, 2100) +
    	theme_bw() +
   	theme(
   	  axis.text=element_text(size=12, colour = "grey50"),
@@ -52,13 +101,13 @@
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
    
-   mean_lat_yearly_plot_text <- mean_lat_yearly_plot +
-		annotate(geom = "text", x = 2026, y = 57,
-           label = paste("spawning\nhabitat\nsuitability", symbol, "0.5", sep = " "),
-           color = "#7f7fbf", size = 4) +
-   	annotate(geom = "text", x = 2026, y = 56,
-           label = paste("spawning\nhabitat\nsuitability", symbol, "0.9", sep = " "),
-           color = "#00345C", size = 4) 
+  # mean_lat_yearly_plot_text <- mean_lat_yearly_plot +
+	#	annotate(geom = "text", x = 2026, y = 57,
+  #         label = paste("spawning\nhabitat\nsuitability", symbol, "0.5", sep = " "),
+  #         color = "#7f7fbf", size = 4) +
+  # 	annotate(geom = "text", x = 2026, y = 56,
+  #         label = paste("spawning\nhabitat\nsuitability", symbol, "0.9", sep = " "),
+  #         color = "#00345C", size = 4) 
    	
 	ggsave("./output/plots/mean_lat_yearly_plot.png",
 			 mean_lat_yearly_plot_text,
@@ -97,7 +146,7 @@
   					axis.title = element_text(size = 14),
   					legend.title.align=0.5)
 	
-	#### month ####
+	#### month #### START HERE #################
 
 	mean_lat_mo <- function(x){
 		
