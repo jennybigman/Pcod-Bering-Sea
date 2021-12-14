@@ -16,6 +16,7 @@
 	library(stars)
 	library(marmap)
 	library(zoo)
+	library(RColorBrewer)
 	
 	# turn off spherical geometry
 	sf_use_s2(FALSE)
@@ -29,14 +30,18 @@
 	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv") %>% filter(., year != 2021)
 	
 	# projected data
-	years_drop <- c(2021:2099)
-	
-	ROMS_projected_dat <- fread(file = "./data/ROMS_projected_dat.csv") %>%
-		filter(., year %in% years_drop) %>%
-		mutate(latitude = Lat,
-					 longitude = Lon)
 
+	ROMS_projected_dat <- fread(file = "./data/ROMS_projected_dat.csv")
 	
+	# add name of month for plotting
+	ROMS_projected_dat$month_name <- NA
+     
+  ROMS_projected_dat$month_name[ROMS_projected_dat$month == 1] <- "January"
+  ROMS_projected_dat$month_name[ROMS_projected_dat$month == 2] <- "February"
+	ROMS_projected_dat$month_name[ROMS_projected_dat$month == 3] <- "March"
+	ROMS_projected_dat$month_name[ROMS_projected_dat$month == 4] <- "April"
+
+
 	# reorder for plotting
 	ROMS_hindcast_dat$month_name <- factor(ROMS_hindcast_dat$month_name)
   ROMS_hindcast_dat$month_name <- fct_reorder(ROMS_hindcast_dat$month_name, 
@@ -52,9 +57,11 @@
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
   
   ROMS_projected_dat_sf <- ROMS_projected_dat %>%
-  		mutate(long_not_360 = case_when(
-				longitude >= 180 ~ longitude - 360,
-				longitude < 180 ~ longitude)) %>%
+  		mutate(longitude = Lon,
+  					 latitude = Lat,
+  					 long_not_360 = case_when(
+						 longitude >= 180 ~ longitude - 360,
+						 longitude < 180 ~ longitude)) %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
 	
 	

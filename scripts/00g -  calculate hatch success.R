@@ -3,10 +3,10 @@
 	library(here)
 
 	# read in data
-	ROMS_hindcast_temp_dat <- fread("./data/ROMS_hindcast_temp_dat.csv")
+	ROMS_hindcast_temp_dat <- fread("./data/ROMS_hindcast_temp_dat.csv") %>% filter(., year != 2021)
 
 	# projected data
-	ROMS_proj_temp_dat <- fread(file = here("./data/projected_ROMS_temp.csv"))
+	ROMS_proj_temp_dat <- fread(file = here("./data/ROMS_proj_temp_dat_all.csv"))
 
 
 	# calculate hatch success
@@ -40,8 +40,12 @@
 	fwrite(ROMS_hindcast_dat, file = "./data/ROMS_hindcast_dat.csv")
 	
 	
-	 ROMS_projected_dat <- ROMS_proj_temp_dat %>%
+	ROMS_projected_dat <- ROMS_proj_temp_dat %>%
   	mutate(sp_hab_suit = hatch_success_cauchy/max(hatch_success_cauchy))
+	 
+	 ROMS_projected_dat_sum <- ROMS_projected_dat %>%
+	 	group_by(simulation, projection, year) %>%
+	 	summarise(n())
   
 	fwrite(ROMS_projected_dat, file = "./data/ROMS_projected_dat.csv")
 	

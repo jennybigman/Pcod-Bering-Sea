@@ -128,41 +128,40 @@
 	months <- c(1:4)
 	
 	cesm_dfs_trim <- cesm_dfs %>%
-		filter(., month %in% months)
-	
-	# trim df to those lat/lons in hindcast df 
-	
-	# summarize by lat/lon and convert to sf object
-  cesm_dfs_trim_sum <- cesm_dfs_trim %>%
-		group_by(Lat, Lon) %>%
-		summarize(mean_temp = mean(temp)) %>%
+		filter(., month %in% months) %>%
 		mutate(latitude = Lat,
-					 long_not_360 = case_when(
-							Lon >= 180 ~ Lon - 360,
-							Lon < 180 ~ Lon)) %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  
-  cesm_dfs_trim_sum <- cesm_dfs_trim_sum %>%
-  	rename(latitude = Lat,
-  				 longitude = Lon)
+					 longitude = Lon)
 	
-  # make a summary object of the hindcast data for intersecting the lat/lons
-  ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
-		group_by(latitude, longitude) %>%
- 		summarise(mean_temp = mean(temp)) %>%
-		mutate(long_not_360 = case_when(
-				   longitude >= 180 ~ longitude - 360,
-				   longitude < 180 ~ longitude)) %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+  fwrite(cesm_dfs_trim, "./data/cesm_dfs_trim.csv")
 	
-	dat_ints <- st_intersection(cesm_dfs_trim_sum, ROMS_hindcast_dat_sum)
-  
-	cesm_dat_trim <- cesm_dfs_trim %>% 
-		filter(., Lon %in% dat_ints$longitude) %>%
-		filter(., Lat %in% dat_ints$latitude)
-
-	fwrite(cesm_dat_trim, "./data/cesm_dat_trim.csv")
-
+	## trim df to those lat/lons in hindcast df ##### SKIP THIS BC WILL DO THIS ON NEXT SCRIPT ####
+	#
+	## summarize by lat/lon and convert to sf object
+  #cesm_dfs_trim_sum <- cesm_dfs_trim %>%
+	#	group_by(latitude, longitude) %>%
+ 	#	summarise(mean_temp = mean(temp)) %>%
+	#	mutate(long_not_360 = case_when(
+	#			   longitude >= 180 ~ longitude - 360,
+	#			   longitude < 180 ~ longitude)) %>%
+  #	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+  #
+  ## make a summary object of the hindcast data for intersecting the lat/lons
+  #ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
+	#	group_by(latitude, longitude) %>%
+ 	#	summarise(mean_temp = mean(temp)) %>%
+	#	mutate(long_not_360 = case_when(
+	#			   longitude >= 180 ~ longitude - 360,
+	#			   longitude < 180 ~ longitude)) %>%
+  #	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+	#
+	#dat_ints <- st_intersection(cesm_dfs_trim, ROMS_hindcast_dat_sum)
+  #
+	#cesm_dat_trim <- cesm_dfs_trim %>% 
+	#	filter(., Lon %in% dat_ints$longitude) %>%
+	#	filter(., Lat %in% dat_ints$latitude)
+#
+	#fwrite(cesm_dat_trim, "./data/cesm_dat_trim.csv")
+#
 
   # plots ####
   
@@ -395,39 +394,42 @@
 	gfdl_dfs_trim <- gfdl_dfs %>%
 		filter(., month %in% months)
 	
-	# trim df to those lat/lons in hindcast df 
-	
-	# summarize by lat/lon and convert to sf object
-  gfdl_dfs_trim_sum <- gfdl_dfs_trim %>%
-		group_by(Lat, Lon) %>%
-		summarize(mean_temp = mean(temp)) %>%
-		mutate(latitude = Lat,
-					 long_not_360 = case_when(
-							Lon >= 180 ~ Lon - 360,
-							Lon < 180 ~ Lon)) %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  
-  gfdl_dfs_trim_sum <- gfdl_dfs_trim_sum %>%
-  	rename(latitude = Lat,
-  				 longitude = Lon)
-	
-  # make a summary object of the hindcast data for intersecting the lat/lons
-  ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
-		group_by(latitude, longitude) %>%
- 		summarise(mean_temp = mean(temp)) %>%
-		mutate(long_not_360 = case_when(
-				   longitude >= 180 ~ longitude - 360,
-				   longitude < 180 ~ longitude)) %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-	
-	dat_ints <- st_intersection(gfdl_dfs_trim_sum, ROMS_hindcast_dat_sum)
-  
-	gfdl_dat_trim <- gfdl_dfs_trim %>% 
-		filter(., Lon %in% dat_ints$longitude) %>%
-		filter(., Lat %in% dat_ints$latitude)
+	fwrite(gfdl_dfs_trim, "./data/gfdl_dfs_trim.csv")
 
-	# write to file
-	fwrite(gfdl_dat_trim, "./data/gfdl_dat_trim.csv")
+	
+#	# trim df to those lat/lons in hindcast df #### SKIP THIS BC WILL DO THIS ON NEXT SCRIPT ####
+#	
+#	# summarize by lat/lon and convert to sf object
+#  gfdl_dfs_trim_sum <- gfdl_dfs_trim %>%
+#		group_by(Lat, Lon) %>%
+#		summarize(mean_temp = mean(temp)) %>%
+#		mutate(latitude = Lat,
+#					 long_not_360 = case_when(
+#							Lon >= 180 ~ Lon - 360,
+#							Lon < 180 ~ Lon)) %>%
+#  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+#  
+#  gfdl_dfs_trim_sum <- gfdl_dfs_trim_sum %>%
+#  	rename(latitude = Lat,
+#  				 longitude = Lon)
+#	
+#  # make a summary object of the hindcast data for intersecting the lat/lons
+#  ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
+#		group_by(latitude, longitude) %>%
+# 		summarise(mean_temp = mean(temp)) %>%
+#		mutate(long_not_360 = case_when(
+#				   longitude >= 180 ~ longitude - 360,
+#				   longitude < 180 ~ longitude)) %>%
+#  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+#	
+#	dat_ints <- st_intersection(gfdl_dfs_trim_sum, ROMS_hindcast_dat_sum)
+#  
+#	gfdl_dat_trim <- gfdl_dfs_trim %>% 
+#		filter(., Lon %in% dat_ints$longitude) %>%
+#		filter(., Lat %in% dat_ints$latitude)
+#
+#	# write to file
+#	fwrite(gfdl_dat_trim, "./data/gfdl_dat_trim.csv")
 
   # summarize by year
   gfdl_dat_trim_sum <- gfdl_dat_trim %>%
@@ -658,54 +660,56 @@
 	miroc_dfs_trim <- miroc_dfs %>%
 		filter(., month %in% months)
 	
-	# trim df to those lat/lons in hindcast df 
+	fwrite(miroc_dfs_trim, "./data/miroc_dfs_trim.csv")
 	
-	# summarize by lat/lon and convert to sf object
-  miroc_dfs_trim_sum <- miroc_dfs_trim %>%
-		group_by(Lat, Lon) %>%
-		summarize(mean_temp = mean(temp)) %>%
-		mutate(latitude = Lat,
-					 long_not_360 = case_when(
-							Lon >= 180 ~ Lon - 360,
-							Lon < 180 ~ Lon)) %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  
-  miroc_dfs_trim_sum <- miroc_dfs_trim_sum %>%
-  	rename(latitude = Lat,
-  				 longitude = Lon)
-	
-  # make a summary object of the hindcast data for intersecting the lat/lons
-  ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
-		group_by(latitude, longitude) %>%
- 		summarise(mean_temp = mean(temp)) %>%
-		mutate(long_not_360 = case_when(
-				   longitude >= 180 ~ longitude - 360,
-				   longitude < 180 ~ longitude)) %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-	
-	dat_ints <- st_intersection(miroc_dfs_trim_sum, ROMS_hindcast_dat_sum)
-  
-	miroc_dat_trim <- miroc_dfs_trim %>% 
-		filter(., Lon %in% dat_ints$longitude) %>%
-		filter(., Lat %in% dat_ints$latitude)
-
-	# write to file
-	fwrite(miroc_dat_trim, "./data/miroc_dat_trim.csv")
-
-  # summarize by year
-  miroc_dat_trim_sum <- miroc_dat_trim %>%
-  	filter(., scenario != "historical") %>%
-		group_by(scenario, Lat, Lon, year) %>%
-		summarise(mean_temp = mean(temp))
-
-  # convert to sf object
-  miroc_dat_trim_sum_sf <- miroc_dat_trim_sum %>% 
-			mutate(latitude = Lat,
-				long_not_360 = case_when(
-					Lon >= 180 ~ Lon - 360,
-					Lon < 180 ~ Lon)) %>%
-  		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  	
+#	# trim df to those lat/lons in hindcast df #### SKIP THIS BC WILL DO THIS ON NEXT SCRIPT ####
+#	
+#	# summarize by lat/lon and convert to sf object 
+#  miroc_dfs_trim_sum <- miroc_dfs_trim %>%
+#		group_by(Lat, Lon) %>%
+#		summarize(mean_temp = mean(temp)) %>%
+#		mutate(latitude = Lat,
+#					 long_not_360 = case_when(
+#							Lon >= 180 ~ Lon - 360,
+#							Lon < 180 ~ Lon)) %>%
+#  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+#  
+#  miroc_dfs_trim_sum <- miroc_dfs_trim_sum %>%
+#  	rename(latitude = Lat,
+#  				 longitude = Lon)
+#	
+#  # make a summary object of the hindcast data for intersecting the lat/lons
+#  ROMS_hindcast_dat_sum <- ROMS_hindcast_dat %>%
+#		group_by(latitude, longitude) %>%
+# 		summarise(mean_temp = mean(temp)) %>%
+#		mutate(long_not_360 = case_when(
+#				   longitude >= 180 ~ longitude - 360,
+#				   longitude < 180 ~ longitude)) %>%
+#  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+#	
+#	dat_ints <- st_intersection(miroc_dfs_trim_sum, ROMS_hindcast_dat_sum)
+#  
+#	miroc_dat_trim <- miroc_dfs_trim %>% 
+#		filter(., Lon %in% dat_ints$longitude) %>%
+#		filter(., Lat %in% dat_ints$latitude)
+#
+#	# write to file
+#	fwrite(miroc_dat_trim, "./data/miroc_dat_trim.csv")
+#
+#  # summarize by year
+#  miroc_dat_trim_sum <- miroc_dat_trim %>%
+#  	filter(., scenario != "historical") %>%
+#		group_by(scenario, Lat, Lon, year) %>%
+#		summarise(mean_temp = mean(temp))
+#
+#  # convert to sf object
+#  miroc_dat_trim_sum_sf <- miroc_dat_trim_sum %>% 
+#			mutate(latitude = Lat,
+#				long_not_360 = case_when(
+#					Lon >= 180 ~ Lon - 360,
+#					Lon < 180 ~ Lon)) %>%
+#  		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
+#  	
   	
   # plots ####
   
