@@ -523,5 +523,5 @@
 	
 		ggsave("./output/plots/mo_bc_temp.png",
 			 mo_bc_temp,
-			 width = 15, height = 5, units = "in")
+			 width = 15, height = 10, units = "in")
 	
