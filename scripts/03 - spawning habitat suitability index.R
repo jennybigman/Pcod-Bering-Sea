@@ -8,9 +8,9 @@
 	
 	yearly_hab_dat_proj <- ROMS_projected_dat %>% 
 		group_by(simulation, projection, year) %>%
-   	summarise(annual_hatch_success_cauchy = mean(hatch_success_cauchy),
-   					  annual_hatch_success_gaussian = mean(hatch_success_gaus),
-   						annual_spawning_hab_suit = mean(sp_hab_suit)) 
+   	summarise(annual_hatch_success_cauchy_var = mean(hatch_success_cauchy_var),
+   						annual_hatch_success_gaussian_var = mean(hatch_success_gaus_var),
+   						annual_spawning_hab_suit_var = mean(sp_hab_suit_var)) 
 	
 	# create interaction variable for plotting different colors
 	
@@ -25,20 +25,22 @@
 	
 	names(colors) <- unique(yearly_hab_dat_proj$sim_proj)
 	
-	annual_hatch_success_cauchy <-    
+	# with bias-corrected temp with variance ratio
+		
+	annual_hatch_success_cauchy_var <-    
    	ggplot() +
    	geom_line(data = yearly_hab_dat_hind, 
    						aes(x = year, y = annual_spawning_hab_suit), 
    						color = "black", alpha = 0.5) +
 		geom_line(data = yearly_hab_dat_proj,
-							aes(year, annual_spawning_hab_suit, 
+							aes(year, annual_spawning_hab_suit_var, 
 									group = sim_proj, 
 									color = sim_proj), alpha = 0.5) +
 		facet_wrap(~ simulation) +
 		xlab("Year") + 
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Annual spawning habitat suitability",
+	  	name = "Annual spawning\nhabitat suitability\nvar",
 	  	breaks = c(0.20, 0.40, 0.60, 0.80),
 	  ) +
 		scale_x_continuous(
@@ -58,9 +60,10 @@
   	  panel.border = element_rect(fill = NA, color = "grey50"))
 	
 	
-		ggsave("./output/plots/annual_hatch_success_cauchy_hindproj.png",
-			 annual_hatch_success_cauchy,
+		ggsave("./output/plots/annual_hatch_success_cauchy_hindproj_var.png",
+			 annual_hatch_success_cauchy_var,
 			 width = 15, height = 5, units = "in")
+		
 	
 	## monthly
 	
@@ -72,11 +75,10 @@
 	
 	mo_hab_dat_proj <- ROMS_projected_dat %>% 
 		group_by(simulation, projection, year, month_name, month) %>%
-   	summarise(avg_hatch_success_cauchy = mean(hatch_success_cauchy),
-   					  avg_hatch_success_gaussian = mean(hatch_success_gaus),
-   						avg_spawning_hab_suit = mean(sp_hab_suit)) 
+   	summarise(avg_hatch_success_cauchy_var = mean(hatch_success_cauchy_var),
+   						avg_hatch_success_gaussian_var = mean(hatch_success_gaus_var),
+   						avg_spawning_hab_suit_var = mean(sp_hab_suit_var)) 
 		
-	
 	mo_hab_dat_proj <- mo_hab_dat_proj %>%
 		tidyr::unite("sim_proj", simulation, projection, remove = F)
 
@@ -96,21 +98,23 @@
   mo_hab_dat_proj$month_name <- factor(mo_hab_dat_proj$month_name)
   mo_hab_dat_proj$month_name <- fct_reorder(mo_hab_dat_proj$month_name, 
   																		mo_hab_dat_proj$month)
-
-	mo_hatch_success_cauchy <-    
+		
+  # with bias-corrected temp with variance ratio
+  
+	mo_hatch_success_cauchy_var <-    
    	ggplot() +
    	geom_line(data = mo_hab_dat_hind, 
    						aes(x = year, y = avg_spawning_hab_suit), 
    						color = "black", alpha = 0.5) +
 		geom_line(data = mo_hab_dat_proj,
-							aes(year, avg_spawning_hab_suit, 
+							aes(year, avg_spawning_hab_suit_var, 
 									group = sim_proj, 
 									color = sim_proj), alpha = 0.5) +
 		facet_wrap(~ simulation + month_name) +
 		xlab("Year") + 
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Mean spawning habitat suitability",
+	  	name = "Mean spawning\nhabitat suitability\nvar",
 	  	breaks = c(0.20, 0.40, 0.60, 0.80),
 	  ) +
 		scale_x_continuous(
@@ -120,7 +124,7 @@
   	theme(legend.position = "none") +
   	theme(
 			strip.background = element_blank(),
-  		strip.text = element_text(size = 18, face = "bold"),
+  		strip.text = element_text(size = 16, face = "bold"),
 			axis.text = element_text(size = 16, colour = "grey50"),
   	  axis.ticks = element_line(colour = "grey50"),
   	  axis.line = element_line(colour = "grey50"),
@@ -130,22 +134,88 @@
   	  panel.border = element_rect(fill = NA, color = "grey50"))
 	
 	
-		ggsave("./output/plots/mo_hatch_success_cauchy_hindproj.png",
-			 mo_hatch_success_cauchy,
+		ggsave("./output/plots/mo_hatch_success_cauchy_hindproj_var.png",
+			 mo_hatch_success_cauchy_var,
 			 width = 10, height = 7, units = "in")
+		
+	#### temp ####
+		
+	# monthly
+		
+	mo_temp_hind <- ROMS_hindcast_dat %>%
+		group_by(year, month_name, month) %>%
+    summarise(avg_temp = mean(temp))
 	
+	mo_temp_proj <- ROMS_projected_dat %>% 
+		group_by(simulation, projection, year, month_name, month) %>%
+   	summarise(avg_temp_novar = mean(bc_temp),
+   						avg_temp_var = mean(bc_temp_sd)) 
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	mo_temp_proj <- mo_temp_proj %>%
+		tidyr::unite("sim_proj", simulation, projection, remove = F)
 
+	colors <- c("lightgrey", "#efd966", "#b79a00", 
+						  "lightgrey", "#7fb27f", "#004700", 
+						  "lightgrey", "#6666b2", "#000059")
+	
+	sim_proj <- unique(mo_temp_proj$sim_proj)
+	
+	names(colors) <- unique(mo_temp_proj$sim_proj)
+	
+	# reorder for plotting
+	mo_temp_hind$month_name <- factor(mo_temp_hind$month_name)
+  mo_temp_hind$month_name <- fct_reorder(mo_temp_hind$month_name, 
+  																		mo_temp_hind$month)
+  
+  mo_temp_proj$month_name <- factor(mo_temp_proj$month_name)
+  mo_temp_proj$month_name <- fct_reorder(mo_temp_proj$month_name, 
+  																		mo_temp_proj$month)
+
+	# with bias-corrected temp with variance ratio
+
+	mo_temp_var <-    
+   	ggplot() +
+   	geom_line(data = mo_temp_hind, 
+   						aes(x = year, y = avg_temp), 
+   						color = "black", alpha = 0.5) +
+		geom_line(data = mo_temp_proj,
+							aes(year, avg_temp_var, 
+									group = sim_proj, 
+									color = sim_proj), alpha = 0.5) +
+		facet_wrap(~ simulation + month_name) +
+		xlab("Year") + 
+		scale_color_manual(name = "sim_proj", values = colors) +
+	  scale_y_continuous(
+	  	name = "Mean projected temp\nvar",
+	  	breaks = c(0, 2, 4, 6),
+	  ) +
+		scale_x_continuous(
+	  	name = "Year",
+	  	breaks = c(1980, 2030, 2080)) +
+   	theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+			strip.background = element_blank(),
+  		strip.text = element_text(size = 16, face = "bold"),
+			axis.text = element_text(size = 16, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+  	  axis.title = element_text(size=18, color = "grey30"),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
+	
+	
+		ggsave("./output/plots/mo_temp_novar_hindproj_var.png",
+			 mo_temp_var,
+			 width = 10, height = 7, units = "in")
+		
+		
+		
+		
+	#### code below needs to be organized ####
+		
+		
 	#### comparing year bins: 2000 - 2014 vs. 2015 - 2020 ####
 	
 	years_keep <- c(2000:2020)

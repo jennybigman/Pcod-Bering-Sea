@@ -1,4 +1,4 @@
-# rollingm mean and sd (following Litzow et al 2018)
+# rolling mean and sd (following Litzow et al 2018)
 
 	library(zoo)
 	library(runner)
@@ -8,79 +8,147 @@
 	# year ####
 	
 	# summarize spawning habitat suitability by year 
-	yr_stats <- ROMS_hindcast_dat %>%
+	yr_stats_hind <- ROMS_hindcast_dat %>%
 		group_by(year) %>%
-		filter(year != 2021) %>%
 		summarise(mean_sp_hab_suit = mean(sp_hab_suit),
 							sd_sp_hab_suit = sd(sp_hab_suit),
 							CV = sd_sp_hab_suit/mean_sp_hab_suit)
 	
-	# plot yearly spawning habitat suitability
-	annual_sp_hab_plot <- 
-		ggplot(yr_stats) +
-		geom_line(aes(x = year, y = mean_sp_hab_suit)) +
-		xlab("Year") +
-		ylab("Annual spawning\nhabitat suitability") +
-		pos1r1_theme()
-		
-	# calculate rolling mean of mean and sd
-	roll_yr_mean <- rollmean(yr_stats$mean_sp_hab_suit, 11, fill = NA)
-	roll_yr_mean_sd <- rollmean(yr_stats$sd_sp_hab_suit, 11, fill = NA)
-	years <- c(1970:2020)
+	yr_stats_proj <- ROMS_projected_dat %>%
+		group_by(simulation, projection, year) %>%
+		summarise(mean_sp_hab_suit = mean(sp_hab_suit),
+							sd_sp_hab_suit = sd(sp_hab_suit),
+							CV = sd_sp_hab_suit/mean_sp_hab_suit)
+	
+	cesm_dat <- ROMS_projected_dat %>%
+		filter(., simulation == "cesm")
+	
+	cesm_yr_stats <- cesm_dat %>%
+		group_by(projection, year) %>%
+		summarise(mean_sp_hab_suit = mean(sp_hab_suit),
+							sd_sp_hab_suit = sd(sp_hab_suit),
+							CV = sd_sp_hab_suit/mean_sp_hab_suit)
+	
+	gfdl_dat <- ROMS_projected_dat %>%
+		filter(., simulation == "gfdl")
+	
+	gfdl_yr_stats <- gfdl_dat %>%
+		group_by(projection, year) %>%
+		summarise(mean_sp_hab_suit = mean(sp_hab_suit),
+							sd_sp_hab_suit = sd(sp_hab_suit),
+							CV = sd_sp_hab_suit/mean_sp_hab_suit)
 
-	rolling_stats <- data.frame(years, roll_yr_mean, roll_yr_mean_sd) %>%
+	
+	miroc_dat <- ROMS_projected_dat %>%
+		filter(., simulation == "miroc")
+	
+	miroc_yr_stats <- miroc_dat %>%
+		group_by(projection, year) %>%
+		summarise(mean_sp_hab_suit = mean(sp_hab_suit),
+							sd_sp_hab_suit = sd(sp_hab_suit),
+							CV = sd_sp_hab_suit/mean_sp_hab_suit)
+
+
+
+	roll_yr_mean_proj <- rollmean(yr_stats_proj$mean_sp_hab_suit, 11, fill = NA)
+	years_proj_hist <- c(1980:2014)
+	years_proj_scenario <- c(2015:2099)
+	years_proj <- c(rep(years_proj_hist, 3), rep(years_proj_scenario, 6))
+
+	cems_years_proj <- c(rep(years_proj_hist, 1), rep(years_proj_scenario, 2))
+
+	rolling_mean_proj <- data.frame(years_proj, roll_yr_mean_proj) %>%
 		na.omit()
-	
-	# calculate the standard deviation over 11-yr window -- not the rolling mean of the sd as above
-	
-	rw_sd <- runner(
-		x = yr_stats$mean_sp_hab_suit,
-		k = 11,
-		f = function(x) { 
-			sd(x)
-			}
-	)
-	
-	rw_sd <- rw_sd[11:51]
-	
-	rw_mean <- runner(
-		x = yr_stats$mean_sp_hab_suit,
-		k = 11,
-		f = function(x){
-			mean(x)
-		}
-	)
-	
-	rw_mean <- rw_mean[11:51]
-	
-	rolling_stats <- cbind(rolling_stats, rw_mean, rw_sd)
-	
-  
-  # using Mike Litzow's code
-  
-  sds <- NA
-  
-  for(i in 6:47){
-  	win <- (i - 5):(i + 5)
-  	sds[i] <- sd(yr_stats$mean_sp_hab_suit[win])
-  }
-  
-  sds_noNA <- na.omit(sds)
-  
-  means <- NA
-  
-  for(i in 6:47){
-  	win <- (i - 5):(i + 5)
-  	means[i] <- mean(yr_stats$mean_sp_hab_suit[win])
-  }
-  
-  means_noNA <- na.omit(means)
-	yrs_mike <- c(1975:2015)
-  mike_stats <- as.data.frame(cbind(yrs_mike, means_noNA, sds_noNA))
 
-  rolling_stats <- cbind(rolling_stats, mike_stats)
+	
+	# calculate the standard deviation over 11-yr window -- not the rolling mean of the sd as above ####
+	
+	# hindcast ####
+	
+  sds_cesm_hind <- NA
   
-	# plots
+  for(i in 6:205){
+  	win <- (i - 5):(i + 5)
+  	sds_cesm_hind[i] <- sd(cesm_yr_stats$mean_sp_hab_suit[win])
+  }
+  
+  sds_hind_noNA <- na.omit(sds_cesm_hind)
+  
+  means_hind <- NA
+  
+  for(i in 6:46){
+  	win <- (i - 5):(i + 5)
+  	means_hind[i] <- mean(yr_stats_hind$mean_sp_hab_suit[win])
+  }
+  
+  means_noNA <- na.omit(means_hind)
+	years_hind <- c(1975:2015)
+  rolling_sd <- as.data.frame(cbind(years_hind,means_noNA, sds_noNA))
+
+  rolling_stats_hind <- merge(rolling_mean_hind, rolling_sd, by = "years_hind")
+  
+  
+  # projections #####
+  
+  sds_proj <- NA
+  
+  for(i in 6:610){
+  	win <- (i - 5):(i + 5)
+  	sds_proj[i] <- sd(yr_stats_proj$mean_sp_hab_suit[win])
+  }
+  
+  sds_proj_noNA <- na.omit(sds_proj)
+  
+  means_proj <- NA
+  
+  for(i in 6:610){
+  	win <- (i - 5):(i + 5)
+  	means_proj[i] <- mean(yr_stats_proj$mean_sp_hab_suit[win])
+  }
+  
+  means_proj_noNA <- na.omit(means_proj)
+	years_proj <- c(1985:2094)
+  rolling_sd_proj <- as.data.frame(cbind(sds_proj, means_proj))
+
+  rolling_stats <- merge(rolling_mean_hind, rolling_sd, by = "years_hind")
+  
+  
+  ### with just cesm
+ 
+  sds_cesm <- NA
+  
+  for(i in 6:205){
+  	win <- (i - 5):(i + 5)
+  	sds_cesm[i] <- sd(cesm_yr_stats$mean_sp_hab_suit[win])
+  }
+  
+  means_cesm <- NA
+  
+  for(i in 6:205){
+  	win <- (i - 5):(i + 5)
+  	means_cesm[i] <- mean(cesm_yr_stats$mean_sp_hab_suit[win])
+  }
+  
+	years_proj_hist <- c(1980:2014)
+	years_proj_scenario <- c(2015:2099)
+	years_proj <- c(rep(years_proj_hist, 1), rep(years_proj_scenario, 2))
+	
+  rolling_sd_cesm <- as.data.frame(cbind(years_proj, sds_cesm)) %>%
+  	mutate(stat = "sds",
+  				 simulation = "cesm",
+  				 projection = c(rep("historical", 35), rep("ssp126", 85), rep("ssp585", 85))) %>%
+  	rename(value = sds_cesm)
+  
+ rolling_means_cesm <- as.data.frame(cbind(years_proj, means_cesm)) %>%
+  	mutate(stat = "means",
+  				 simulation = "cesm",
+  				 projection = c(rep("historical", 35), rep("ssp126", 85), rep("ssp585", 85))) %>%
+  	rename(value = means_cesm)
+
+ rolling_stats_cesm <- bind_rows(rolling_means_cesm, rolling_sd_cesm)
+	
+
+# plots
 	
 	# mean 
 	rolling_mean_plot <- 
@@ -104,24 +172,6 @@
 		rolling_stats_plot,
 		width = 15, height = 10, units = "in")
 	
-	# CV
-	rolling_cv_plot <- 
-		ggplot(yr_stats) +
-		geom_line(aes(x = year, y = CV)) +
-		xlab("Year") +
-		ylab("CV")
-	
- ### fix this #### 
-	plot1 <- rolling_mean_plot + theme(plot.margin = unit(c(0.2, 0, 0, 0.2), "in")) 
-
-	plot2 <- rolling_sd_plot + theme(plot.margin = unit(c(-0.05, 0.2, 0.2, 0.2), "in"))
- 
-	plot <- plot1 / plot2 #+ plot_layout(widths = c(1.1, 1))
-
-	ggsave("./output/plots/rolling_stats_plot.png",
-		plot,
-		width = 15, height = 10, units = "in")
-
 
 	## month ####
   

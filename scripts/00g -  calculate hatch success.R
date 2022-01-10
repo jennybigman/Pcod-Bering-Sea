@@ -6,8 +6,7 @@
 	ROMS_hindcast_temp_dat <- fread("./data/ROMS_hindcast_temp_dat.csv") %>% filter(., year != 2021)
 
 	# projected data
-	ROMS_proj_temp_dat <- fread(file = here("./data/ROMS_proj_temp_dat_all.csv"))
-
+	ROMS_proj_temp_dat <- fread(file = here("./data/proj_temp_dat.csv"))
 
 	# calculate hatch success
 	hatch_success_cauchy_func <- function(x, k = 0.453, mu = 4.192, sigma = 2.125 ){
@@ -23,8 +22,10 @@
 					 hatch_success_gaus = sapply(temp, hatch_success_gaus_func))
 	
 	ROMS_proj_temp_dat <- ROMS_proj_temp_dat %>%
-		mutate(hatch_success_cauchy = sapply(bc_temp, hatch_success_cauchy_func),
-					 hatch_success_gaus = sapply(bc_temp, hatch_success_gaus_func))
+		mutate(hatch_success_cauchy_novar = sapply(bc_temp, hatch_success_cauchy_func),
+					 hatch_success_cauchy_var = sapply(bc_temp_sd, hatch_success_cauchy_func),
+					 hatch_success_gaus_novar = sapply(bc_temp, hatch_success_gaus_func),
+					 hatch_success_gaus_var = sapply(bc_temp_sd, hatch_success_gaus_func))
 	
 	
 	# standardize hatch success (calculating spawning habitat suitability)
@@ -41,7 +42,8 @@
 	
 	
 	ROMS_projected_dat <- ROMS_proj_temp_dat %>%
-  	mutate(sp_hab_suit = hatch_success_cauchy/max(hatch_success_cauchy))
+  	mutate(sp_hab_suit_novar = hatch_success_cauchy_novar/max(hatch_success_cauchy_novar),
+  				 sp_hab_suit_var = hatch_success_cauchy_var/max(hatch_success_cauchy_var))
 	 
 	 ROMS_projected_dat_sum <- ROMS_projected_dat %>%
 	 	group_by(simulation, projection, year) %>%
