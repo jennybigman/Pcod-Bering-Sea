@@ -18,6 +18,16 @@ start with these files:
 
 01 - run this script to load libraries, helpful functions, data (hatch success and habitat suitability)
 
-02 - code for mapping monthly-averaged habitat suitability for each year 
+02 - code for mapping monthly-averaged habitat suitability and temperature for each year for both projections and hindcasts
 
-03 - estimating and plotting mean latitude 
+03 - calculating spawning habitat suitability indices
+
+04 - calculating mean latitude metrics
+
+05 - calculating area metrics
+
+06 - calculating rollig means and sds
+
+07 - calculating region-specific metrics
+
+08 - mapping consistency of spawning habitat suitability 
