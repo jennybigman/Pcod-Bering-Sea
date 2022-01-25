@@ -21,7 +21,7 @@
 	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
 	
 	# restrict dataset to only those months of spawning (January to June)
-	sp_months <- c(1:4)
+	sp_months <- c(1:6)
 	
 	ROMS_dat_hind$date <- as.Date(ROMS_dat_hind$DateTime) # date in Date format
 	ROMS_dat_hind$month <- month(ROMS_dat_hind$date) # month of year
@@ -38,8 +38,10 @@
   ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 2] <- "February"
 	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 3] <- "March"
 	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 4] <- "April"
+	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 5] <- "May "
+	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 6] <- "June"
 
-	## remove any area where depth > 250m ####
+		## remove any area where depth > 250m ####
 	
 	ROMS_dat_hind_trim <- ROMS_dat_hind_trim %>%
 			filter(., between(depth, 0, 250))
@@ -85,7 +87,8 @@
 	plot(bsregions_no_15)
 	
 	bsregions_no_15_sf <- bsregions_no_15 %>% 	  
-		st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+		st_as_sf(coords = c("long", "lat"), crs = 4326) 
+	
 	poly_bsregions_no_15_sf <- st_union(bsregions_no_15_sf)
 	
 	plot(poly_bsregions_no_15_sf)

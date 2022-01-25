@@ -43,7 +43,7 @@
 										aes(color = pct_yrs))  +
 						geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 						coord_sf(crs = 3338) +
-	  		    facet_wrap(~ decade, nrow = 1) +
+	  		   facet_wrap(~ decade, nrow = 1) +
 						scale_color_viridis_c() +
 	 					scale_x_continuous(
 	 						breaks = c(-175, -170, -165, -160),
@@ -65,7 +65,8 @@
 	 						strip.background = element_blank(),
 	 						axis.text = element_text(size = 12),	
 	  					axis.title = element_text(size = 14),
-	  					legend.title = element_text(hjust = 0.5, size = 12),
+	  					legend.title = element_text(hjust = 0.5, size = 16),
+	 						legend.text = element_text(size = 14),
 	 						plot.title = element_text(size = 18, face = "bold")
 	 						)
   	
@@ -968,9 +969,6 @@ plot <-
   
  #### hindcasts ####	
 
-	# first try 10-yr bins
-	# remove 2020 and 2021
-	
 	ROMS_hindcast_dat_current <- ROMS_hindcast_dat %>%
 		filter(., year != 2020) 
 

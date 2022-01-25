@@ -10,7 +10,7 @@
     
     	  plot <- 
     	  	ggplot() +
-					geom_sf(data = new_dat, aes(color = bc_temp))  +
+					geom_sf(data = new_dat, aes(color = temp))  +
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
 					scale_color_viridis_c() +
@@ -28,6 +28,7 @@
  					) +
     	  	labs(colour = "Temperature (˚C)") +
 					theme_bw() +
+    	  	ggtitle(paste0("Year:", x)) + 
  					theme(
  						strip.text = element_text(size = 14, face = "bold"),
  						strip.background = element_blank(),
@@ -44,7 +45,7 @@
 	monthly_plot_list <- lapply(years, temp_monthly_plot_func)
   
   mo_name_func_year <- function(x){
-  	year_month <- paste0(x, "_temp")
+  	year_month <- paste0(x, "_temp_test")
   }
    
   month_names_year <- sapply(years, mo_name_func_year)
@@ -145,6 +146,7 @@
  					) +
     	  	labs(colour = "Spawning\nhabitat\nsuitability") +
 					theme_bw() +
+    	  	ggtitle(paste0("Year:", x)) + 
  					theme(
  						strip.text = element_text(size = 14, face = "bold"),
  						strip.background = element_blank(),
@@ -175,7 +177,7 @@
 				
 	plot_list <- mapply(ggsave_func, x = monthly_plot_list, y = month_names)
 
-  
+ 
 	#### map spawning habitat suitability where > 0.1 < 0.9 and > 0.9 colored different blues ####
 
 		hab_suit_monthly_plot_func <- function(x){

@@ -86,7 +86,7 @@
   ggsave_func <- function(x,y){
   	ggsave(plot = x,
     file = paste(y,".png",sep=""),
-    width = 10, height = 10, units = "in")
+    width = 3, height = 3, units = "in")
   }
   
 

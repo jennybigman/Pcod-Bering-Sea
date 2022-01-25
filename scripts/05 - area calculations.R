@@ -9,7 +9,7 @@
 
 	c_area_hind_dat_sum_yr <- c_area_hind_dat %>%
 		group_by(year) %>%
-		summarize(total_area = sum(area_km2)) %>%
+		summarize(total_area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "core")
 
 	# potential habitat = sum of area where sps >= 0.5
@@ -143,14 +143,7 @@
 	
 	#### projections ####
 	
-	carea_proj_dat <- ROMS_projected_dat %>%
-		filter(sp_hab_suit >= 0.9) 
-
-	carea_proj_dat_sum_mo <- carea_proj_dat %>%
-		group_by(simulation, projection, year, month_name, month) %>%
-		summarize(total_area = sum(area_km2)) %>%
-		mutate(sp_hab_threshold = 0.9)
-
+0
 	# potential habitat = sum of area where sps >= 0.5
 	
 	parea_proj_dat <- ROMS_projected_dat %>%

@@ -5,6 +5,8 @@
 	library(reshape2)
 	library(here)
 	library(data.table)
+	library(tidync)
+
 
 	# set up download from server 
 	url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
@@ -12,7 +14,7 @@
 	
 	# test_path <- paste0(url_base, opendap)
 	
-	# tidy_temps <- tidync(file.path(test_path)) %>% hyper_tibble()
+	# tidy_temps <- tidync(test_path) %>% hyper_tibble()
 	
 	nc <- nc_open(paste(url_base, opendap, sep = ""))
 
