@@ -267,7 +267,7 @@
 		xlab("Year") + 
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Annual spawning\nhabitat suitability",
+	  	name = "Cross-shelf annual spawning\nhabitat suitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
 	  	limits = c(0.2, 0.65)
@@ -280,10 +280,10 @@
   	theme(legend.position = "none") +
   	theme(
   		plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-			axis.text.y = element_text(size = 12, colour = "grey50"),
+			axis.text.y = element_text(size = 14, colour = "grey50"),
   	  axis.ticks.y = element_line(colour = "grey50"),
   	  axis.line.y = element_line(colour = "grey50"),
-  	  axis.title.y = element_text(size=14, color = "grey30"),
+  	  axis.title.y = element_text(size=16, color = "grey30"),
 			axis.text.x = element_blank(),
 			axis.ticks.x = element_blank(),
 			axis.title.x = element_blank(),
@@ -294,17 +294,17 @@
 	low_habsuit_time_lab <- low_habsuit_time +
 			annotate(geom = "text", x = 2107, y = 0.45,
            label = "cesm",
-           color = "#6dc3a9", size = 4) +
+           color = "#6dc3a9", size = 4.5) +
 				annotate(geom = "text", x = 2107, y = 0.30,
            label = "gfdl",
-           color = "#4e8d9c", size = 4) +
+           color = "#4e8d9c", size = 4.5) +
 				annotate(geom = "text", x = 2107, y = 0.37,
            label = "miroc",
-           color = "#97c3e5", size = 4)  +
+           color = "#97c3e5", size = 4.5)  +
 				annotate(geom = "text", x = 1995, y = 0.39,
            label = "hindcast",
-           color = "black", alpha = 0.5, size = 4) +
-				annotate(geom = "text", x = 1991, y = 0.65,
+           color = "black", alpha = 0.5, size = 4.5) +
+				annotate(geom = "text", x = 1990, y = 0.65,
            label = "low emission (ssp126)",
            color = "black", size = 5)
 
@@ -323,7 +323,7 @@
 		xlab("Year") + 
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Annual spawning\nhabitat suitability",
+	  	name = "Cross-shelf annual spawning\nhabitat suitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
 	  	limits = c(0.2, 0.65)
@@ -336,10 +336,10 @@
   	theme(legend.position = "none") +
   	theme(
   		plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-			axis.text = element_text(size = 12, colour = "grey50"),
+			axis.text = element_text(size = 14, colour = "grey50"),
   	  axis.ticks = element_line(colour = "grey50"),
   	  axis.line = element_line(colour = "grey50"),
-  	  axis.title = element_text(size=14, color = "grey30"),
+  	  axis.title = element_text(size=16, color = "grey30"),
   	  panel.grid.major = element_blank(),
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
@@ -347,17 +347,17 @@
 	high_habsuit_time_lab <- high_habsuit_time +
 			annotate(geom = "text", x = 2107, y = 0.46,
            label = "cesm",
-           color = "#ff7373", size = 4) +
+           color = "#ff7373", size = 4.5) +
 				annotate(geom = "text", x = 2107, y = 0.5,
            label = "gfdl",
-           color = "#ff4040", size = 4) +
+           color = "#ff4040", size = 4.5) +
 				annotate(geom = "text", x = 2107, y = 0.62,
            label = "miroc",
-           color = "#ffb733", size = 4) +
+           color = "#ffb733", size = 4.5) +
 				annotate(geom = "text", x = 1994, y = 0.39,
            label = "hindcast",
-           color = "black", alpha = 0.5, size = 4) +
-			annotate(geom = "text", x = 1992, y = 0.65,
+           color = "black", alpha = 0.5, size = 4.5) +
+			annotate(geom = "text", x = 1990, y = 0.65,
            label = "high emission (ssp585)",
            color = "black", size = 5)
 
@@ -373,9 +373,9 @@
 	time_series_habsuit_top <- plot1 / plot2 +
 		plot_layout( widths = c(1.1, 1))
 	
-	ggsave("./output/plots/time_series_habsuit_top.png",
+	ggsave(here("./output/plots/time_series_habsuit_top.png"),
 			 time_series_habsuit_top,
-			 width = 8, height = 10, units = "in")
+			 width = 10, height = 10, units = "in")
 	
 	
 	## monthly
