@@ -331,7 +331,7 @@
 	
 	sep_dfs_sf <- lapply(sep_dfs, sf_func)
 	
-	# save dfs for mapping
+	# save dfs for mapping -- need to write a loop so that don't have to separate each simulation
 	cesm_df <- sep_dfs_sf[[1]]
 	gfdl_df <- sep_dfs_sf[[2]]
 	miroc_df <- sep_dfs_sf[[3]]

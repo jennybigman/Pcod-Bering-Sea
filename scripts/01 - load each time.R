@@ -21,6 +21,10 @@
 	library(mapdata)
 	library(zoo)
 	library(runner)
+	library(tidync)
+	library(cowplot)
+	library(scales)
+	library(ggtext)
 	
 	# turn off spherical geometry
 	sf_use_s2(FALSE)

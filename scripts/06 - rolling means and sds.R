@@ -1,8 +1,5 @@
 # rolling mean and sd (following Litzow et al 2018)
 
-	library(zoo)
-	library(runner)
-	
 	#### spawning habitat suitability ####
 	
 	# year ####
@@ -104,230 +101,92 @@
 
   
   #### plots ####
+ 
   
-  rolling_stats_proj_var <- tidyr::unite(rolling_stats_proj_var,"sim_proj",
-													simulation, scenario, remove = F)
-
-	rolling_stats_proj_var_plot <- rolling_stats_proj_var %>%
-		filter(!str_detect(sim_proj, "_historical"))
-	
-	hist_data_var <- rolling_stats_proj_var %>%
-		filter(str_detect(sim_proj, "_historical"))
-
-	
-	colors <- c("#efd966", "#b79a00", 
-						  "#7fb27f", "#004700", 
-						  "#6666b2", "#000059")
-
-	sim_proj_var <- unique(rolling_stats_proj_var_plot$sim_proj)
-	
-	names(colors) <- unique(rolling_stats_proj_var_plot$sim_proj)
-
+	## by scenario
 		
-  ## plot together
+	rolling_stats_proj <- rolling_stats_proj_var %>% filter(., scenario != "historical")
 		
-	rolling_mean_plot_form_var <-    
-   	ggplot(data = rolling_stats_hind) +
-	 	geom_line(aes(years_hind, means_hind), alpha = 0.5) +
-		geom_line(data = rolling_stats_proj_var_plot, 
-							aes(years_proj, means_proj_var, color = sim_proj, group = sim_proj), alpha = 0.5) +
-		facet_wrap(~ simulation) +
-		geom_line(data = hist_data, 
-							aes(years_proj, means_proj_var, color = "lightgrey"), alpha = 0.5) +
-		xlab("Year") +
-		scale_color_manual(name = "sim_proj", values = colors) +
-	  scale_y_continuous(
-	  	name = "11-year rolling mean\nvar",
-	  	breaks = c(0.3, 0.4, 0.5, 0.6),
-	  	labels = c(0.3, 0.4, 0.5, 0.6)
-	  ) +
-   	xlim(1970, 2100) +
-    theme_bw() +
-  	theme(legend.position = "none") +
-  	theme(
-			strip.background = element_blank(),
-  		strip.text = element_text(size = 18, face = "bold"),
-			axis.text.y = element_text(size = 16, colour = "grey50"),
-  	  axis.ticks.y = element_line(colour = "grey50"),
-  	  axis.line.y = element_line(colour = "grey50"),
-  	  axis.title.y = element_text(size=18, color = "grey30"),
-			axis.text.x = element_blank(),
-			axis.ticks.x = element_blank(),
-			axis.line.x = element_blank(),
-			axis.title.x = element_blank(),
-  	  panel.grid.major = element_blank(),
-  	  panel.grid.minor = element_blank(),
-  	  panel.border = element_rect(fill = NA, color = "grey50"))
+	rolling_stats_proj$scen <- NA
+		
+	rolling_stats_proj$scen[rolling_stats_proj$scenario == "ssp126"] <- "low emission\n(ssp126)"
+	rolling_stats_proj$scen[rolling_stats_proj$scenario == "ssp585"] <- "high emission\n(ssp585)"
 	
-	rolling_sd_plot_form_var <-    
+	rolling_stats_proj <- tidyr::unite(rolling_stats_proj,"sim_proj",
+															 simulation, scenario, remove = F)
+
+	colors <- c("#6dc3a9", "#ffabab", # cesm low, cesm high
+						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
+						  "#97c3e5", "#ffb733") # miroc low, miroc high
+
+	sim_proj <- unique(rolling_stats_proj$sim_proj)
+	
+	names(colors) <- unique(rolling_stats_proj$sim_proj)
+	
+	# order facets
+	rolling_stats_proj$scen_f = factor(rolling_stats_proj$scen, levels=c('low emission\n(ssp126)', 
+																																				 'high emission\n(ssp585)'))
+	# plot
+	rolling_sd_plot <-    
    	ggplot(data = rolling_stats_hind) +
 	 	geom_line(aes(years_hind, sds_hind), alpha = 0.5) +
-		geom_line(data = rolling_stats_proj_var_plot, 
+		geom_line(data = rolling_stats_proj, 
 							aes(years_proj, sds_proj_var, color = sim_proj, group = sim_proj), alpha = 0.5) +
-		facet_wrap(~ simulation) +
-		geom_line(data = hist_data, 
-							aes(years_proj, sds_proj_var, color = "lightgrey"), alpha = 0.5) +
+		facet_wrap(~ scen_f) +
 		xlab("Year") +
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "11-year rolling\n standard deviation\nvar",
-	  	breaks = c(0.05, 0.10, 0.15, 0.20),
-	  	labels = c(0.05, 0.10, 0.15, 0.20)
+	  	name = "11-year rolling\n standard deviation",
+	  	breaks = c(0.025, 0.050, 0.075, 0.100),
+	  	labels = c(0.025, 0.050, 0.075, 0.100)
 	  ) +
-   	xlim(1970, 2100) +
+   	xlim(1970, 2105) +
     theme_bw() +
   	theme(legend.position = "none") +
   	theme(
 			strip.background = element_blank(),
-  		strip.text = element_blank(),
-			axis.text = element_text(size = 16, colour = "grey50"),
+  		strip.text = element_text(size = 14),
+			axis.text = element_text(size = 12, colour = "grey50"),
   	  axis.ticks = element_line(colour = "grey50"),
   	  axis.line = element_line(colour = "grey50"),
-  	  axis.title = element_text(size=18, color = "grey30"),
+  	  axis.title = element_text(size=14, color = "grey30"),
   	  panel.grid.major = element_blank(),
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
 	
 	
-	rolling_stats_plot_var <- rolling_mean_plot_form_var/
-			rolling_sd_plot_form_var + plot_layout(heights = 1, 1.1)
-	
-		ggsave("./output/plots/rolling_stats_plot_var.png",
-			 rolling_stats_plot_var,
-			 width = 13, height = 7.5, units = "in")
+	rolling_sd_plot_labs <- 
+			ggdraw(rolling_sd_plot) +
+			draw_label("cesm", x = 0.523, y = 0.41, color = "#6dc3a9", size = 10, alpha = 0.5) +
+			draw_label("gfdl", x = 0.52, y = 0.55, color = "#4e8d9c", size = 10, alpha = 0.5) +
+			draw_label("miroc", x = 0.52, y = 0.30, color = "#97c3e5", size = 10,  alpha = 0.5) +
+			draw_label("cesm", x = 0.965, y = 0.30, color = "#ffabab", size = 10,  alpha = 0.5) +
+			draw_label("gfdl", x = 0.965, y = 0.65, color = "#ff4040", size = 10,  alpha = 0.5) +
+			draw_label("miroc", x = 0.965, y = 0.41, color = "#ffb733", size = 10,  alpha = 0.5) 
+
+		
+	ggsave(here("./output/plots/rolling_sd_plot.png"),
+			 rolling_sd_plot_labs,
+			 width = 10, height = 5, units = "in")
+
+
   
-	
 	## month ####
   
+	# hindcasts ####
+	
 	# summarize spawning habitat suitability by year 
-  mo_stats <- ROMS_hindcast_dat %>%
-	group_by(year, month) %>%
+  mo_stats_hind <- ROMS_hindcast_dat %>%
+	group_by(year, month, month_name) %>%
 	summarise(mean_sp_hab_suit = mean(sp_hab_suit),
 						sd_sp_hab_suit = sd(sp_hab_suit)) %>%
   filter(., year != 2021)
 
-	# add month names
-  mo_stats$month_name <- NA
-  mo_stats$month_name[mo_stats$month == 1] <- "January"
-  mo_stats$month_name[mo_stats$month == 2] <- "February"
-	mo_stats$month_name[mo_stats$month == 3] <- "March"
-	mo_stats$month_name[mo_stats$month == 4] <- "April"
-
-	# calculate rolling mean of mean over 11-yr window and turn into df
-	roll_mean_func <- function(x){
- 	
-		new_dat <- mo_stats %>% filter(month_name == x)
-  	roll_mean_mo <- rollmean(new_dat$mean_sp_hab_suit, 11, fill = NA) 
-  	roll_mean_mo
-  
-	}
- 
-	months <- as.character(unique(mo_stats$month_name))
-	month_no <- 1:4
- 
-	mo_mean_dfs <- lapply(months, roll_mean_func) %>% set_names(months, )
-
-	mo_means <- bind_rows(mo_mean_dfs) %>%
- 		gather(key = "month") %>%
- 		mutate(year = rep(1970:2020, 4)) %>%
- 		rename(roll_mean = value)
-
-	# calculate rolling mean of sd over 11-yr window and turn into df
-	roll_sd_func <- function(x){
- 	
-		new_dat <- mo_stats %>% filter(month_name == x)
-  	roll_sd_mo <- rollmean(new_dat$sd_sp_hab_suit, 11, fill = NA) 
-  	roll_sd_mo
-  	
-	}
- 
-	mo_sd_dfs <- lapply(months, roll_sd_func) %>% set_names(months)
-
-	mo_sds <- bind_rows(mo_sd_dfs) %>%
-		gather(key = "month") %>%
-		mutate(year = rep(1970:2020, 4),
-					 month_no = rep(1:4, 51)) %>%
-		rename(roll_sd = value)
- 
-	# combine both into one df
-	mo_stats_4plot <- merge(mo_means, mo_sds, by = c("month", "year")) %>%
- 		na.omit()
-
-	# reorder for plotting
-	mo_stats_4plot$month <- factor(mo_stats_4plot$month)
-  mo_stats_4plot$month <- fct_reorder(mo_stats_4plot$month, 
-  																		mo_stats_4plot$month_no)
-
- # plots 
- 
-  # mean
-  rolling_mean_plot_mo <- 
-		ggplot(mo_stats_4plot) +
-		geom_line(aes(x = year, y = roll_mean)) +
-  	facet_wrap(~ month, ncol = 3, nrow = 3) +
-		xlab("Year") +
-		ylab("11-year rolling mean") +
-  	facet_theme()
-    	  
-  ggsave("./output/plots/rolling_mean_plot_mo.png",
-		rolling_mean_plot_mo,
-		width = 15, height = 10, units = "in")
-
-	# sd
-	rolling_sd_plot_mo <- 
-		ggplot(mo_stats_4plot) +
-		geom_line(aes(x = year, y = roll_sd)) +
-  	facet_wrap(~ month, ncol = 3, nrow = 3) +
-		xlab("Year") +
-		ylab("11-year rolling sd") +
-	  facet_theme()
-
-  ggsave("./output/plots/rolling_sd_plot_mo.png",
-		rolling_sd_plot_mo,
-		width = 15, height = 10, units = "in")
-
-
-	#### 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-	## month ####
-  
-	# summarize spawning habitat suitability by year 
-  mo_stats <- ROMS_hindcast_dat %>%
-	group_by(year, month) %>%
-	summarise(mean_sp_hab_suit = mean(sp_hab_suit),
-						sd_sp_hab_suit = sd(sp_hab_suit)) %>%
-  filter(., year != 2021)
-
-	# add month names
-  mo_stats$month_name <- NA
-  mo_stats$month_name[mo_stats$month == 1] <- "January"
-  mo_stats$month_name[mo_stats$month == 2] <- "February"
-	mo_stats$month_name[mo_stats$month == 3] <- "March"
-	mo_stats$month_name[mo_stats$month == 4] <- "April"
-	
 	
 	# calculate rolling mean of mean over 11-yr window and turn into df
 	roll_mean_func <- function(x){
  	
-		new_dat <- mo_stats %>% filter(month_name == x)
+		new_dat <- mo_stats_hind %>% filter(month_name == x)
   	roll_mean_mo <- rollmean(new_dat$mean_sp_hab_suit, 11, fill = NA) 
   	roll_mean_mo
   
@@ -336,26 +195,26 @@
 	month_names <- as.character(unique(mo_stats$month_name))
 	month <- 1:4
  
-	mo_mean_dfs <- lapply(month_names, roll_mean_func) %>% set_names(month_names)
+	mo_mean_hind_dfs <- lapply(month_names, roll_mean_func) %>% set_names(month_names)
 
-	mo_means <- bind_rows(mo_mean_dfs) %>%
+	mo_means_hind <- bind_rows(mo_mean_hind_dfs) %>%
  		gather(key = "month_name") %>%
  		mutate(year = rep(1970:2020, 4)) %>%
  		rename(roll_mean = value) %>%
 		na.omit()
 	
 	# add month names
-  mo_means$month <- NA
-  mo_means$month[mo_means$month_name == "January"] <- 1
-  mo_means$month[mo_means$month_name == "February"] <- 2
-	mo_means$month[mo_means$month_name == "March"] <- 3
-	mo_means$month[mo_means$month_name == "April"] <- 4
+  mo_means_hind$month <- NA
+  mo_means_hind$month[mo_means_hind$month_name == "January"] <- 1
+  mo_means_hind$month[mo_means_hind$month_name == "February"] <- 2
+	mo_means_hind$month[mo_means_hind$month_name == "March"] <- 3
+	mo_means_hind$month[mo_means_hind$month_name == "April"] <- 4
 
 
 	# calculate rolling mean of sd over 11-yr window and turn into df
 	roll_sd_func <- function(x){
  	
-		new_dat <- mo_stats %>% filter(month_name == x)
+		new_dat <- mo_stats_hind %>% filter(month_name == x)
 		
 		sds_mo <- NA
   
@@ -370,60 +229,108 @@
 	mo_sd_lists <- lapply(month_names, roll_sd_func) %>% 
 		set_names(month_names) 
 
-	mo_sds <- bind_rows(mo_sd_lists) %>%
+	mo_sds_hind <- bind_rows(mo_sd_lists) %>%
 		gather(key = "month_name") %>%
 		na.omit() %>%
 		mutate(year = rep(1975:2015, 4)) %>%
 		rename(roll_sd = value)
 	
 	# add month names
-  mo_sds$month <- NA
-  mo_sds$month[mo_sds$month_name == "January"] <- 1
-  mo_sds$month[mo_sds$month_name == "February"] <- 2
-	mo_sds$month[mo_sds$month_name == "March"] <- 3
-	mo_sds$month[mo_sds$month_name == "April"] <- 4
+  mo_sds_hind$month <- NA
+  mo_sds_hind$month[mo_sds_hind$month_name == "January"] <- 1
+  mo_sds_hind$month[mo_sds_hind$month_name == "February"] <- 2
+	mo_sds_hind$month[mo_sds_hind$month_name == "March"] <- 3
+	mo_sds_hind$month[mo_sds_hind$month_name == "April"] <- 4
 
  
 	# combine both into one df
-	mo_stats <- merge(mo_means, mo_sds, by = c("month", "month_name", "year")) %>%
+	mo_stats_hind <- merge(mo_means_hind, mo_sds_hind, by = c("month", "month_name", "year")) %>%
  		na.omit()
 
 	# reorder for plotting
-	mo_stats$month_name <- factor(mo_stats$month_name)
-  mo_stats$month_name <- fct_reorder(mo_stats$month_name, 
-  																	 mo_stats$month)
+	mo_stats_hind$month_name <- factor(mo_stats_hind$month_name)
+  mo_stats_hind$month_name <- fct_reorder(mo_stats_hind$month_name, 
+  																	 mo_stats_hind$month)
 
- # plots 
+ # plots####
  
-  # mean
-  
-  #### fix order ####
-  
-  rolling_mean_plot_mo <- 
-		ggplot(mo_stats) +
-		geom_line(aes(x = year, y = roll_mean)) +
-  	facet_wrap(~ month_name, ncol = 2, nrow = 2) +
+ 	# plot
+	
+	proj_area_mo <- proj_area_mo %>% filter(projection != "historical")
+		
+	proj_area_mo <- tidyr::unite(proj_area_mo,"sim_proj",
+															 simulation, projection, remove = F)
+
+	colors <- c("#6dc3a9", "#ff7373", # cesm low, cesm high
+						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
+						  "#97c3e5", "#ffb733") # miroc low, miroc high
+
+	sim_proj <- unique(proj_area_mo$sim_proj)
+	
+	names(colors) <- unique(proj_area_mo$sim_proj)
+	
+	# order facets
+	proj_area_mo$scen <- NA
+		
+	proj_area_mo$scen[proj_area_mo$projection == "ssp126"] <- "low emission\n(ssp126)"
+	proj_area_mo$scen[proj_area_mo$projection == "ssp585"] <- "high emission\n(ssp585)"
+
+	proj_area_mo$scen_f = factor(proj_area_mo$scen, levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+
+	# plots
+	
+	core_area_mo <- proj_area_mo %>%
+		filter(sp_hab_threshold == "core")
+
+  core_area_mo$month_name <- factor(core_area_mo$month_name)
+  core_area_mo$month_name <- fct_reorder(core_area_mo$month_name, 
+  																		core_area_mo$month)
+
+	core_area_mo_plot <- 
+		ggplot(hind_area_mo) +
+		geom_line(aes(year, area),
+		  data = . %>% filter(sp_hab_threshold == "core"), color = "black",  alpha = 0.5) +
+		geom_line(data = core_area_mo, 
+							aes(year, area, color = sim_proj, group = sim_proj), alpha = 0.5) +
+		facet_grid(scen_f ~ month_name) +
 		xlab("Year") +
-		ylab("11-year rolling mean") +
-  	facet_theme()
-    	  
-  ggsave("./output/plots/rolling_mean_plot_mo.png",
-		rolling_mean_plot_mo,
-		width = 6, height = 6, units = "in")
-
-	# sd
-	rolling_sd_plot_mo <- 
-		ggplot(mo_stats) +
-		geom_line(aes(x = year, y = roll_sd)) +
-  	facet_wrap(~ month_name, ncol = 2, nrow = 2) +
-		xlab("Year") +
-		ylab("11-year rolling sd") +
-	  facet_theme()
-
-  ggsave("./output/plots/rolling_sd_plot_mo.png",
-		rolling_sd_plot_mo,
-		width = 6, height = 6, units = "in")
-
+		scale_color_manual(name = "sim_proj", values = colors) +
+ scale_y_continuous(
+	  	name =	"Area (x 10<sup>5</sup> km<sup>2</sup>)",
+	  	breaks = c(100000, 200000, 300000),
+	  	labels = c(1, 2, 3),
+	  	limits = c(7000, 300000)) +
+   	xlim(1970, 2100) +
+		ggtitle("Core habitat") +
+		theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+			strip.background = element_blank(),
+  		strip.text = element_text(size = 12),
+			axis.text = element_text(size = 10, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+  	  axis.title.x = element_text(size=14, color = "grey30"),
+			axis.title.y = element_markdown(size = 14, color = "grey50"),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+			plot.title = element_text(size = 14, face = "bold", color = "black", hjust = 0.5),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
+		
+	ggsave("./output/plots/core_area_mo_plot.png",
+			 core_area_mo_plot,
+			 width = 10, height = 7, units = "in")
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 	# other window lengths ####
   

@@ -249,6 +249,51 @@ dat2006cesm <- ROMS_projected_dat %>%
  ggsave(here("./output/plots/ex_sphabsuit0905.png"),
 			 ex_sphabsuit0905,
 			 width = 7, height = 7, units = "in")
+ 
+ 
+ # cold year
+ 
+ dat2010cesm <- ROMS_projected_dat %>%
+	filter(simulation =="cesm") %>%
+	filter(year == 2010) %>%
+	group_by(latitude, longitude) %>%
+	summarize(mean_hs = mean(sp_hab_suit_var)) %>%
+  mutate(long_not_360 = case_when(
+				 longitude >= 180 ~ longitude - 360,
+				 longitude < 180 ~ longitude)) %>%
+  st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
+	
+
+ ex_sphabsuit0905_cold <- 
+    	  	ggplot() +
+					geom_sf(data = dat2010cesm, aes(color = mean_hs))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+				scale_color_gradientn(colors = c("#B3E5FC","#B3E5FC",
+																					 "#3378af","#3378af",
+																					 "#00345C","#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = c(0.1, 0.5, 0.9),
+																limits = c(0, 1)) +
+ 				scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+				scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+ 				  black_map_theme_no_legend()
+
+ ggsave(here("./output/plots/ex_sphabsuit0905_cold.png"),
+			 ex_sphabsuit0905_cold,
+			 width = 7, height = 7, units = "in")
+
+
 
 
 ## temperature time series ####

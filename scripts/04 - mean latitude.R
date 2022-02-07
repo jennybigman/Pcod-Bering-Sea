@@ -26,14 +26,14 @@
 	hind_mean_lats_yr_0.9 <- hind_mean_lats_yr[[2]]	%>%
 		mutate(sp_hab_threshold = 0.9)
 	
-	hind_mean_lats_yr_df <- bind_rows(hind_mean_lats_yr_0.5, hind_mean_lats_yr_0.9) 
+	hind_mean_lat_yr <- bind_rows(hind_mean_lats_yr_0.5, hind_mean_lats_yr_0.9) 
 	
 	
 	#### projections ####
 	
 	# bias-corrected temp with variance ratio
 		
-	proj_mean_lat_yr_var <- function(x){
+	proj_mean_lat_yr <- function(x){
 		
 		new_dat <- ROMS_projected_dat %>%
 			filter(., sp_hab_suit_var >= x)
@@ -47,54 +47,123 @@
 	
 	sp_hab_thresholds <- c(0.5, 0.9)
 	
-	proj_mean_lat_yr_var <- lapply(sp_hab_thresholds, proj_mean_lat_yr_var)
+	proj_mean_lat_yr <- lapply(sp_hab_thresholds, proj_mean_lat_yr)
 	
-	proj_mean_lats_var_yr_0.5 <- proj_mean_lat_yr_var[[1]] %>%
+	proj_mean_lats_yr_0.5 <- proj_mean_lat_yr[[1]] %>%
 		mutate(sp_hab_threshold = 0.5)
 
-	proj_mean_lats_var_yr_0.9 <- proj_mean_lat_yr_var[[2]]	%>%
+	proj_mean_lats_yr_0.9 <- proj_mean_lat_yr[[2]]	%>%
 		mutate(sp_hab_threshold = 0.9)
 	
-	proj_mean_lats_yr_var_df <- bind_rows(proj_mean_lats_var_yr_0.5, proj_mean_lats_var_yr_0.9) 
+	proj_mean_lat_yr <- bind_rows(proj_mean_lats_yr_0.5, proj_mean_lats_yr_0.9) 
 	
-	proj_mean_lats_yr_var_df <- tidyr::unite(proj_mean_lats_yr_var_df,"sim_proj",
+	proj_mean_lat_yr <- tidyr::unite(proj_mean_lat_yr,"sim_proj",
 																			 simulation, projection, remove = F)
 
-	proj_mean_lats_yr_var_df_plot <- proj_mean_lats_yr_var_df %>%
-		filter(!str_detect(sim_proj, "_historical"))
+#	proj_mean_lats_yr_var_df_plot <- proj_mean_lats_yr_var_df %>%
+#		filter(!str_detect(sim_proj, "_historical"))
+#	
+#	hist_data <- proj_mean_lats_yr_var_df %>%
+#		filter(str_detect(sim_proj, "_historical"))
+#
+#	
+#	colors <- c("#efd966", "#b79a00", 
+#						  "#7fb27f", "#004700", 
+#						  "#6666b2", "#000059")
+#
+#	sim_proj <- unique(proj_mean_lats_yr_var_df_plot$sim_proj)
+#	
+#	names(colors) <- unique(proj_mean_lats_yr_var_df_plot$sim_proj)
 	
-	hist_data <- proj_mean_lats_yr_var_df %>%
-		filter(str_detect(sim_proj, "_historical"))
+	
+#	mean_latitude_plot_var <-    
+#   	ggplot(data = hind_mean_lats_yr_df) +
+#	 	geom_line(aes(year, hist_mean_lat, alpha = 0.5),
+#            data = . %>% filter(sp_hab_threshold == 0.5), color = "black") +
+#		geom_line(data = proj_mean_lats_yr_var_df_plot, 
+#							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj, alpha = 0.5)) +
+#		facet_grid(sp_hab_threshold ~ simulation) +
+#	  geom_line(aes(year, hist_mean_lat, colour = sp_hab_threshold, alpha = 0.5),
+#            data = . %>% filter(sp_hab_threshold == 0.9), color = "black") +
+#		geom_line(data = hist_data, 
+#							aes(year, proj_mean_lat, color = "lightgrey", alpha = 0.5)) +
+#		xlab("Year") +
+#		scale_color_manual(name = "sim_proj", values = colors) +
+#	  scale_y_continuous(
+#	  	name = "Meanlatitude\nvar",
+#	  	breaks = c(56, 58, 60, 62),
+#	  	labels = c("56˚N", "58˚N", "60˚N", "62˚N")
+#	  ) +
+#   	xlim(1970, 2100) +
+#    theme_bw() +
+#  	theme(legend.position = "none") +
+#  	theme(
+#			strip.background = element_blank(),
+#  		strip.text = element_text(size = 18, face = "bold"),
+#			axis.text = element_text(size = 16, colour = "grey50"),
+#  	  axis.ticks = element_line(colour = "grey50"),
+#  	  axis.line = element_line(colour = "grey50"),
+#  	  axis.title = element_text(size=18, color = "grey30"),
+#  	  panel.grid.major = element_blank(),
+#  	  panel.grid.minor = element_blank(),
+#  	  panel.border = element_rect(fill = NA, color = "grey50"))
+#	
+#	
+#		ggsave("./output/plots/mean_latitude_var_plot.png",
+#			 mean_latitude_plot_var,
+#			 width = 10, height = 5, units = "in")
+#	
+	## facet by scenario ####
+	
+	proj_mean_lat_yr <- proj_mean_lat_yr %>% filter(projection != "historical")
+		
+	proj_mean_lat_yr$scen <- NA
+		
+	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "ssp126"] <- "low emission (ssp126)"
+	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "ssp585"] <- "high emission (ssp585)"
+	
+	proj_mean_lat_yr$thresh <- NA
 
+	proj_mean_lat_yr$thresh[proj_mean_lat_yr$sp_hab_threshold == 0.9] <- "core"
+	proj_mean_lat_yr$thresh[proj_mean_lat_yr$sp_hab_threshold == 0.5] <- "potential"
 	
-	colors <- c("#efd966", "#b79a00", 
-						  "#7fb27f", "#004700", 
-						  "#6666b2", "#000059")
+	hind_mean_lat_yr$thresh <- NA
+	
+	hind_mean_lat_yr$thresh[hind_mean_lat_yr$sp_hab_threshold == 0.9] <- "core"
+	hind_mean_lat_yr$thresh[hind_mean_lat_yr$sp_hab_threshold == 0.5] <- "potential"
+	
 
-	sim_proj <- unique(proj_mean_lats_yr_var_df_plot$sim_proj)
+	colors <- c("#6dc3a9", "#ffabab", # cesm low, cesm high
+						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
+						  "#97c3e5", "#ffb733") # miroc low, miroc high
+
+	sim_proj <- unique(proj_mean_lat_yr$sim_proj)
 	
-	names(colors) <- unique(proj_mean_lats_yr_var_df_plot$sim_proj)
+	names(colors) <- unique(proj_mean_lat_yr$sim_proj)
 	
+	# order facets
+	proj_mean_lat_yr$scen_f = factor(proj_mean_lat_yr$scen, 
+																	 levels=c('low emission (ssp126)', 'high emission (ssp585)'))
+	# plot
 	
-	mean_latitude_plot_var <-    
-   	ggplot(data = hind_mean_lats_yr_df) +
-	 	geom_line(aes(year, hist_mean_lat, alpha = 0.5),
-            data = . %>% filter(sp_hab_threshold == 0.5), color = "black") +
-		geom_line(data = proj_mean_lats_yr_var_df_plot, 
-							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj, alpha = 0.5)) +
-		facet_grid(sp_hab_threshold ~ simulation) +
-	  geom_line(aes(year, hist_mean_lat, colour = sp_hab_threshold, alpha = 0.5),
-            data = . %>% filter(sp_hab_threshold == 0.9), color = "black") +
-		geom_line(data = hist_data, 
-							aes(year, proj_mean_lat, color = "lightgrey", alpha = 0.5)) +
+	mean_latitude_plot <-    
+   	ggplot(data = hind_mean_lat_yr) +
+	 	geom_line(aes(year, hist_mean_lat),
+            data = . %>% filter(sp_hab_threshold == 0.5), color = "black", alpha = 0.5) +
+		geom_line(data = proj_mean_lat_yr, 
+							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj), alpha = 0.5) +
+		facet_grid(thresh ~ scen_f) +
+	  geom_line(aes(year, hist_mean_lat, colour = sp_hab_threshold),
+            data = . %>% filter(sp_hab_threshold == 0.9), color = "black",  alpha = 0.5) +
 		xlab("Year") +
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Meanlatitude\nvar",
-	  	breaks = c(56, 58, 60, 62),
-	  	labels = c("56˚N", "58˚N", "60˚N", "62˚N")
+	  	name = "Mean latitude (˚N)",
+	  	breaks = c(56, 57, 58, 59),
+	  	labels = c(56, 57, 58, 59),
+	  	limits = c(55.2, 59.7)
 	  ) +
-   	xlim(1970, 2100) +
+   	xlim(1970, 2110) +
     theme_bw() +
   	theme(legend.position = "none") +
   	theme(
@@ -108,17 +177,67 @@
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
 	
-	
-		ggsave("./output/plots/mean_latitude_var_plot.png",
-			 mean_latitude_plot_var,
+		
+	mean_latitude_plot_labs <- 
+		ggdraw(mean_latitude_plot) +
+		draw_label("cesm", x = 0.485, y = 0.79, color = "#6dc3a9", size = 12) +
+		draw_label("gfdl", x = 0.485, y = 0.735, color = "#4e8d9c", size = 12) +
+		draw_label("miroc", x = 0.485, y = 0.68, color = "#97c3e5", size = 12) +
+		draw_label("cesm", x = 0.93, y = 0.85, color = "#ffabab", size = 12) +
+		draw_label("gfdl", x = 0.93, y = 0.76, color = "#ff4040", size = 12) +
+		draw_label("miroc", x = 0.93, y = 0.81, color = "#ffb733", size = 12) 
+
+	ggsave("./output/plots/mean_latitude_plot.png",
+			 mean_latitude_plot_labs,
 			 width = 10, height = 5, units = "in")
 	
+	
+	### in black ####
+		
+	mean_latitude_plot_black <-    
+   	ggplot(data = hind_mean_lats_yr_df) +
+	 	geom_line(aes(year, hist_mean_lat, alpha = 0.5),
+            data = . %>% filter(sp_hab_threshold == 0.5), color = "lightgrey") +
+		geom_line(data = proj_mean_lats_yr_var_df_plot, 
+							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj, alpha = 0.5)) +
+		facet_grid(thresh ~ scen_f) +
+	  geom_line(aes(year, hist_mean_lat, colour = sp_hab_threshold, alpha = 0.5),
+            data = . %>% filter(sp_hab_threshold == 0.9), color = "lightgrey") +
+		xlab("Year") +
+		scale_color_manual(name = "sim_proj", values = colors) +
+	  scale_y_continuous(
+	  	name = "Mean latitude (˚N)",
+	  	breaks = c(56, 57, 58, 59),
+	  	labels = c(56, 57, 58, 59),
+	  	limits = c(55.5, 59.7)
+	  ) +
+   	xlim(1970, 2100) +
+     theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+			strip.background = element_blank(),
+  		strip.text = element_text(size = 16, color = "lightgrey"),
+			axis.text = element_text(size = 14, colour = "white"),
+  	  axis.ticks = element_line(colour = "white"),
+  	  axis.line = element_line(colour = "white"),
+  	  axis.title = element_text(size=16, color = "white"),
+			panel.background = element_rect(fill = "black", color = "lightgrey", size = 1),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+  	  panel.border = element_rect(fill = NA, color = "black"),
+			plot.background = element_rect(fill = "black", color = "black"))
+	
+	
+	
+		ggsave("./output/plots/mean_latitude_black.png",
+			 mean_latitude_plot_black,
+			 width = 10, height = 5, units = "in")
 	
 	#### month ####
 
 	# hindcasts 
 		
-	mean_lat_mo_hind <- function(x){
+	mean_lat_mo_hind_func <- function(x){
 		
 		new_dat <- ROMS_hindcast_dat %>%
 			filter(., sp_hab_suit >= x)
@@ -132,27 +251,27 @@
 	
 	sp_hab_thresholds <- c(0.5, 0.9)
 	
-	mean_lats_mo_hind <- lapply(sp_hab_thresholds, mean_lat_mo_hind)
+	mean_lats_mo_hind <- lapply(sp_hab_thresholds, mean_lat_mo_hind_func)
 	
 	mean_lats_mo_hind_0.5 <- mean_lats_mo_hind[[1]] %>%
-		mutate(sp_hab_threshold = 0.5)
+		mutate(sp_hab_threshold = "potential")
 	
 	mean_lats_mo_hind_0.9 <- mean_lats_mo_hind[[2]]	%>%
-		mutate(sp_hab_threshold = 0.9)
+		mutate(sp_hab_threshold = "core")
 	
-	mean_lats_mo_hind_df <- bind_rows(mean_lats_mo_hind_0.5, mean_lats_mo_hind_0.9)
+	mean_lat_mo_hind <- bind_rows(mean_lats_mo_hind_0.5, mean_lats_mo_hind_0.9)
 	
 	# reorder for plotting
 	
-	mean_lats_mo_hind_df$month_name <- factor(mean_lats_mo_hind_df$month_name)
-  mean_lats_mo_hind_df$month_name <- fct_reorder(mean_lats_mo_hind_df$month_name, 
-  																					mean_lats_mo_hind_df$month)
+	mean_lat_mo_hind$month_name <- factor(mean_lat_mo_hind$month_name)
+  mean_lat_mo_hind$month_name <- fct_reorder(mean_lat_mo_hind$month_name, 
+  																					mean_lat_mo_hind$month)
   
   # projections
   
 	# bias-corrected temp with variance ratio
   		
-  	mean_lat_mo_proj_var <- function(x){
+  mean_lat_mo_proj_func <- function(x){
 		
 		new_dat <- ROMS_projected_dat %>%
 			filter(., sp_hab_suit_var >= x)
@@ -166,173 +285,255 @@
 	
 	sp_hab_thresholds <- c(0.5, 0.9)
 	
-	mean_lat_mo_proj_var <- lapply(sp_hab_thresholds, mean_lat_mo_proj_var)
+	mean_lat_mo_proj <- lapply(sp_hab_thresholds, mean_lat_mo_proj_func)
 	
-	mean_lat_mo_proj_var_0.5 <- mean_lat_mo_proj_var[[1]] %>%
-		mutate(sp_hab_threshold = 0.5)
+	mean_lat_mo_proj_0.5 <- mean_lat_mo_proj[[1]] %>%
+		mutate(sp_hab_threshold = "potential")
 	
-	mean_lat_mo_proj_var_0.9 <- mean_lat_mo_proj_var[[2]]	%>%
-		mutate(sp_hab_threshold = 0.9)
+	mean_lat_mo_proj_0.9 <- mean_lat_mo_proj[[2]]	%>%
+		mutate(sp_hab_threshold = "core")
 	
-	mean_lat_mo_proj_var_df <- bind_rows(mean_lat_mo_proj_var_0.5, mean_lat_mo_proj_var_0.9) 
+	mean_lat_mo_proj <- bind_rows(mean_lat_mo_proj_0.5, mean_lat_mo_proj_0.9) 
 	
-	# reorder for plotting
+	mean_lat_mo_proj <- mean_lat_mo_proj %>% filter(projection != "historical")
 	
-	mean_lat_mo_proj_var_df$month_name <- factor(mean_lat_mo_proj_var_df$month_name)
-  mean_lat_mo_proj_var_df$month_name <- fct_reorder(mean_lat_mo_proj_var_df$month_name, 
-  																					mean_lat_mo_proj_var_df$month)
- 
+	mean_lat_mo_proj$scen <- NA
+	
+	mean_lat_mo_proj$scen[mean_lat_mo_proj$projection == "ssp126"] <- "low emission\n(ssp126)"
+	mean_lat_mo_proj$scen[mean_lat_mo_proj$projection == "ssp585"] <- "high emission\n(ssp585)"
+
+	
 	# plot
   
 
-	mean_lat_mo_proj_var_df <- tidyr::unite(mean_lat_mo_proj_var_df,"sim_proj",
+	mean_lat_mo_proj <- tidyr::unite(mean_lat_mo_proj,"sim_proj",
 																			 simulation, projection, remove = F)
 
-	mean_lat_mo_proj_var_df_plot <- mean_lat_mo_proj_var_df %>%
+	mean_lat_mo_proj <- mean_lat_mo_proj %>%
 		filter(!str_detect(sim_proj, "_historical"))
 	
-	hist_data <- mean_lat_mo_proj_var_df %>%
-		filter(str_detect(sim_proj, "_historical"))
+	mean_lat_mo_proj <- mean_lat_mo_proj %>%
+		tidyr::unite("sim_proj", simulation, projection, remove = F)
 	
-	colors <- c("#efd966", "#b79a00", 
-						  "#7fb27f", "#004700", 
-						  "#6666b2", "#000059")
+	colors <- c("#6dc3a9", "#ffabab", # cesm low, cesm high
+						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
+						  "#97c3e5", "#ffb733") # miroc low, miroc high
 
-	sim_proj <- unique(mean_lat_mo_proj_var_df$sim_proj)
+	sim_proj <- unique(mean_lat_mo_proj$sim_proj)
 	
-	names(colors) <- unique(mean_lat_mo_proj_var_df_plot$sim_proj)
+	names(colors) <- unique(mean_lat_mo_proj$sim_proj)
 	
-	mean_lat_mo_plot_var <- 
-		ggplot(mean_lats_mo_hind_df) +
-	 	geom_line(aes(year, hist_mean_lat, alpha = 0.5),
-		  data = . %>% filter(sp_hab_threshold == 0.5), color = "black") +
-		geom_line(data = mean_lat_mo_proj_var_df, 
-							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj, alpha = 0.5)) +
-		facet_grid(month_name ~ simulation + sp_hab_threshold) +
-		geom_line(aes(year, hist_mean_lat, alpha = 0.5),
-		  data = . %>% filter(sp_hab_threshold == 0.9), color = "black") +
-		geom_line(data = hist_data, 
-							aes(year, proj_mean_lat, color = "lightgrey", alpha = 0.5)) +
-		xlab("Year") +
-		scale_color_manual(name = "sim_proj", values = colors) +
-	  scale_y_continuous(
-	  	name = "Mean latitude\nvar",
-	  	breaks = c(56, 58, 60, 62),
-	  	labels = c("56˚N", "58˚N", "60˚N", "62˚N"),
-	  	limits = c(55, 63)
-	  ) +
-   	xlim(1970, 2100) +
-		theme_bw() +
-  	theme(legend.position = "none") +
-  	theme(
-			strip.background = element_blank(),
-  		strip.text = element_text(size = 18, face = "bold"),
-			axis.text = element_text(size = 16, colour = "grey50"),
-  	  axis.ticks = element_line(colour = "grey50"),
-  	  axis.line = element_line(colour = "grey50"),
-  	  axis.title = element_text(size=18, color = "grey30"),
-  	  panel.grid.major = element_blank(),
-  	  panel.grid.minor = element_blank(),
-  	  panel.border = element_rect(fill = NA, color = "grey50"))
-	
-  		ggsave("./output/plots/mean_lat_mo_plot_var.png",
-			 mean_lat_mo_plot_var,
-			 width = 15, height = 7, units = "in")
-  		
-  		
-  		
-  	# try fixing labels
-  		
-  facet_labeller_top <- function(variable, value) {
-  c(
-    "", 
-    "",
-    "",
-    "",
-    "",
-    ""
-  )
-}
-
-facet_labeller_bottom <- function(variable, value) {
-  c(
-    "0.5", 
-    "0.9",
-    "0.5",
-    "0.9",
-    "0.5", 
-    "0.9"
-  )
-}
-  		
-  mean_lat_mo_plot <- 
-		ggplot(mean_lats_mo_hind_df) +
-	 	geom_line(aes(year, hist_mean_lat, alpha = 0.5),
-		  data = . %>% filter(sp_hab_threshold == 0.5), color = "black") +
-		geom_line(data = mean_lats_mo_proj_df_plot, 
-							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj, alpha = 0.5)) +
-		facet_grid(month_name ~ simulation + sp_hab_threshold,
-							 labeller = labeller(
-							 	simulation=as_labeller(facet_labeller_top),
-                sp_hab_threshold = as_labeller(facet_labeller_bottom))) +
-		geom_line(aes(year, hist_mean_lat, alpha = 0.5),
-		  data = . %>% filter(sp_hab_threshold == 0.9), color = "black") +
-		geom_line(data = hist_data, 
-							aes(year, proj_mean_lat, color = "lightgrey", alpha = 0.5)) +
-		xlab("Year") +
-		scale_color_manual(name = "sim_proj", values = colors) +
-	  scale_y_continuous(
-	  	name = "Mean\nlatitude",
-	  	breaks = c(56, 58, 60, 62),
-	  	labels = c("56˚N", "58˚N", "60˚N", "62˚N")
-	  ) +
-   	xlim(1970, 2100) +
-		theme_bw() +
-  	theme(legend.position = "none") +
-  	theme(
-  		plot.title = element_text(size = 18, face = "bold"),
-			strip.background = element_blank(),
-  		strip.text = element_text(size = 18, face = "bold"),
-			axis.text = element_text(size = 16, colour = "grey50"),
-  	  axis.ticks = element_line(colour = "grey50"),
-  	  axis.line = element_line(colour = "grey50"),
-  	  axis.title = element_text(size=18, color = "grey30"),
-  	  panel.grid.major = element_blank(),
-  	  panel.grid.minor = element_blank(),
-  	  panel.border = element_rect(fill = NA, color = "grey50"))
-	
+	# reorder for plotting
+	mean_lat_mo_proj$month_name <- factor(mean_lat_mo_proj$month_name)
+  mean_lat_mo_proj$month_name <- fct_reorder(mean_lat_mo_proj$month_name, 
+  																		mean_lat_mo_proj$month)
   
- mean_lat_mo_plot2 <- 
- 	mean_lats_mo_proj_df %>% 
-  ggplot(aes(year, proj_mean_lat)) + 
-  geom_blank() + 
-  facet_grid(~ simulation, scales = "free_x") +
-  theme(panel.spacing.x = unit(0,"cm"),
-        axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title = element_blank(),
-        plot.margin = margin(b = -2),
-				strip.background = element_blank(),
-  			strip.text = element_text(size = 18, face = "bold"),
-				panel.background = element_rect(colour = "white", fill = "white"), 
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
  
- 
- 
- plot1 <- mean_lat_mo_plot2 + theme(plot.margin = unit(c(-10, -10, -10, -10), "in"))
- plot2 <- mean_lat_mo_plot + theme(plot.margin = unit(c(0, 0.2, 0.2, 0.2), "in"))
- 
-	mean_lat_mo_plot_form <- plot1/plot2 + plot_layout(heights = c(0.1,100) ) 
- 
- 
- 
-  		ggsave("./output/plots/mean_lat_mo_plot_form.png",
-			 mean_lat_mo_plot_form,
-			 width = 15, height = 7, units = "in")
-  		
-  		
-  		
-  		
-
+	# order facets
+	mean_lat_mo_proj$scen_f = factor(mean_lat_mo_proj$scen, levels=c('low emission\n(ssp126)', 
+																																 'high emission\n(ssp585)'))
 	
+	core_mean_lat <- mean_lat_mo_proj %>%
+		filter(., sp_hab_threshold == "core")
+	
+	core_mean_lat_plot <- 
+		ggplot(mean_lat_mo_hind) +
+		geom_line(aes(year, hist_mean_lat),
+		  data = . %>% filter(sp_hab_threshold == "core"), color = "black",  alpha = 0.5) +
+		geom_line(data = core_mean_lat, 
+							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj), alpha = 0.5) +
+		facet_grid(scen_f ~ month_name) +
+		xlab("Year") +
+		scale_color_manual(name = "sim_proj", values = colors) +
+		scale_y_continuous(
+	  	name = "Mean latitude (˚N)",
+	  	breaks = c(55, 56, 57, 58, 59),
+	  	labels = c(55, 56, 57, 58, 59),
+	  	limits = c(54.9, 59.7)
+	  ) +
+   	xlim(1970, 2100) +
+		ggtitle("Core habitat") +
+		theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+			strip.background = element_blank(),
+			strip.text.y = element_blank(),
+  		strip.text.x = element_text(size = 12),
+			axis.text = element_text(size = 10, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+  	  axis.title = element_text(size=12, color = "grey30"),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+			plot.title = element_text(size = 14, face = "bold", color = "black", hjust = 0.5),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
+	
+	#ggsave("./output/plots/core_mean_lat_plot.png",
+	#		 core_mean_lat_plot,
+	#		 width = 10, height = 7, units = "in")
+  		
+  # potential
+	
+	potential_mean_lat <- mean_lat_mo_proj %>%
+		filter(., sp_hab_threshold == "potential")
+	
+	potential_mean_lat_plot <- 
+		ggplot(mean_lat_mo_hind) +
+		geom_line(aes(year, hist_mean_lat),
+		  data = . %>% filter(sp_hab_threshold == "potential"), color = "black",  alpha = 0.5) +
+		geom_line(data = potential_mean_lat, 
+							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj), alpha = 0.5) +
+		facet_grid(scen_f ~ month_name) +
+		#xlab("Year") +
+		scale_color_manual(name = "sim_proj", values = colors) +
+		scale_x_continuous(
+			name = "Year",
+			breaks = c(1990, 2080),
+			limits = c(1970, 2100)
+		) +
+		scale_y_continuous(
+	  	name = "Mean latitude (˚N)",
+	  	breaks = c(55, 56, 57, 58, 59),
+	  	labels = c(55, 56, 57, 58, 59),
+	  	limits = c(54.9, 59.7)
+	  ) +
+   	#xlim(1970, 2100) +
+		ggtitle("Potential habitat") +
+		theme_bw() +
+  	theme(legend.position = "none") +
+  	theme(
+			strip.background = element_blank(),
+  		strip.text = element_text(size = 12),
+			axis.text.x = element_text(size = 10, colour = "grey50"),
+  	  axis.ticks.x = element_line(colour = "grey50"),
+  	  axis.line.x = element_line(colour = "grey50"),
+  	  axis.title.x = element_text(size=12, color = "grey30"),
+			axis.title.y = element_blank(),
+			axis.text.y = element_blank(),
+			axis.line.y = element_blank(),
+			axis.ticks.y = element_blank(),
+  	  panel.grid.major = element_blank(),
+  	  panel.grid.minor = element_blank(),
+			plot.title = element_text(size = 14, face = "bold", color = "black", hjust = 0.5),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
+	
+##	ggsave("./output/plots/potential_mean_lat_plot.png",
+##			 potential_mean_lat_plot,
+##			 width = 10, height = 7, units = "in")
+  		
+ 
+	# plot side by side
+	
+	plot1 <- core_mean_lat_plot + theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
+	plot2 <- potential_mean_lat_plot + theme(plot.margin = unit(c(0.2, 0.2, 0.2, 0), "in"))
+	
+	mean_lat_mo <- plot1 + plot2
+	 		
+  ggsave("./output/plots/mean_lat_mo.png",
+			 mean_lat_mo,
+			 width = 10, height = 5, units = "in")
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  		
+#  	# try fixing labels
+#  		
+#  facet_labeller_top <- function(variable, value) {
+#  c(
+#    "", 
+#    "",
+#    "",
+#    "",
+#    "",
+#    ""
+#  )
+#}
+#
+#facet_labeller_bottom <- function(variable, value) {
+#  c(
+#    "0.5", 
+#    "0.9",
+#    "0.5",
+#    "0.9",
+#    "0.5", 
+#    "0.9"
+#  )
+#}
+#  		
+#  mean_lat_mo_plot <- 
+#		ggplot(mean_lats_mo_hind_df) +
+#	 	geom_line(aes(year, hist_mean_lat, alpha = 0.5),
+#		  data = . %>% filter(sp_hab_threshold == 0.5), color = "black") +
+#		geom_line(data = mean_lats_mo_proj_df_plot, 
+#							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj, alpha = 0.5)) +
+#		facet_grid(month_name ~ simulation + sp_hab_threshold,
+#							 labeller = labeller(
+#							 	simulation=as_labeller(facet_labeller_top),
+#                sp_hab_threshold = as_labeller(facet_labeller_bottom))) +
+#		geom_line(aes(year, hist_mean_lat, alpha = 0.5),
+#		  data = . %>% filter(sp_hab_threshold == 0.9), color = "black") +
+#		geom_line(data = hist_data, 
+#							aes(year, proj_mean_lat, color = "lightgrey", alpha = 0.5)) +
+#		xlab("Year") +
+#		scale_color_manual(name = "sim_proj", values = colors) +
+#	  scale_y_continuous(
+#	  	name = "Mean\nlatitude",
+#	  	breaks = c(56, 58, 60, 62),
+#	  	labels = c("56˚N", "58˚N", "60˚N", "62˚N")
+#	  ) +
+#   	xlim(1970, 2100) +
+#		theme_bw() +
+#  	theme(legend.position = "none") +
+#  	theme(
+#  		plot.title = element_text(size = 18, face = "bold"),
+#			strip.background = element_blank(),
+#  		strip.text = element_text(size = 18, face = "bold"),
+#			axis.text = element_text(size = 16, colour = "grey50"),
+#  	  axis.ticks = element_line(colour = "grey50"),
+#  	  axis.line = element_line(colour = "grey50"),
+#  	  axis.title = element_text(size=18, color = "grey30"),
+#  	  panel.grid.major = element_blank(),
+#  	  panel.grid.minor = element_blank(),
+#  	  panel.border = element_rect(fill = NA, color = "grey50"))
+#	
+#  
+# mean_lat_mo_plot2 <- 
+# 	mean_lats_mo_proj_df %>% 
+#  ggplot(aes(year, proj_mean_lat)) + 
+#  geom_blank() + 
+#  facet_grid(~ simulation, scales = "free_x") +
+#  theme(panel.spacing.x = unit(0,"cm"),
+#        axis.text = element_blank(),
+#        axis.ticks = element_blank(),
+#        axis.title = element_blank(),
+#        plot.margin = margin(b = -2),
+#				strip.background = element_blank(),
+#  			strip.text = element_text(size = 18, face = "bold"),
+#				panel.background = element_rect(colour = "white", fill = "white"), 
+#        panel.grid.major = element_blank(),
+#        panel.grid.minor = element_blank())
+# 
+# 
+# 
+# plot1 <- mean_lat_mo_plot2 + theme(plot.margin = unit(c(-10, -10, -10, -10), "in"))
+# plot2 <- mean_lat_mo_plot + theme(plot.margin = unit(c(0, 0.2, 0.2, 0.2), "in"))
+# 
+#	mean_lat_mo_plot_form <- plot1/plot2 + plot_layout(heights = c(0.1,100) ) 
+# 
+# 
+# 
+#  		ggsave("./output/plots/mean_lat_mo_plot_form.png",
+#			 mean_lat_mo_plot_form,
+#			 width = 15, height = 7, units = "in")
+#  		
+#  		
+#  		
+#  		
+#
+#	#
