@@ -25,6 +25,7 @@
 	library(cowplot)
 	library(scales)
 	library(ggtext)
+	library(ggpubr)
 	
 	# turn off spherical geometry
 	sf_use_s2(FALSE)
