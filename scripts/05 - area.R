@@ -390,24 +390,393 @@
 			 width = 10, height = 5, units = "in")
 
   
+  #### maps of area averaged across first 20 years and last 20 years ####
+	first_yrs <- 2001:2020
+  
+  first20_dat <- ROMS_hindcast_dat_sf %>%
+  	filter(year %in% first_yrs) %>%
+  	group_by(latitude, longitude, long_not_360) %>%
+  	summarize(mean_sp_hab_suit = mean(sp_hab_suit))
+  
+  # plot
+   first20_plot <- 
+    	  	ggplot() +
+					geom_sf(data = first20_dat, aes(color = mean_sp_hab_suit))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-170, -160),
+ 						labels = c("-170˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						legend.position = "none",
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 12),	
+  					axis.title = element_text(size = 14),
+ 						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
+    	  
+  last_yrs <- 2080:2099
+  
+  last20_dat <- ROMS_projected_dat_sf %>%
+  	filter(year %in% last_yrs) %>%
+  	group_by(simulation, projection, latitude, longitude, long_not_360) %>%
+  	summarize(mean_sp_hab_suit = mean(sp_hab_suit_var))
+ 
+  # plot
+  last20_dat$scen <- NA
+  last20_dat$scen[last20_dat$projection == "ssp126"] <- "low emission\n(ssp126)"
+	last20_dat$scen[last20_dat$projection == "ssp585"] <- "high emission\n(ssp585)"
+	
+	last20_dat$scen_f = factor(last20_dat$scen, levels=c('low emission\n(ssp126)', 
+																											 'high emission\n(ssp585)'))
+
+  last20_plot <- 
+    	  	ggplot() +
+					geom_sf(data = last20_dat, aes(color = mean_sp_hab_suit))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+    			facet_grid(scen_f ~ simulation) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-170, -160),
+ 						labels = c("-170˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						legend.position = "none",
+ 						strip.text = element_text(size = 12, face = "bold"),
+ 						strip.text.y = element_text(angle = 0),
+ 						strip.background = element_blank(),
+ 						axis.text.x = element_text(size = 10),	
+  					axis.title.x = element_text(size = 12),
+ 						axis.ticks.y = element_blank(),
+ 						axis.title.y = element_blank(),
+ 						axis.text.y = element_blank(),
+ 						panel.spacing = unit(0.25, "lines"),
+ 						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
+
+    
+   # extract legend
+   legend_plot <-     
+    	  	ggplot() +
+					geom_sf(data = first20_dat, aes(color = mean_sp_hab_suit))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-170, -160),
+ 						labels = c("-170˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 12),	
+  					axis.title = element_text(size = 14),
+ 						legend.title.align = 0.5,
+ 						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
+
+ 
+  legend_plot <- cowplot::get_legend(legend_plot) 
+  legend_plot <- 	ggpubr::as_ggplot(legend_plot) 
+
+  # plot together
+	hab_maps <- first20_plot + last20_plot + legend_plot + plot_layout(ncol = 3, widths = c(1.3,4,1))
+
+	
+  ggsave("./output/plots/hab_maps.png",
+			 hab_maps,
+			 height = 5,
+			 width = 10)
+  
+  ## try another way
+  annotate_npc_abs <- function(label, x, y, ...) {
+  grid::grid.draw(grid::textGrob(
+    label, x = unit(x, "npc"), y = unit(y, "npc"), ...))
+  }
+  
+  hab_maps <- first20_plot + last20_plot + legend_plot + plot_layout(ncol = 3, widths = c(1.3,4,1))
+
+	hab_maps2 <- hab_maps + annotate_npc_abs("Current (2001-2020)", 0.5, 0.5)
+		
+  ggsave("./output/plots/hab_maps2.png",
+			 grid::grid.draw(hab_maps2),
+			 height = 5,
+			 width = 10)
+
+
   
   
   
   
   
   
+  # try another way
+  first20_plot <- 
+    	  	ggplot() +
+					geom_sf(data = first20_dat, aes(color = mean_sp_hab_suit))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-170, -160),
+ 						labels = c("-170˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+  				geom_text("text", x = 0.5, y = 1, label = "Current (2001 - 2020)") +
+ 					theme(
+ 						legend.position = "none",
+ 						strip.text = element_text(size = 14, face = "bold", color = "darkgrey"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 12, color = "darkgrey"),	
+  					axis.title = element_text(size = 14, color = "darkgrey"),
+ 						plot.margin = unit(c(-0.05,-0.05,-0.05,-0.05), "in"))
+
+  last20_plot <- 
+    	  	ggplot() +
+					geom_sf(data = last20_dat, aes(color = mean_sp_hab_suit))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+    			facet_grid(scen_f ~ simulation) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-170, -160),
+ 						labels = c("-170˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+  				annotate("text", x = 0.5, y = 1, label = "Future (2080 - 2099)") 
+ 					theme(
+ 						plot.title = element_text(size = 16, face = "bold"),
+ 						legend.position = "none",
+ 						strip.text = element_text(size = 12, face = "bold", color = "darkgrey"),
+ 						strip.text.y = element_text(angle = 0),
+ 						strip.background = element_blank(),
+ 						axis.text.x = element_text(size = 10, color = "darkgrey"),	
+  					axis.title.x = element_text(size = 12, color = "darkgrey"),
+ 						axis.ticks.y = element_blank(),
+ 						axis.title.y = element_blank(),
+ 						axis.text.y = element_blank(),
+ 						panel.spacing = unit(0.25, "lines"),
+ 						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
+  
+  hab_maps2 <- first20_plot + last20_plot + legend_plot + plot_layout(ncol = 3, widths = c(1.3,4,1))
+
+  ggsave("./output/plots/hab_maps2.png",
+			 hab_maps2,
+			 height = 5,
+			 width = 10)
+
+   
+    
+    
+  # averaged across all simulations
+    
+   last20_dat_avg <- ROMS_projected_dat_sf %>%
+  	filter(year %in% last_yrs) %>%
+  	group_by(projection, latitude, longitude, long_not_360) %>%
+  	summarize(mean_sp_hab_suit = mean(sp_hab_suit_var))
+  
+  # plot
+   
+   # ssp126
+   last20_avg_ssp126_plot <- 
+    	  	ggplot(last20_dat_avg) +
+					geom_sf(aes(color = mean_sp_hab_suit),
+						data = . %>% filter(projection == "ssp126")) +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text.y = element_text(size = 12),	
+  					axis.title.y = element_text(size = 14),
+ 						axis.text.x = element_blank(),
+ 						axis.title.x = element_blank(),
+ 						axis.ticks.x = element_blank(),
+  					legend.title.align=0.5)
+   
+   # no legend
+   last20_avg_ssp126_plot_noleg <- 
+    	  	ggplot(last20_dat_avg) +
+					geom_sf(aes(color = mean_sp_hab_suit),
+						data = . %>% filter(projection == "ssp126")) +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						legend.position = "none",
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text.y = element_text(size = 12),	
+  					axis.title.y = element_text(size = 14),
+ 						axis.text.x = element_blank(),
+ 						axis.title.x = element_blank(),
+ 						axis.ticks.x = element_blank(),
+  					legend.title.align=0.5)
+    
+  # ssp585
+  last20_avg_ssp1585_plot <- 
+    	  	ggplot(last20_dat_avg) +
+					geom_sf(aes(color = mean_sp_hab_suit),
+						data = . %>% filter(projection == "ssp585")) +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
+																					 "#01579B", "#01579B",
+																					 "#00345C", "#00345C"),
+																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
+																breaks = c(0.1, 0.5, 0.9),
+																labels = format(c(0.1, 0.5, 0.9)),
+																limits = c(0, 1)) +
+ 					scale_x_continuous(
+ 						breaks = c(-175, -170, -165, -160),
+ 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						name = "Longitude",
+ 						limits = c(-1400000, -150000)
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = c(55, 60),
+ 						limits = c(470000, 1900000),
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
+					theme_bw() +
+ 					theme(
+ 						legend.position = "none",
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 12),	
+  					axis.title = element_text(size = 14),
+  					legend.title.align=0.5)  
+  
+  legend_plot <- cowplot::get_legend(last20_avg_ssp126_plot) 
+  
+  # put plots together
+	first20_plot <- first20_plot + theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
+	legend_plot <- 	ggpubr::as_ggplot(legend_plot) + theme(plot.margin = unit(c(1, 1, 0.2, 0.2), "in"))
+	
+	proj_maps <- last20_avg_ssp126_plot_noleg / last20_avg_ssp1585_plot
+	
+  hab_maps <- first20_plot + proj_maps + plot_layout(ncol = 2, widths = c(1, 1.5))
   
   
+  + legend_plot
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  ggsave("./output/plots/hab_maps.png",
+			 hab_maps)
+	
   
   	# try fixing labels
   		

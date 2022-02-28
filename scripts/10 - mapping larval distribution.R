@@ -14,7 +14,9 @@
 	names_abund <- names(abund_dat)
 	match_cols <- intersect(names_length, names_abund)
 	match_cols <- match_cols[-(8:10)]
-	larval_dat <- merge(length_dat, abund_dat, by = match_cols) # doesn't work
+	larval_dat <- merge(length_dat, abund_dat, by = match_cols) 
+	
+	# make sure get the same number of records if just merge by HAUL ID
 	
 	larval_dat <- larval_dat %>%
 		rename(catch = "LARVALCATCHPER10M2.x",
@@ -106,7 +108,7 @@
 		geom_sf(data = larval_dat_sf, aes(color = length, size = catch))  +
 		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 		coord_sf(crs = 3338) +
-	  facet_wrap(MONTH ~ YEAR) +
+	  facet_grid(MONTH ~ YEAR) +
  					scale_x_continuous(
  						breaks = breaks_x,
  						labels =labels_x,
@@ -130,7 +132,41 @@
 			 larval_mo_plot,
 			 width = 20, height = 10, units = "in")
 	
+		# remove summer mo
+		month_keep <- 4:6
 		
+		larval_dat_sf_trim <- larval_dat_sf %>%
+			filter(MONTH %in% month_keep)
+			
+	larval_mo_trim_plot <- 
+  	ggplot() +
+		geom_sf(data = larval_dat_sf_trim, aes(color = length, size = catch))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+	  facet_grid(MONTH ~ YEAR) +
+ 					scale_x_continuous(
+ 						breaks = breaks_x,
+ 						labels =labels_x,
+ 						name = "Longitude",
+ 						limits = limits_x
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = breaks_y,
+ 						limits = limits_y,
+ 						name = "Latitude",
+ 					) +
+					theme_bw() +
+ 					theme(
+ 						strip.text = element_text(size = 12, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 10),	
+  					axis.title = element_text(size = 12),
+  					legend.title.align=0.5)
+	
+		ggsave("./output/plots/larval_mo_trim_plot.png",
+			 larval_mo_trim_plot,
+			 width = 20, height = 10, units = "in")
+	
 	# size distribution
 	larval_dat_trim <- larval_dat %>%
 		filter(length <= 6) 

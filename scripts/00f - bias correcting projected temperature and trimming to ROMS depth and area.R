@@ -30,7 +30,7 @@
 
 	#1 calculate the mean of the hindcast during the reference years (needed for all models) ####
 	
-	baseline_years <- 1980:2014 # define baseline/ref years (here based on Cheng et al 2021)
+	baseline_years <- 1980:2014 # define baseline/ref years (here based on Cheng et al 2021) # change to 1990
 	
 	ROMS_baseline_temp_dat <- ROMS_hindcast_dat %>% # select ref yrs from df
 		filter(., year %in% baseline_years)
