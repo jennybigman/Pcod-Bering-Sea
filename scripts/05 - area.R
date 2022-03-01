@@ -396,7 +396,7 @@
   first20_dat <- ROMS_hindcast_dat_sf %>%
   	filter(year %in% first_yrs) %>%
   	group_by(latitude, longitude, long_not_360) %>%
-  	summarize(mean_sp_hab_suit = mean(sp_hab_suit))
+  	dplyr::summarize(mean_sp_hab_suit = mean(sp_hab_suit))
   
   # plot
    first20_plot <- 
@@ -425,27 +425,27 @@
     	  	labs(colour = "Spawning\nhabitat\nsuitability") +
 					theme_bw() +
  					theme(
+ 						panel.border = element_rect(color = "#666666"),
  						legend.position = "none",
- 						strip.text = element_text(size = 14, face = "bold"),
- 						strip.background = element_blank(),
- 						axis.text = element_text(size = 12),	
-  					axis.title = element_text(size = 14),
+ 						axis.text = element_text(size = 8,  color = "#666666"),	
+  					axis.title = element_text(size = 10,  color = "#666666"),
+ 						axis.ticks = element_line(color = "#666666"),
  						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
     	  
   last_yrs <- 2080:2099
   
-  last20_dat <- ROMS_projected_dat_sf %>%
-  	filter(year %in% last_yrs) %>%
-  	group_by(simulation, projection, latitude, longitude, long_not_360) %>%
-  	summarize(mean_sp_hab_suit = mean(sp_hab_suit_var))
+ # last20_dat <- ROMS_projected_dat_sf %>%
+ # 	filter(year %in% last_yrs) %>%
+ # 	group_by(simulation, projection, latitude, longitude, long_not_360) %>%
+ # 	dplyr::summarize(mean_sp_hab_suit = mean(sp_hab_suit_var))
  
   # plot
   last20_dat$scen <- NA
-  last20_dat$scen[last20_dat$projection == "ssp126"] <- "low emission\n(ssp126)"
-	last20_dat$scen[last20_dat$projection == "ssp585"] <- "high emission\n(ssp585)"
+  last20_dat$scen[last20_dat$projection == "ssp126"] <- "low\nemission\n(ssp126)"
+	last20_dat$scen[last20_dat$projection == "ssp585"] <- "high\nemission\n(ssp585)"
 	
-	last20_dat$scen_f = factor(last20_dat$scen, levels=c('low emission\n(ssp126)', 
-																											 'high emission\n(ssp585)'))
+	last20_dat$scen_f = factor(last20_dat$scen, levels=c('low\nemission\n(ssp126)', 
+																											 'high\nemission\n(ssp585)'))
 
   last20_plot <- 
     	  	ggplot() +
@@ -474,15 +474,17 @@
     	  	labs(colour = "Spawning\nhabitat\nsuitability") +
 					theme_bw() +
  					theme(
+ 						panel.border = element_rect(color = "#666666"),
  						legend.position = "none",
- 						strip.text = element_text(size = 12, face = "bold"),
- 						strip.text.y = element_text(angle = 0),
+ 						strip.text = element_text(size = 10, face = "bold",  color = "#808080"),
+ 						strip.text.y = element_text(angle = 0,  color = "#666666"),
  						strip.background = element_blank(),
- 						axis.text.x = element_text(size = 10),	
-  					axis.title.x = element_text(size = 12),
+ 						axis.text.x = element_text(size = 8,  color = "#666666"),	
+  					axis.title.x = element_text(size = 10,  color = "#666666"),
  						axis.ticks.y = element_blank(),
  						axis.title.y = element_blank(),
  						axis.text.y = element_blank(),
+ 						axis.ticks.x = element_line( color = "#666666"),
  						panel.spacing = unit(0.25, "lines"),
  						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
 
@@ -514,11 +516,13 @@
     	  	labs(colour = "Spawning\nhabitat\nsuitability") +
 					theme_bw() +
  					theme(
- 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.text = element_text(size = 12, face = "bold"),
  						strip.background = element_blank(),
- 						axis.text = element_text(size = 12),	
-  					axis.title = element_text(size = 14),
+ 						axis.text = element_text(size = 8),	
+  					axis.title = element_text(size = 10),
  						legend.title.align = 0.5,
+ 						legend.title = element_text( color = "#666666", size = 9),
+ 						legend.text = element_text(color = "#666666", size = 7),
  						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
 
  
@@ -528,118 +532,28 @@
   # plot together
 	hab_maps <- first20_plot + last20_plot + legend_plot + plot_layout(ncol = 3, widths = c(1.3,4,1))
 
-	
-  ggsave("./output/plots/hab_maps.png",
-			 hab_maps,
-			 height = 5,
-			 width = 10)
-  
-  ## try another way
-  annotate_npc_abs <- function(label, x, y, ...) {
-  grid::grid.draw(grid::textGrob(
-    label, x = unit(x, "npc"), y = unit(y, "npc"), ...))
-  }
-  
-  hab_maps <- first20_plot + last20_plot + legend_plot + plot_layout(ncol = 3, widths = c(1.3,4,1))
-
-	hab_maps2 <- hab_maps + annotate_npc_abs("Current (2001-2020)", 0.5, 0.5)
+	hab_maps2 <- hab_maps +  annotate("text", label = "Current\n(2001 - 2020)", 
+  																	x = -5.2, y = 0.83, size = 5, fontface = 2)
+	hab_maps_form <- hab_maps2 + 
+		theme(plot.margin = unit(c(0.25, 0, 0, 0), "in")) +
+		annotate("text", label = "Projected (2080 - 2099)",	
+						 x = -2.5, y = 1.1, size = 5, fontface = 2)
 		
-  ggsave("./output/plots/hab_maps2.png",
-			 grid::grid.draw(hab_maps2),
+  ggsave("./output/plots/hab_maps_form.png",
+			 hab_maps_form,
 			 height = 5,
 			 width = 10)
+  
+  
+  
+  
 
-
   
   
   
   
   
   
-  # try another way
-  first20_plot <- 
-    	  	ggplot() +
-					geom_sf(data = first20_dat, aes(color = mean_sp_hab_suit))  +
-					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-					coord_sf(crs = 3338) +
-					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
-																					 "#01579B", "#01579B",
-																					 "#00345C", "#00345C"),
-																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
-																breaks = c(0.1, 0.5, 0.9),
-																labels = format(c(0.1, 0.5, 0.9)),
-																limits = c(0, 1)) +
- 					scale_x_continuous(
- 						breaks = c(-170, -160),
- 						labels = c("-170˚", "-160˚"),
- 						name = "Longitude",
- 						limits = c(-1400000, -150000)
- 					) +
- 					scale_y_continuous(
- 						breaks = c(55, 60),
- 						limits = c(470000, 1900000),
- 						name = "Latitude",
- 					) +
-    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
-					theme_bw() +
-  				geom_text("text", x = 0.5, y = 1, label = "Current (2001 - 2020)") +
- 					theme(
- 						legend.position = "none",
- 						strip.text = element_text(size = 14, face = "bold", color = "darkgrey"),
- 						strip.background = element_blank(),
- 						axis.text = element_text(size = 12, color = "darkgrey"),	
-  					axis.title = element_text(size = 14, color = "darkgrey"),
- 						plot.margin = unit(c(-0.05,-0.05,-0.05,-0.05), "in"))
-
-  last20_plot <- 
-    	  	ggplot() +
-					geom_sf(data = last20_dat, aes(color = mean_sp_hab_suit))  +
-					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-					coord_sf(crs = 3338) +
-    			facet_grid(scen_f ~ simulation) +
-					scale_color_gradientn(colors = c("#B3E5FC", "#B3E5FC", 
-																					 "#01579B", "#01579B",
-																					 "#00345C", "#00345C"),
-																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
-																breaks = c(0.1, 0.5, 0.9),
-																labels = format(c(0.1, 0.5, 0.9)),
-																limits = c(0, 1)) +
- 					scale_x_continuous(
- 						breaks = c(-170, -160),
- 						labels = c("-170˚", "-160˚"),
- 						name = "Longitude",
- 						limits = c(-1400000, -150000)
- 					) +
- 					scale_y_continuous(
- 						breaks = c(55, 60),
- 						limits = c(470000, 1900000),
- 						name = "Latitude",
- 					) +
-    	  	labs(colour = "Spawning\nhabitat\nsuitability") +
-					theme_bw() +
-  				annotate("text", x = 0.5, y = 1, label = "Future (2080 - 2099)") 
- 					theme(
- 						plot.title = element_text(size = 16, face = "bold"),
- 						legend.position = "none",
- 						strip.text = element_text(size = 12, face = "bold", color = "darkgrey"),
- 						strip.text.y = element_text(angle = 0),
- 						strip.background = element_blank(),
- 						axis.text.x = element_text(size = 10, color = "darkgrey"),	
-  					axis.title.x = element_text(size = 12, color = "darkgrey"),
- 						axis.ticks.y = element_blank(),
- 						axis.title.y = element_blank(),
- 						axis.text.y = element_blank(),
- 						panel.spacing = unit(0.25, "lines"),
- 						plot.margin = unit(c(-0.05,-0.05,-0.05, -0.05), "in"))
-  
-  hab_maps2 <- first20_plot + last20_plot + legend_plot + plot_layout(ncol = 3, widths = c(1.3,4,1))
-
-  ggsave("./output/plots/hab_maps2.png",
-			 hab_maps2,
-			 height = 5,
-			 width = 10)
-
-   
     
     
   # averaged across all simulations
