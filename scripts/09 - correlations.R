@@ -85,13 +85,15 @@
 		mutate(raw_recruits = recruits * 1000,
 					 log_raw_recruits = log(raw_recruits))
 	
-	abundance_dat <- read_csv(here("./data/SAFE_Pcod_EBS_2021_Abundance.csv")) %>% 
-		na.omit()
-	
 	abundance_dat_long <- abundance_dat %>% gather(key = "age", abundance, "0":"4") %>% 
 		mutate(raw_abundance = abundance * 1000,
-					 log_raw_abundance = log(raw_abundance)) %>%
-		filter(age != 0)
+					 log_raw_abundance = log(raw_abundance))
+	
+	abundance_dat_long$age <- as.numeric(abundance_dat_long$age)
+	abundance_dat_long$year <- as.numeric(abundance_dat_long$year)
+
+	abundance_dat_long$year_class <- abundance_dat_long$year - abundance_dat_long$age
+
 
 	# prelim plots
 	recruitment_plot <- ggplot(recruitment_dat) +
@@ -106,7 +108,7 @@
 	abundance_plot_func <- function(x){
 	
 		plot <- ggplot(abundance_dat_long) +
-						geom_point(aes(x = year, y = log_raw_abundance, color = model),
+						geom_point(aes(x = year_class, y = log_raw_abundance, color = model),
 								data = . %>% filter(age == x)) +
 						ggtitle(paste("age", x)) +
 						white_theme()
@@ -127,7 +129,7 @@
 	
 	years_abund <- (min(abundance_dat_long$year):max(abundance_dat_long$year))
 	hab_suit_abund <- yearly_hab_dat_hind %>% filter(year %in% years_abund)
-	abund_habsuit <- merge(hab_suit_abund, abundance_dat_long, by = "year") 
+	abund_habsuit <- merge(hab_suit_abund, abundance_dat_long, by.x = c("year"), by.y = c("year_class"))
 	
 	
 	# recruitment plots ####
@@ -159,7 +161,7 @@
   
   # set file paths
 	file_path_name <- function(x){
-  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/correlation plots/", x)
+  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/correlation plots/2021/habitat suitability and recruitment/", x)
   }
    
   full_names <- sapply(plot_names, file_path_name)
@@ -173,7 +175,6 @@
   			
 	mapply(ggsave_func2, x = recruit_plot_list, y = full_names)
 
-	
 	# abundance plots ####
 	
 	abund_habsuit <- abund_habsuit %>%
@@ -206,7 +207,7 @@
   
   # set file paths
 	file_path_name <- function(x){
-  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/correlation plots/", x)
+  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/correlation plots/2021/habitat suitability and abundance/", x)
   }
    
   full_names <- sapply(plot_names, file_path_name)
@@ -220,91 +221,7 @@
   			
 	mapply(ggsave_func2, x = abund_plot_list, y = full_names)
 
+	# publication quality plot 
 	
-	#### lag by 1-yr ####
-		
-	abundance_dat <- read_csv(here("./data/SAFE_Pcod_EBS_2021_Abundance.csv")) %>% 
-		na.omit() 
 	
-	col_names <- c("year", "age0", "age1", "age2", "age3", "age4", "model")
 	
-	abundance_dat2 <- abundance_dat
-	
-	names(abundance_dat2) <- col_names
-	
-	lag_function <- function(x){
-
-		new_dat <- abundance_dat2 %>% filter(model == x)
-		
-		new_dat_rep <- new_dat %>%
-				naniar::replace_with_na(replace = 
-																	list(age1 = c(new_dat[1,3]),
-																			 age2 = c(new_dat[1:2, 4]),
-																			 age3 = c(new_dat[1:3, 5]),
-																			 age4 = c(new_dat[1:4, 6])))
-		
-		return(new_dat_rep)
-	}
-	
-	models <- unique(abundance_dat2$model)
-
-	lag_dfs <- lapply(models, lag_function)
-	
-	abundance_dat_lag <- bind_rows(lag_dfs)
-	
-	# convert to long format
-	abundance_dat_lag_long <- abundance_dat_lag %>% gather(key = "age", abundance, age0:age4) %>% 
-		mutate(raw_abundance = abundance * 1000,
-					 log_raw_abundance = log(raw_abundance)) %>%
-		filter(age != 0)
-
-	years_abund_lag <- (min(abundance_dat_lag_long$year):max(abundance_dat_lag_long$year))
-	hab_suit_abund_lag <- yearly_hab_dat_hind %>% filter(year %in% years_abund_lag)
-	abund_habsuit_lag <- merge(hab_suit_abund_lag, abundance_dat_lag_long, by = "year") # this step is wrong
-
-	### plots ####
-	
-
-	abund_habsuit_lag <- abund_habsuit_lag %>%
-		tidyr::unite("age_mod", age, model, remove = F)
-	
-	abundance_habsuit_lag_plot_func <- function(x){
-		
-		new_dat <- abund_habsuit_lag %>% dplyr::filter(age_mod == x)
-		
-		plot <- ggscatter(new_dat, x = "annual_spawning_hab_suit", y = "log_raw_abundance", 
-  	        add = "reg.line", conf.int = TRUE, 
-  	        cor.coef = TRUE, cor.method = "pearson",
-						title = paste("age", x),
-  	        xlab = "index of spawning\nhabitat suitability", ylab = "log(abundance)") +
-						white_theme()
-		
-		plot
-	}
-	
-	# apply function
-	age_mods <- unique(abund_habsuit_lag$age_mod)
-	abund_lag_plot_list <- lapply(age_mods, abundance_habsuit_lag_plot_func)
-	
-
-	# name plots
-	plot_name_func <- function(x){
-  	paste0(x, "_abundance_habsuit_lag_corr_plot")
-	}
-  plot_names <- sapply(age_mods, plot_name_func)
-  
-  # set file paths
-	file_path_name <- function(x){
-  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/correlation plots/", x)
-  }
-   
-  full_names <- sapply(plot_names, file_path_name)
-	
-  # save plots to file path
-  ggsave_func2 <- function(x,y){
-  	ggsave(plot = x,
-    file = paste(y,".png",sep=""),
-    width = 7, height = 7, units = "in")
-  }
-  			
-	mapply(ggsave_func2, x = abund_lag_plot_list, y = full_names)
