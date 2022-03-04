@@ -330,7 +330,7 @@
  						limits = c(470000, 1900000),
  						name = "Latitude",
  					) +
-    			ggtitle("x") +
+    			ggtitle(x) +
     	  	labs(colour = "projected temp") +
 					theme_bw() +
  					theme(
@@ -395,7 +395,7 @@
  						limits = c(470000, 1900000),
  						name = "Latitude",
  					) +
-    	  	ggtitle("x") +
+    	  	ggtitle(x) +
     	  	labs(colour = "Spawning\nhabitat\nsuitability") +
 					theme_bw() +
  					theme(
@@ -411,7 +411,7 @@
 	
   years <- c(1980:2099)
 
-	plot_list <- lapply(years, temp_var_plot_func)
+	plot_list <- lapply(years, hab_suit_plot_func)
   
   name_func_year <- function(x){
   	paste0(x, "_proj_habitat_suitability")
