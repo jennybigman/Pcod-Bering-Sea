@@ -215,6 +215,7 @@
 
 	fwrite(proj_temp_dat, "./data/proj_temp_dat.csv")
 
+	proj_temp_dat <- fread("./data/proj_temp_dat.csv")
 
 	#### plot #### REDO THESE PLOTS SO THEY ARE FACETED (DF CHANGED TO ALL DATA)
 	
@@ -503,7 +504,7 @@
 	
 		ggsave("./output/plots/proj_temp_plots_sd.png",
 			 proj_temp_plots_sd,
-			 width = 15, height = 5, units = "in")
+			 width = 15, height = 4, units = "in")
 	
 		## plot together
 		
