@@ -10,6 +10,10 @@
 	url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
 	opendap  <- "dodsC/Level2/B10K-K20_CORECFS_bottom5m.nc"
 	
+	## see dataset
+  #nc_handle <- nc_open(paste(url_base,opendap,sep="")) 
+  #nc_handle
+ 
 	# test_path <- paste0(url_base, opendap)
 	
 	# tidy_temps <- tidync(file.path(test_path)) %>% hyper_tibble()

@@ -42,7 +42,7 @@
 		geom_polygon(data = bsregions_df, 
 								 aes(x = long, y = lat, group = group),
 								 fill = "white", color = "black") +
-		geom_text(data = centroid, aes(x = long, y = lat, label = DOMAIN)) +
+	#	geom_text(data = centroid, aes(x = long, y = lat, label = DOMAIN)) +
   	geom_contour(data = bathy_df, # 50m contour
               	 aes(x = x, y = y, z = z),
               	 breaks = c(-50),
