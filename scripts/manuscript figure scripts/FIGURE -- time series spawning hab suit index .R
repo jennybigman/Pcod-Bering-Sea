@@ -1,4 +1,4 @@
-# figure 2
+# figure 2 -- time series of spawning habitat suitability
 
 	#### spawning habitat suitability index ####
 	

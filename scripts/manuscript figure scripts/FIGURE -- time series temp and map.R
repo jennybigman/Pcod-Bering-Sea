@@ -1,101 +1,46 @@
-# figure 1
+# figure 1 -- time series of temperature and map of domain of interest
 
-	#### plot of domain ####
-	
-	# load Ortiz Bering Sea regions and convert to sf object
-	bsregions <- readOGR("./other:older code/Mapping Code - Bigman/Ortiz Regions", layer="BSIERP_regions_2012")
-	bsregions <- spTransform(bsregions, CRS("+init=epsg:4326"))
-	bsregions@data$id = rownames(bsregions@data)
-	bsregions_points <- fortify(bsregions, region="id")
-	bsregions_df <- left_join(bsregions_points, bsregions@data, by = "id")
+	#### plot of domain -- plotting domain + avg historical march temps ####
 
-	# remove domain 15 because needs to be fixed
-	bsregions_df_no15 <- bsregions_df %>%
-		filter(DOMAIN != 15)
-	
-	# fix domain 15
-	bsregions15 <-bsregions[bsregions@data$DOMAIN == 15, ] 
-	bsregions15@data$id = rownames(bsregions15@data)
-	bsregions_points15 <- fortify(bsregions15, region="id")
-	bsregions15_df <- left_join(bsregions_points15, bsregions15@data, by = "id") %>%
-		filter(., long < 0)
-	
-	#add back in
-	bsregions_df <- bind_rows(bsregions15_df, bsregions_df_no15)
+	march_temp <- ROMS_hindcast_dat %>%
+		filter(month == 3) %>%
+		group_by(latitude, long_not_360) %>%
+		summarize(mean_temp = mean(temp)) %>%
+		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
 
-	# seaparate domains in order for merging later
-	inner_domains <- c(2, 7, 11, 13, 14)
-	middle_domains <- c(1, 3, 4, 5, 6, 9, 10, 12)
-	outer_domains <- c(8, 15, 16)
+	march_avg_temps <-
+		ggplot() +
+		geom_sf(data = march_temp, aes(color = mean_temp))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+		scale_color_viridis_c() +
+ 		scale_x_continuous(
+ 		 breaks = c(-175, -170, -165, -160),
+		 labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+		 limits = c(-1400000, 10000),
+ 			name = "Longitude") +
+ 		scale_y_continuous(
+ 			breaks = breaks_y,
+ 			limits = limits_y,
+ 			name = "Latitude") +
+    labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
+		labs(tag = "(a)") +
+		theme_bw() +
+		white_map_theme() +
+		theme(legend.title.align = 0.5,
+					legend.position = c(0.89, 0.72),
+					legend.background = element_blank(),
+					legend.title = element_text(size = 9),
+					legend.text = element_text(size = 8),
+					plot.tag.position = c(0.185, 0.9),
+					axis.text = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks = element_line(colour = "grey50"),
+  	  		axis.line = element_line(colour = "grey50"),
+  	  		axis.title = element_text(size=14, color = "grey50"),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"))
 	
-	inner_domain <- bsregions_df %>%
-		filter(., DOMAIN %in% inner_domains) %>%
-		mutate(latitude = lat)
-	
-	middle_domain <- bsregions_df %>%
-		filter(., DOMAIN %in% middle_domains)
-	
-	outer_domain <- bsregions_df %>%
-		filter(., DOMAIN %in% outer_domains)
-	
-	# turn each df into sf object and combine polygons
-	inner_domain_sf <- inner_domain %>%
-		  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-  		group_by(DOMAIN) %>%
-  		summarise(geometry = st_combine(geometry)) %>%
-  		st_cast("POLYGON")
-	
-	inner_poly <-  st_union(inner_domain_sf)
 
-	middle_domain_sf <- middle_domain %>%
-		  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-  		group_by(DOMAIN) %>%
-  		summarise(geometry = st_combine(geometry)) %>%
-  		st_cast("POLYGON")
-	
-	middle_poly <-  st_union(middle_domain_sf)
-
-	outer_domain_sf <- outer_domain %>%
-		  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-  		group_by(DOMAIN) %>%
-  		summarise(geometry = st_combine(geometry)) %>%
-  		st_cast("POLYGON")
-	
-	outer_poly <-  st_union(outer_domain_sf)
-
-	# combine all regions into one polygon
-	full_poly1 <-  st_union(inner_poly, middle_poly)
-	full_poly <- st_union(full_poly1, outer_poly)
-
-	#### plot ####
-	
-	study_domain_plot  <- 
-    	ggplot() +
-	 	 	geom_sf(data = full_poly, color = "#bfbfbf", fill = "#bfbfbf", alpha = 0.5) +
-			geom_sf(data = world_map_data, fill = "#808080", lwd = 0) +
-			coord_sf(crs = 3338) +
- 			scale_x_continuous(
- 				breaks = breaks_x,
- 				labels = labels_x,
- 				name = "Longitude",
- 				limits = limits_x
- 			) +
- 			scale_y_continuous(
- 				breaks = breaks_y,
- 				limits = limits_y,
- 				name = "Latitude",
- 			) +
-			labs(tag = "(a)") +
-			theme_bw() +
- 			theme(
- 			axis.text = element_text(size = 12, colour = "grey50"),
-  	  axis.ticks = element_line(colour = "grey50"),
-  	  axis.line = element_line(colour = "grey50"),
-  	  axis.title = element_text(size=14, color = "grey50"),
- 			plot.tag.position = c(0.21, 0.9))
-
-	
-	#### temperature plot ####
+	#### temperature plots ####
 	
 	# temp data
 	
@@ -303,7 +248,7 @@
            color = "black", alpha = 0.5, size = 4.5)
 		
 	#plot together
-	plot1 <- study_domain_plot + theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
+	plot1 <- march_avg_temps + theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
 	plot2 <- low_temp_time_lab + theme(plot.margin = unit(c(0.2, 0.025, 0.2, 0), "in"))
 	plot3 <- high_temp_time_lab + theme(plot.margin = unit(c(0.2, 0.2, 0.2, 0), "in"))
 		
@@ -312,4 +257,116 @@
 	ggsave("./output/plots/time_series_temp_domain.png",
 			 time_series_temp_domain,
 			 width = 15, height = 5, units = "in")
+	
+	## study domain without temps
+	
+	# load Ortiz Bering Sea regions and convert to sf object
+	bsregions <- readOGR("./other:older code/Mapping Code - Bigman/Ortiz Regions", layer="BSIERP_regions_2012")
+	bsregions <- spTransform(bsregions, CRS("+init=epsg:4326"))
+	bsregions@data$id = rownames(bsregions@data)
+	bsregions_points <- fortify(bsregions, region="id")
+	bsregions_df <- left_join(bsregions_points, bsregions@data, by = "id")
 
+	# remove domain 15 because needs to be fixed
+	bsregions_df_no15 <- bsregions_df %>%
+		filter(DOMAIN != 15)
+	
+	# fix domain 15
+	bsregions15 <-bsregions[bsregions@data$DOMAIN == 15, ] 
+	bsregions15@data$id = rownames(bsregions15@data)
+	bsregions_points15 <- fortify(bsregions15, region="id")
+	bsregions15_df <- left_join(bsregions_points15, bsregions15@data, by = "id") %>%
+		filter(., long < 0)
+	
+	#add back in
+	bsregions_df <- bind_rows(bsregions15_df, bsregions_df_no15)
+	
+	# trim by ROMS depth
+	depth_df <- fread("./data/ROMS_depth_df.csv") %>%
+		mutate(long_not_360 = case_when(
+					 longitude >= 180 ~ longitude - 360,
+					 longitude < 180 ~ longitude)) %>%
+		dplyr::select(-Xi, -Eta)
+	
+	bsregions_df <- bsregions_df %>%
+			mutate(long_not_360 = long,
+  					 latitude = lat)
+	
+	bsregions_df_all <- merge(depth_df, bsregions_df, 
+														by = c("latitude", "long_not_360"))
+	
+	bsregions_df_all_trim <- bsregions_df_all %>%
+			filter(., between(depth, 0, 250))
+
+	# separate domains in order for merging later
+	inner_domains <- c(2, 7, 11, 13, 14)
+	middle_domains <- c(1, 3, 4, 5, 6, 9, 10, 12)
+	outer_domains <- c(8, 15, 16)
+	
+	inner_domain <- bsregions_df_all_trim %>%
+		filter(., DOMAIN %in% inner_domains) %>%
+		mutate(latitude = lat)
+	
+	middle_domain <- bsregions_df_all_trim %>%
+		filter(., DOMAIN %in% middle_domains)
+	
+	outer_domain <- bsregions_df_all_trim %>%
+		filter(., DOMAIN %in% outer_domains)
+	
+	# turn each df into sf object and combine polygons
+	inner_domain_sf <- inner_domain %>%
+		  st_as_sf(coords = c("long_not_360", "lat"), crs = 4326) %>%
+  		group_by(DOMAIN) %>%
+  		summarise(geometry = st_combine(geometry)) %>%
+  		st_cast("POLYGON")
+	
+	inner_poly <-  st_union(inner_domain_sf)
+
+	middle_domain_sf <- middle_domain %>%
+		  st_as_sf(coords = c("long_not_360", "lat"), crs = 4326) %>%
+  		group_by(DOMAIN) %>%
+  		summarise(geometry = st_combine(geometry)) %>%
+  		st_cast("POLYGON")
+	
+	middle_poly <-  st_union(middle_domain_sf)
+
+	outer_domain_sf <- outer_domain %>%
+		  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+  		group_by(DOMAIN) %>%
+  		summarise(geometry = st_combine(geometry)) %>%
+  		st_cast("POLYGON")
+	
+	outer_poly <-  st_union(outer_domain_sf)
+
+	# combine all regions into one polygon
+	full_poly1 <-  st_union(inner_poly, middle_poly)
+	full_poly <- st_union(full_poly1, outer_poly)
+
+	#### plot ####
+	
+	study_domain_plot  <- 
+    	ggplot() +
+	 	 	geom_sf(data = full_poly, color = "#bfbfbf", fill = "#bfbfbf", alpha = 0.5) +
+			geom_sf(data = world_map_data, fill = "#808080", lwd = 0) +
+			coord_sf(crs = 3338) +
+ 			scale_x_continuous(
+ 				breaks = breaks_x,
+ 				labels = labels_x,
+ 				name = "Longitude",
+ 				limits = limits_x
+ 			) +
+ 			scale_y_continuous(
+ 				breaks = breaks_y,
+ 				limits = limits_y,
+ 				name = "Latitude",
+ 			) +
+			labs(tag = "(a)") +
+			theme_bw() +
+ 			theme(
+ 			axis.text = element_text(size = 12, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+  	  axis.title = element_text(size=14, color = "grey50"),
+ 			plot.tag.position = c(0.21, 0.9))
+
+	
