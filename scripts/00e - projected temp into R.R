@@ -53,7 +53,6 @@
 	# create object for time axis
 	cesm_hist_dfs$DateTime <- as.POSIXct(cesm_hist_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
 
-	
   # ssp 126 scenario ####
 	
 	cesm_ssp126_file_list <- cesm_file_list[str_detect(cesm_file_list, "ssp126")]
@@ -82,6 +81,7 @@
 	# create object for time axis
 	cesm_ssp126_dfs$DateTime <- as.POSIXct(cesm_ssp126_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
 
+	
  # ssp585 scenario ####
 	
 	cesm_ssp585_file_list <- cesm_file_list[str_detect(cesm_file_list, "ssp585")]
@@ -117,9 +117,22 @@
 
 	
 	cesm_dfs <- bind_rows(cesm_hist_dfs, cesm_ssp126_dfs, cesm_ssp585_dfs) 
+	
+	test <- is.na(cesm_dfs_trim$ocean_time)
+	unique(test)
+	
+	test2 <- is.na(cesm_dfs_trim$DateTime)
+	unique(test2)
+	
+
 
 	# separate date column into components
 	cesm_dfs$date <- as.Date(cesm_dfs$DateTime) # date in Date format
+	
+		
+	test3 <- is.na(cesm_dfs$date)
+	unique(test3)
+
 	cesm_dfs$month <- month(cesm_dfs$date) # month of year
 	cesm_dfs$week <- week(cesm_dfs$date) # week of year
 	cesm_dfs$year <- year(cesm_dfs$date)
@@ -381,6 +394,14 @@
 	gfdl_hist_dfs$scenario <- "historical"
 	
 	gfdl_dfs <- bind_rows(gfdl_hist_dfs, gfdl_ssp126_dfs, gfdl_ssp585_dfs)
+	
+	test <- is.na(gfdl_dfs$ocean_time)
+	unique(test)
+	
+	test2 <- is.na(gfdl_dfs$DateTime)
+	unique(test2)
+	
+
 
 	# separate date column into components
 	gfdl_dfs$date <- as.Date(gfdl_dfs$DateTime) # date in Date format
