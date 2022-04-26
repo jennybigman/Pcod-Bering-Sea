@@ -47,59 +47,47 @@
   rolling_stats_hind <- merge(rolling_mean_hind, rolling_sd_hind, by = "years_hind") %>%
   	na.omit() 
   
-  # projections ####
+ #### projections #####
 		
-	# with bias-corrected temperature with variance ratio
-		
-  sds_proj_var <- NA
-  
-  for(i in 6:615){
-  	win <- (i - 5):(i + 5)
-  	sds_proj_var[i] <- sd(yr_stats_proj$mean_sp_hab_suit_var[win])
-  }
-  
-  means_proj_var <- NA
-  
-  for(i in 6:615){
-  	win <- (i - 5):(i + 5)
-  	means_proj_var[i] <- mean(yr_stats_proj$mean_sp_hab_suit_var[win])
-  }
-  
- 	years_proj_hist <- (c(1980:2014))
-	years_proj_scenario <- c(rep(c(2015:2099), 2))
-	years_proj <- c(years_proj_hist, years_proj_scenario)
-	years_proj_all <- rep(years_proj, 3)
+	years_proj <- 2020:2099
 	
-	
-	sims <- c("cesm", "gfdl", "miroc")
-	simulations <- list()
-	
-	for(i in sims){
-		simulations[[i]] <- rep(i, times = 205)
-		simulations
-	}
-	
-	simulation <- as.data.frame(bind_rows(simulations)) %>%
-		gather(., key = simulation)
+	yr_stats_proj_trim <- yr_stats_proj %>%
+		filter(year %in% years_proj)
 	
  
-	scens <- list("ssp126", "ssp585")
-	scenarios <- list()
+	rolling_proj_func <- function(x, y){
+ 	
+ 		new_dat <- yr_stats_proj_trim %>%
+ 			filter(simulation == x, projection == y)
+ 		
+  	sds_proj <- NA
+  	
+  	for(i in 6:length(new_dat$year)){
+  		win <- (i - 5):(i + 5)
+  		sds_proj[i] <- sd(new_dat$mean_sp_hab_suit_var[win])
+  	}
+  	
+  	means_proj <- NA
+  	
+  	for(i in 6:length(new_dat$year)){
+  		win <- (i - 5):(i + 5)
+  		means_proj[i] <- mean(new_dat$mean_sp_hab_suit_var[win]) }
+  		
+  	data.frame(sds_proj, means_proj, years_proj, x, y)
+  	
+  	}
 	
-	for(i in scens){
-		scenarios[[i]] <- rep(i, times = (85))
-		scenarios
-	}
+	sims <- unique(yr_stats_proj_trim$simulation)
+	projs <- unique(yr_stats_proj_trim$projection)
 	
-	scenarios <- as.vector(c(scenarios[[1]], scenarios[[2]]))
-	scenario <- c(rep("historical", 35), scenarios)
+	sims_projs <- expand_grid(sims, projs)
 	
-  rolling_stats_proj_var <- as.data.frame(cbind(sds_proj_var, means_proj_var, years_proj, simulation, 
-  																					scenario)) %>% 
-  	dplyr::select(-value) %>%
-  	na.omit()
+	rolling_stats_proj <- mapply(rolling_proj_func,
+															 x = sims_projs$sims, 
+															 y = sims_projs$projs,
+															 SIMPLIFY = FALSE) %>% bind_rows()
+		
 
-  
   #### plots ####
  
   
