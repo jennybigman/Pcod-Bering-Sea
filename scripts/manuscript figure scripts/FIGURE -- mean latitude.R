@@ -30,6 +30,10 @@
 	
 	hind_mean_lat_yr <- bind_rows(hind_mean_lats_yr_0.5, hind_mean_lats_yr_0.9) 
 	
+	# mean latitude
+	mean_lat_hind <- hind_mean_lat_yr %>%
+		group_by(sp_hab_threshold) %>%
+		summarize(mean_lat = mean(hist_mean_lat))
 	
 	#### projections ####
 	
@@ -64,6 +68,11 @@
 	proj_mean_lat_yr <- proj_mean_lat_yr %>%
 		filter(year %in% years_proj)
 	
+	mean_lat_proj <- proj_mean_lat_yr %>%
+		group_by(year, projection, simulation, sp_hab_threshold) %>%
+		summarize(mean_lat = mean(proj_mean_lat)) %>%
+		filter(year == 2099)
+
 	#### rolling means ####
 	
 	# hind

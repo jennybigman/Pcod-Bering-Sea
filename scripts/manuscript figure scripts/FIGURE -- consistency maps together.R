@@ -99,8 +99,8 @@
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
  		scale_x_continuous(
- 			breaks = c(-175, -170, -165, -160),
- 			labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 			breaks = c( -170, -160),
+ 			labels = c( "-170˚", "-160˚"),
  			name = "Longitude",
  			limits = c(-1400000, -150000)
  		) +
@@ -112,11 +112,14 @@
     labs(colour = "%\nyears") +
 		theme_bw() +
 	 	theme(
+	 		axis.text.y = element_blank(),
+	 		axis.title.y =element_blank(),
+ 			axis.ticks.y = element_blank(),
 	 		legend.position = "none",
 			panel.border = element_rect(color = "#666666"),
- 			axis.text = element_text(size = 8,  color = "#666666"),	
-  		axis.title = element_text(size = 10,  color = "#666666"),
- 			axis.ticks = element_line(color = "#666666"),
+ 			axis.text.x = element_text(size = 8,  color = "#666666"),	
+  		axis.title.x = element_text(size = 10,  color = "#666666"),
+ 			axis.ticks.x = element_line(color = "#666666"),
  			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
 
 	
@@ -128,8 +131,8 @@
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
  		scale_x_continuous(
- 			breaks = breaks_x,
- 			labels = labels_x,
+ 			breaks = c( -170, -160),
+ 			labels = c( "-170˚", "-160˚"),
  			name = "Longitude",
  			limits = limits_x
  		) +
@@ -155,57 +158,6 @@
  			axis.ticks.x = element_line( color = "#666666"),
  			plot.margin = unit(c(0.25,-0.05,-0.05, -0.1), "in"))
 	
-	# legend
-	
-	legend <- 	
-		ggplot() +
-		geom_sf(data = ROMS_hindcast_dat_dec_yr_sum_05_sf, aes(color = pct_yrs))  +
-		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-		coord_sf(crs = 3338) +
-		scale_color_viridis_c() +
- 		scale_x_continuous(
- 			breaks = c(-175, -170, -165, -160),
- 			labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 			name = "Longitude",
- 			limits = c(-1400000, -150000)
- 		) +
- 		scale_y_continuous(
- 			breaks = c(55, 60),
- 			limits = c(470000, 1900000),
- 			name = "Latitude",
- 		) +
-    labs(colour = "%\nyears") +
-		theme_bw() +
-	 	theme(
-			panel.border = element_rect(color = "#666666"),
- 			axis.text = element_text(size = 8,  color = "#666666"),	
-  		axis.title = element_text(size = 10,  color = "#666666"),
- 			axis.ticks = element_line(color = "#666666"),
- 			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
-	
-	legend_plot <- cowplot::get_legend(legend) 
-  legend_plot <- 	ggpubr::as_ggplot(legend_plot) 
-
-
-		#### plot together ####
-	
-	#05 Potential habitat 
-
-  consis05_maps <- current20_consistency05 + last20_consistency05 + legend_plot +
- 		plot_layout(ncol = 3, widths = c(1.3,4,1), guides = "collect") 
-	
-  consis05_maps_form <- consis05_maps + 
-		annotate("text", label = "Current\n(2001 - 2020)", 
-  			x = -5.2, y = 0.83, size = 4, fontface = 2)  +
-		annotate("text", label = "Projected (2080 - 2099)",	
-						 x = -2.5, y = 1.1, size = 4, fontface = 2)
- 
-  ggsave("./output/plots/consis05_maps_form.png",
-			 consis05_maps_form,
-			 height = 5,
-			 width = 10)
-
-
 	# core habitat
 
 	current20_consistency09 <-	
@@ -215,8 +167,8 @@
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
  		scale_x_continuous(
- 			breaks = c(-175, -170, -165, -160),
- 			labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 			breaks = c( -170, -160),
+ 			labels = c( "-170˚", "-160˚"),
  			name = "Longitude",
  			limits = c(-1400000, -150000)
  		) +
@@ -244,8 +196,8 @@
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
  		scale_x_continuous(
- 			breaks = breaks_x,
- 			labels = labels_x,
+ 			breaks = c( -170, -160),
+ 			labels = c( "-170˚", "-160˚"),
  			name = "Longitude",
  			limits = limits_x
  		) +
@@ -261,7 +213,7 @@
  			panel.spacing = unit(2, "pt"),
  			panel.border = element_rect(color = "#666666"),
  			strip.text.x = element_text(size = 10, face = "bold",  color = "#808080"),
- 			strip.text.y = element_text(size = 10, face = "bold", angle = 0,  color = "#666666"),
+ 			strip.text.y = element_blank(),
  			strip.background = element_blank(),
  			axis.text.x = element_text(size = 8,  color = "#666666"),	
   		axis.title.x = element_text(size = 10,  color = "#666666"),
@@ -280,8 +232,8 @@
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c(breaks = c(0,25,50,75,100)) +
  		scale_x_continuous(
- 			breaks = c(-175, -170, -165, -160),
- 			labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 			breaks = c( -170, -160),
+ 			labels = c( "-170˚", "-160˚"),
  			name = "Longitude",
  			limits = c(-1400000, -150000)
  		) +
@@ -293,71 +245,43 @@
     labs(colour = "%\nyears") +
 		theme_bw() +
 	 	theme(
+	 		legend.title.align = 0.5,
 			panel.border = element_rect(color = "#666666"),
  			axis.text = element_text(size = 8,  color = "#666666"),	
   		axis.title = element_text(size = 10,  color = "#666666"),
  			axis.ticks = element_line(color = "#666666"),
- 			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
+ 			plot.margin = unit(c(0.05,0.2, 0, 0.2), "in"))
 	
 	legend_plot <- cowplot::get_legend(legend) 
   legend_plot <- 	ggpubr::as_ggplot(legend_plot) 
 
-
-	#### plot together ####
-	
-  consis09_maps <- current20_consistency09 + last20_consistency09 + legend_plot +
- 		plot_layout(ncol = 3, widths = c(1.3,4,1), guides = "collect") 
-	
-  consis09_maps_form <- consis09_maps + 
-		annotate("text", label = "Current\n(2001 - 2020)", 
-  			x = -5.2, y = 0.83, size = 4, fontface = 2)  +
-		annotate("text", label = "Projected (2080 - 2099)",	
-						 x = -2.5, y = 1.1, size = 4, fontface = 2)
- 
-  ggsave("./output/plots/consis09_maps_form.png",
-			 consis09_maps_form,
-			 height = 5,
-			 width = 10)
-  
-  #### plot both core and potential together
-  
-  consistency_sum_maps <- consis09_maps_form/consis05_maps_form
-  
-  ggsave("./output/plots/consistency_sum_maps.png",
-			 consistency_sum_maps,
-			 height = 5,
-			 width = 10)
-
-  # try again
-  
-  layout <- "
-  	##BBBB
-  	AABBBB
-  	AABBBB
-  	##BBBB
-  	"
-  plot1 <- current20_consistency05
-  plot2 <- last20_consistency05
-  
-  consistency_sum_maps <- plot1 + plot2 + plot_layout(design = layout, guides = "collect")
-  
-  ggsave("./output/plots/consistency_sum_maps.png",
-		consistency_sum_maps)
-  
-  
-  ##### try something else
-  
+	# plot together  
    consis_maps <- current20_consistency09 + last20_consistency09 +
    	current20_consistency05 + last20_consistency05 + legend_plot +
- 		plot_layout(ncol = 5, widths = c(1.3,4, 1.3, 4, 1))
+ 		plot_layout(ncol = 5, widths = c(1.3,4, 1.3, 4, 0.75))
  				
      
   ggsave("./output/plots/consis_maps.png",
 		consis_maps)
  				
  								
-  consis09_maps_form <- consis09_maps + 
+  consis_maps_form <- consis_maps + 
 		annotate("text", label = "Current\n(2001 - 2020)", 
-  			x = -5.2, y = 0.83, size = 4, fontface = 2)  +
+  			x = -14.78, y = 0.68, size = 3, fontface = 2)  +
 		annotate("text", label = "Projected (2080 - 2099)",	
-						 x = -2.5, y = 1.1, size = 4, fontface = 2)
+						 x = -4, y = 0.87, size = 3, fontface = 2) +
+  	annotate("text", label = "Current\n(2001 - 2020)", 
+  			x = -7.5, y = 0.68, size = 3, fontface = 2)  +
+		annotate("text", label = "Projected (2080 - 2099)",	
+						 x = -11, y = 0.87, size = 3, fontface = 2) +
+  	annotate("text", label = "Potential habitat",	
+						 x = -7, y = 1.03, size = 5, fontface = 2) +
+  	annotate("text", label = "Core habitat",	
+						 x = -15, y = 1.03, size = 5, fontface = 2) +
+  	annotate("segment", x = -8.45, xend = -8.45, y = 0.13, yend = 1.05)
+
+  ggsave("./output/plots/consis_maps_form.png",
+		consis_maps_form,
+			 height = 5,
+			 width = 10)
+ 
