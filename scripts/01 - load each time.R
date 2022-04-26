@@ -38,11 +38,26 @@
 	# hindcast data
 	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv") %>% filter(., year != 2021)
 	
+	ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
+	 mutate(grid_cell_id = paste0(latitude, longitude))
+	
+	grid_cells <- ROMS_hindcast_dat %>%
+	 distinct(grid_cell_id) %>%
+	 mutate(ID = 1:5024)
+
+	ROMS_hindcast_dat <- merge(ROMS_hindcast_dat, grid_cells, by = "grid_cell_id")
+
 	# projected data
 
 	ROMS_projected_dat <- fread(file = "./data/ROMS_projected_dat.csv") %>%
 		mutate(latitude = Lat,
 					 longitude = Lon)
+	
+	ROMS_projected_dat <- ROMS_projected_dat %>%
+	 mutate(grid_cell_id = paste0(latitude, longitude))
+
+	ROMS_projected_dat <- merge(ROMS_projected_dat, grid_cells, by = "grid_cell_id")
+
 	
 	# add name of month for plotting
 	ROMS_projected_dat$month_name <- NA
@@ -75,12 +90,14 @@
   ROMS_hindcast_dat_sf <- ROMS_hindcast_dat %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
   
-  ROMS_projected_dat_sf <- ROMS_projected_dat %>%
+  ROMS_projected_dat <- ROMS_projected_dat %>%
   		mutate(longitude = Lon,
   					 latitude = Lat,
   					 long_not_360 = case_when(
 						 longitude >= 180 ~ longitude - 360,
-						 longitude < 180 ~ longitude)) %>%
+						 longitude < 180 ~ longitude)) 
+  
+ ROMS_projected_dat_sf <-  ROMS_projected_dat %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
 	
 	
