@@ -5,6 +5,7 @@
 	library(tidync)
 	require(tidyverse)
 	library(data.table)
+	library(sf)
 	
 	#### read in data ####
 	
@@ -62,9 +63,11 @@
 							sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
+	#cesm_dfs_trim <- cesm_dfs_trim %>% 
+	#	mutate(WOY = lubridate::week(DateTime))
 	
 	cesm_proj_temp_dat <- cesm_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(projection, year, month, week, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 calculate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -86,6 +89,7 @@
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 	
+	fwrite(cesm_bc_temps, file = "./data/cesm_bc_temps.csv")
 	
 	#### GFDL ####
 	
@@ -103,9 +107,11 @@
 								sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
+	gfdl_dfs_trim <- gfdl_dfs_trim %>% 
+		mutate(WOY = lubridate::week(DateTime))
 	
 	gfdl_proj_temp_dat <- gfdl_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(projection, year, month, WOY, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -127,7 +133,8 @@
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 	
-	
+	fwrite(gfdl_bc_temps, file = "./data/gfdl_bc_temps.csv")
+
 	#### MIROC ####
 
 	#2 calculate the mean of the projections during the reference years ####
@@ -145,8 +152,11 @@
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
+	miroc_dfs_trim <- miroc_dfs_trim %>% 
+		mutate(WOY = lubridate::week(DateTime))
+	
 	miroc_proj_temp_dat <- miroc_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(projection, year, month, WOY, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -169,9 +179,13 @@
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 
 	
-	
+	fwrite(miroc_bc_temps, file = "./data/miroc_bc_temps.csv")
+
 	#### add together ####
-	
+	cesm_bc_temps <- fread(file = "./data/cesm_bc_temps.csv")
+	gfdl_bc_temps <- fread(file = "./data/gfdl_bc_temps.csv")
+	miroc_bc_temps <- fread(file = "./data/miroc_bc_temps.csv")
+
 	cesm_bc_temps$simulation <- "cesm"
 	gfdl_bc_temps$simulation <- "gfdl"
 	miroc_bc_temps$simulation <- "miroc"
@@ -180,7 +194,7 @@
 	
 	fwrite(proj_temp_dat_all, file = here("./data/ROMS_proj_temp_dat_all.csv"))
 	
-
+	#proj_temp_dat_all <- fread(file = here("./data/ROMS_proj_temp_dat_all.csv"))
 	
 	## remove grid cells based on depth and location (keep those < 250 m and within Ortiz regions)
 	
