@@ -752,8 +752,7 @@
 	
 	mean_lat_proj <- proj_mean_lat_yr %>%
 		group_by(year, projection, simulation, sp_hab_threshold) %>%
-		summarize(mean_lat = mean(proj_mean_lat)) %>%
-		filter(year == 2099)
+		summarize(mean_lat = mean(proj_mean_lat))
 
 	
 
