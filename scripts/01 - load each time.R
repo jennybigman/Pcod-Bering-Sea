@@ -26,6 +26,7 @@
 	library(scales)
 	library(ggtext)
 	library(ggpubr)
+	library(glue)
 
 	# turn off spherical geometry
 	sf_use_s2(FALSE)

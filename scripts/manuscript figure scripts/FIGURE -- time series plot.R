@@ -1,10 +1,12 @@
-## FIGURE -- all time series 
-
 	# time series plot theme function  
 	time_series_plot_theme <- function(plot_tag_x = 0.04, 
 																		 plot_tag_y = 0.9, 
 																		 plot_title_size = 20, 
-																		 axis_text_size = 16){
+																		 axis_text_size = 16,
+																		 t = 0,
+																		 r = 0,
+																		 b = 0,
+																		 l = 0){
 			theme(
   				legend.position = "none",
   				panel.background = element_rect(fill = NA),
@@ -12,17 +14,20 @@
 					axis.text = element_text(size = axis_text_size),
   			  axis.ticks.y = element_line(),
 					axis.ticks.x = element_blank(),
+					axis.title.y = element_text(size = 20, color = "black", 
+						face = "bold", angle = 0, vjust = 0.5),
   			  axis.line = element_blank(),
-  			  axis.title =  element_blank(),
+  			  axis.title.x =  element_blank(),
   			  panel.grid.major = element_blank(),
   			  panel.grid.minor = element_blank(),
   			  panel.border = element_rect(fill = NA, color = "grey50"),
-					plot.tag.position = c(plot_tag_x, plot_tag_y))
+					plot.tag.position = c(plot_tag_x, plot_tag_y),
+					plot.margin = margin(t,r,b,l, "cm"))
 	}
 
 	light_black <- "#306364"
 	
-	
+
 	#### temperature time series ####
 
 	# temp data
@@ -100,118 +105,81 @@
   	means_proj_high[i] <- mean(yearly_temp_proj_sum_high$mean_temp[win])
   }
 	
-	years_proj <- c(2020:2099) # does this need to be 1980?
+	years_proj <- c(2020:2099) 
 	
 	rolling_mean_temp_proj <- as.data.frame(cbind(years_proj, means_proj_low, means_proj_high)) 
 
+	rolling_mean_temp_low <- as.data.frame(cbind(years_proj, means_proj_low)) %>%
+		mutate(scen_f = "low emission (ssp126)") %>%
+		rename(means_proj = means_proj_low)
+
+	rolling_mean_temp_high <- as.data.frame(cbind(years_proj, means_proj_high)) %>%
+		mutate(scen_f = "high emission (ssp585)") %>%
+		rename(means_proj = means_proj_high)
+
+	rolling_mean_temp_proj <- rbind(rolling_mean_temp_low, 
+																	rolling_mean_temp_high)
+	
+	rolling_mean_temp_proj$scen_f <- as.factor(rolling_mean_temp_proj$scen_f)
+	
+	# order facets
+	yearly_temp_proj$scen_f = factor(yearly_temp_proj$scen, 
+																			levels=c('low emission (ssp126)',  
+																							 'high emission (ssp585)'))
+	
+	rolling_mean_temp_proj$scen_f = factor(rolling_mean_temp_proj$scen, 
+																			levels=c('low emission (ssp126)',  
+																							 'high emission (ssp585)'))
+
 	#### temp plots ####
 	
-	# low emissions #
-	
-	low_temp_proj <- yearly_temp_proj %>%
-		filter(., scen == "low emission (ssp126)")
-	
-	low_temp_time <-    
-   	ggplot() +
+	temp_plot <- 
+	 	ggplot(yearly_temp_proj, aes(year, avg_temp)) +
 		geom_line(data = rolling_mean_temp_hind, 
    						aes(x = years_hind, y = means_hind), 
    						color = light_black) +
 		geom_line(data = rolling_mean_temp_proj, 
-   						aes(x = years_proj, y = means_proj_low), 
-   						color = light_black) +
-   	geom_line(data = yearly_temp_hind, 
-   						aes(x = year, y = avg_temp), 
-   						color = "grey50", alpha = 0.3) +
-		geom_line(data = low_temp_proj,
-							aes(year, avg_temp, 
-									group = sim_proj, 
-									color = sim_proj), alpha = 0.3) +
-		xlab("Year") + 
-		scale_color_manual(name = "sim_proj", values = colors) +
-	  scale_y_continuous(
-	  	name = "Temperature (˚C)",
-	  	breaks = c(-1, 1, 3),
-	  	limits = c(-1, 4)
-	  ) +
-		labs(tag = "(a)") +
-		geom_vline(aes(xintercept = 2020, color = "#f2f2f2"), alpha = 0.5) +
-		scale_x_continuous(
-	  	name = "Year",
-	  	breaks = c(1980, 2030, 2080),
-	  		  	limits = c(1970, 2110)) +
-		ggtitle("low emission (ssp126)") +
-  	time_series_plot_theme() +
-		theme(axis.text.x = element_blank())
-	
-		low_temp_time_lab <- low_temp_time +
-			annotate(geom = "text", x = 2107, y = 1.9,
-           label = "cesm",
-           color = "#6dc3a9", size = 4.5) +
-				annotate(geom = "text", x = 2107, y = 0.9,
-           label = "gfdl",
-           color = "#4e8d9c", size = 4.5) +
-				annotate(geom = "text", x = 2107, y = 0.25,
-           label = "miroc",
-           color = "#97c3e5", size = 4.5)  +
-				annotate(geom = "text", x = 1995, y = 1,
-           label = "hindcast",
-           color = "black", alpha = 0.5, size = 4.5)
-		
-	# high emissions #		
-	high_temp_dat <- yearly_temp_proj %>%
-		filter(., scen == "high emission (ssp585)")
-	
-	high_temp_time <-    
-   	ggplot() +
-		geom_line(data = rolling_mean_temp_hind, 
-   						aes(x = years_hind, y = means_hind), 
-   						color = light_black) +
-		geom_line(data = rolling_mean_temp_proj, 
-   						aes(x = years_proj, y = means_proj_high), 
+   						aes(x = years_proj, y = means_proj), 
    						color = light_black) +
    	geom_line(data = yearly_temp_hind, 
    						aes(x = year, y = avg_temp), 
    						color = "black", alpha = 0.3) +
-		geom_line(data = high_temp_dat,
+		geom_line(data = yearly_temp_proj,
 							aes(year, avg_temp, 
 									group = sim_proj, 
 									color = sim_proj), alpha = 0.3) +
-		xlab("Year") +
-		geom_vline(aes(xintercept = 2020, color = "#f2f2f2"), alpha = 0.5) +
+		facet_wrap(~ scen_f) +
+		xlab("Year") + 
+		geom_vline(xintercept = 2020, color = "lightgrey") +
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	position = "right",
 	  	name = "Temperature (˚C)",
-	  	breaks = c(-1, 1, 3),
-	  	limits = c(-1, 4)
+	  	breaks = c(0, 2, 4),
+	  	labels = c(0, 2, 4),
+	  	limits = c(-0.8, 4.2)
 	  ) +
 		scale_x_continuous(
 	  	name = "Year",
 	  	breaks = c(1980, 2030, 2080),
 	  		  	limits = c(1970, 2110)) +
-		ggtitle("high emission (ssp585)") +
-		labs(tag = "(b)") +
-   	time_series_plot_theme() +
-		theme(axis.text.y = element_blank(),
-					axis.ticks.y = element_blank(),
-					axis.text.x = element_blank())
-		
-		high_temp_time_lab <- high_temp_time +
-			annotate(geom = "text", x = 2107, y = 3.2,
-           label = "cesm",
-           color = "#ffabab", size = 4.5) +
-				annotate(geom = "text", x = 2107, y = 2.2,
-           label = "gfdl",
-           color = "#ff4040", size = 4.5) +
-				annotate(geom = "text", x = 2107, y = 3.5,
-           label = "miroc",
-           color = "#ffb733", size = 4.5) +
-				annotate(geom = "text", x = 1994, y = 1,
-           label = "hindcast",
-           color = "black", alpha = 0.5, size = 4.5)
-		
+		time_series_plot_theme() +
+		theme(strip.background = element_blank(),
+					strip.text = element_blank(),
+					panel.spacing = unit(0, "lines"),
+  				legend.position = "none",
+  				panel.background = element_rect(fill = NA),
+					axis.text.x = element_blank(),
+					axis.text.y = element_text(size = 16),
+  			  axis.ticks.y = element_line(),
+					axis.ticks.x = element_blank(),
+  			  axis.line = element_blank(),
+  			  axis.title =  element_blank(),
+  			  panel.grid.major = element_blank(),
+  			  panel.grid.minor = element_blank(),
+  			  panel.border = element_rect(fill = NA, color = "grey50"))
+	
 
-	#### spawning habitat suitability index time series ####
+		#### habitat suitability ####
 	
 	yearly_hab_dat_hind <- ROMS_hindcast_dat %>%
 		group_by(year) %>%
@@ -240,9 +208,6 @@
 	
 	names(colors) <- unique(yearly_hab_dat_proj$sim_proj)
 	
-	# order facets
-	yearly_hab_dat_proj$scen_f = factor(yearly_hab_dat_proj$scen, levels=c('low emission (ssp126)', 
-																																																																						 'high emission (ssp585)'))
 	## rolling means of spawning habitat suitability ##
 	
 	# hind
@@ -259,11 +224,11 @@
 	
 	# proj
 	yearly_hab_dat_proj_sum <- yearly_hab_dat_proj %>%
-		group_by(year, scen_f) %>%
+		group_by(year, scen) %>%
 		summarise(mean_hab_suit = mean(mean_hab_suit))
 	
 	yearly_hab_dat_proj_sum_low <- yearly_hab_dat_proj_sum %>%
-		filter(scen_f == "low emission (ssp126)")
+		filter(scen == "low emission (ssp126)")
 	
 	means_proj_low <- NA
   
@@ -273,7 +238,7 @@
   }
 	
 	yearly_hab_dat_proj_sum_high <- yearly_hab_dat_proj_sum %>%
-		filter(scen_f == "high emission (ssp585)")
+		filter(scen == "high emission (ssp585)")
 	
 	means_proj_high <- NA
   
@@ -284,34 +249,51 @@
 	
 	years_proj <- c(2020:2099) 
 	
-	rolling_mean_habsuit_proj <- as.data.frame(cbind(years_proj, means_proj_low, means_proj_high)) 
+	rolling_mean_habsuit_low <- as.data.frame(cbind(years_proj, means_proj_low)) %>%
+		mutate(scen = "low emission (ssp126)") %>%
+		rename(means_proj = means_proj_low)
+
+	rolling_mean_habsuit_high <- as.data.frame(cbind(years_proj, means_proj_high)) %>%
+		mutate(scen = "high emission (ssp585)")  %>%
+		rename(means_proj = means_proj_high)
 	
-	#### hab suit plots ####
+	rolling_mean_habsuit_proj <- rbind(rolling_mean_habsuit_low, 
+																		 rolling_mean_habsuit_high)
 	
-	# low emissions #
-	low_dat <- yearly_hab_dat_proj %>%
-		filter(., scen == "low emission (ssp126)")
+	rolling_mean_habsuit_proj$scen_f <- as.factor(rolling_mean_habsuit_proj$scen)
 	
-	low_habsuit_time <-    
-   	ggplot() +
+	# order facets
+	yearly_hab_dat_proj$scen_f = factor(yearly_hab_dat_proj$scen, 
+																			levels=c('low emission (ssp126)',  
+																							 'high emission (ssp585)'))
+	
+	rolling_mean_habsuit_proj$scen_f = factor(rolling_mean_habsuit_proj$scen, 
+																			levels=c('low emission (ssp126)',  
+																							 'high emission (ssp585)'))
+	
+	#### habitat suitability plot ####
+	
+	habsuit_plot <- 
+	 	ggplot(data = yearly_hab_dat_proj, aes(x = year, y = mean_hab_suit)) +
 		geom_line(data = rolling_mean_habsuit_hind, 
    						aes(x = years_hind, y = means_hind), 
    						color = light_black) +
 		geom_line(data = rolling_mean_habsuit_proj, 
-   						aes(x = years_proj, y = means_proj_low), 
+   						aes(x = years_proj, y = means_proj), 
    						color = light_black) +
    	geom_line(data = yearly_hab_dat_hind, 
    						aes(x = year, y = mean_hab_suit), 
    						color = "black", alpha = 0.3) +
-		geom_line(data = low_dat,
+		geom_line(data = yearly_hab_dat_proj,
 							aes(year, mean_hab_suit, 
 									group = sim_proj, 
 									color = sim_proj), alpha = 0.3) +
+		facet_wrap(~ scen_f) +
 		xlab("Year") + 
-		geom_vline(aes(xintercept = 2020, color = "#f2f2f2"), alpha = 0.5) +
+		geom_vline(xintercept = 2020, color = "lightgrey") +
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Cross-shelf annual spawning\nhabitat suitability index",
+	  	name = "Spawning habitat\nsuitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
 	  	limits = c(0.2, 0.65)
@@ -320,79 +302,28 @@
 	  	name = "Year",
 	  	breaks = c(1980, 2030, 2080),
 	  		  	limits = c(1970, 2110)) +
-		labs(tag = "(c)") +
-		time_series_plot_theme(plot_tag_x = 0.125, plot_tag_y = 0.9) +
-		theme(axis.text.x = element_blank())
+		time_series_plot_theme() +
+		theme(strip.background = element_blank(),
+					strip.text = element_blank(),
+					panel.spacing = unit(0, "lines"),
+  				legend.position = "none",
+  				panel.background = element_rect(fill = NA),
+					axis.text.x = element_blank(),
+					axis.text.y = element_text(size = 16),
+  			  axis.ticks.y = element_line(),
+					axis.ticks.x = element_blank(),
+  			  axis.line = element_blank(),
+  			  axis.title.x =  element_blank(),
+  			  panel.grid.major = element_blank(),
+  			  panel.grid.minor = element_blank(),
+  			  panel.border = element_rect(fill = NA, color = "grey50"))
 	
-	low_habsuit_time_lab <- low_habsuit_time +
-			annotate(geom = "text", x = 2107, y = 0.45,
-           label = "cesm",
-           color = "#6dc3a9", size = 4) +
-				annotate(geom = "text", x = 2107, y = 0.30,
-           label = "gfdl",
-           color = "#4e8d9c", size = 4) +
-				annotate(geom = "text", x = 2107, y = 0.37,
-           label = "miroc",
-           color = "#97c3e5", size = 4)  +
-				annotate(geom = "text", x = 1995, y = 0.39,
-           label = "hindcast",
-           color = "black", alpha = 0.5, size = 4)
+	## put temp and habitat suitability together
+#	plot_temp_form <- temp_plot + theme(plot.margin = margin(0, 0, -0.5, 0, "cm"))
+#	plot_habsuit_form <- habsuit_plot + theme(plot.margin = margin(-0.5, 0, 0, 0, "cm"))
 
-	high_dat <- yearly_hab_dat_proj %>%
-		filter(., scen == "high emission (ssp585)")
-	
-	high_habsuit_time <-    
-   	ggplot() +
-		geom_line(data = rolling_mean_habsuit_hind, 
-   						aes(x = years_hind, y = means_hind), 
-   						color = light_black) +
-		geom_line(data = rolling_mean_habsuit_proj, 
-   						aes(x = years_proj, y = means_proj_high), 
-   						color = light_black) +
-   	geom_line(data = yearly_hab_dat_hind, 
-   						aes(x = year, y = mean_hab_suit), 
-   						color = "black", alpha = 0.3) +
-		geom_line(data = high_dat,
-							aes(year, mean_hab_suit, 
-									group = sim_proj, 
-									color = sim_proj), alpha = 0.3) +
-		xlab("Year") + 
-		geom_vline(aes(xintercept = 2020, color = "#f2f2f2"), alpha = 0.5) +
-		scale_color_manual(name = "sim_proj", values = colors) +
-	  scale_y_continuous(
-	  	name = "Cross-shelf annual spawning\nhabitat suitability index",
-	  	breaks = c(0.20, 0.40, 0.60),
-	  	labels = c(0.20, 0.40, 0.60),
-	  	limits = c(0.2, 0.65)
-	  ) +
-		scale_x_continuous(
-	  	name = "Year",
-	  	breaks = c(1980, 2030, 2080),
-	  	limits = c(1970, 2110)) +
-		labs(tag = "(d)") +
-		time_series_plot_theme(plot_tag_x = 0.03, plot_tag_y = 0.9) +
-		theme(axis.title.y = element_blank(),
-					axis.text.y = element_blank(),
-					axis.ticks.y = element_blank(),
-				  axis.text.x = element_blank())
-	
-	high_habsuit_time_lab <- high_habsuit_time +
-			annotate(geom = "text", x = 2107, y = 0.46,
-           label = "cesm",
-           color = "#ffabab", size = 4) +
-				annotate(geom = "text", x = 2107, y = 0.5,
-           label = "gfdl",
-           color = "#ff4040", size = 4) +
-				annotate(geom = "text", x = 2107, y = 0.62,
-           label = "miroc",
-           color = "#ffb733", size = 4) +
-				annotate(geom = "text", x = 1994, y = 0.39,
-           label = "hindcast",
-           color = "black", alpha = 0.5, size = 4)
-	
+
 	#### area time series ####
-	
-	# calculate area 
 	
 	## hindcast ##
 	
@@ -638,7 +569,7 @@
 	#### area plots ####
 	
 	area_plot <-    
-   	ggplot() +
+   	ggplot(data = proj_area_yr, aes(year, area)) +
 		geom_line(data = rolling_area_hind, 
    						aes(x = year, y = area), 
    						color = light_black) +
@@ -660,28 +591,16 @@
 	  	labels = c(1,3,5),
 	  	limits = c(19000, 567000)) +
    	xlim(1970, 2110) +
-		geom_vline(xintercept = 2020, color = "#f2f2f2", alpha = 0.5) +
+		geom_vline(xintercept = 2020, color = "lightgrey", alpha = 0.5) +
     time_series_plot_theme() +
 		theme(strip.background = element_blank(),
   				strip.text = element_blank(),
 					panel.spacing = unit(0, "lines"),
 					axis.text.x = element_blank(),
 					axis.title.x = element_blank(),
-					axis.ticks.x = element_blank())
+					axis.ticks.x = element_blank(),
+					axis.title.y = element_markdown())
 	
-	area_plot_labs <- 
-			ggdraw(area_plot) +
-			draw_label("cesm", x = 0.475, y = 0.65, color = "#6dc3a9", size = 12) +
-			draw_label("gfdl", x = 0.475, y = 0.55, color = "#4e8d9c", size = 12) +
-			draw_label("miroc", x = 0.475, y = 0.60, color = "#97c3e5", size = 12) +
-			draw_label("cesm", x = 0.93, y = 0.62, color = "#ffabab", size = 12) +
-			draw_label("gfdl", x = 0.93, y = 0.65, color = "#ff4040", size = 12) +
-			draw_label("miroc", x = 0.93, y = 0.73, color = "#ffb733", size = 12) +
-			draw_label("(a)", x = 0.07, y = 0.84, color = "black", size = 12) + # fix this
-			draw_label("(b)", x = 0.525, y = 0.84, color = "black", size = 12) + # fix this
-			draw_label("(c)", x = 0.07, y = 0.45, color = "black", size = 12) + # fix this
-			draw_label("(d)", x = 0.525, y = 0.45, color = "black", size = 12)# fix this
-
 	#### mean latitude time series ####
 	
 	# calculating the mean latitude of spawning habitat suitability
@@ -920,7 +839,8 @@
 	#### mean latitude plot ####
 	
 	mean_latitude_plot <-    
-   	ggplot() +
+   	ggplot(proj_mean_lat_yr, 
+							aes(year, proj_mean_lat)) +
 		geom_line(data = rolling_mean_lat_hind, 
    						aes(x = year, y = mean_lat), 
    						color = light_black) +
@@ -931,7 +851,7 @@
             data = hind_mean_lat_yr %>% filter(sp_hab_threshold == 0.5), color = "black", alpha = 0.3) +
 		geom_line(data = proj_mean_lat_yr, 
 							aes(year, proj_mean_lat, color = sim_proj, group = sim_proj), alpha = 0.3) +
-		facet_grid(thresh ~ scen_f) +
+		facet_grid(factor(thresh) ~ factor(scen_f)) +
 	  geom_line(aes(year, hist_mean_lat, colour = sp_hab_threshold),
             data = hind_mean_lat_yr %>% filter(sp_hab_threshold == 0.9), color = "black",  alpha = 0.3) +
 		xlab("Year") +
@@ -943,64 +863,200 @@
 	  	limits = c(55.2, 59.7)
 	  ) +
    	xlim(1970, 2110) +
-		geom_vline(data = hind_mean_lat_yr, aes(xintercept = 2020, color = "#f2f2f2"), alpha = 0.5) +
+		geom_vline(xintercept = 2020, color = "lightgrey", alpha = 0.5) +
     time_series_plot_theme() +
   	theme(strip.background = element_blank(),
   				strip.text = element_blank(),
   				panel.spacing = unit(0, "lines"),
   				axis.title.x = element_text(size = 18),
-  				axis.text.x = element_text(size = 16))
-	
-	mean_latitude_plot_labs <- 
-		ggdraw(mean_latitude_plot) +
-		draw_label("cesm", x = 0.485, y = 0.74, color = "#6dc3a9", size = 12) +
-		draw_label("gfdl", x = 0.485, y = 0.67, color = "#4e8d9c", size = 12) +
-		draw_label("miroc", x = 0.485, y = 0.63, color = "#97c3e5", size = 12) +
-		draw_label("cesm", x = 0.93, y = 0.82, color = "#ffabab", size = 12) +
-		draw_label("gfdl", x = 0.93, y = 0.71, color = "#ff4040", size = 12) +
-		draw_label("miroc", x = 0.93, y = 0.77, color = "#ffb733", size = 12) +
-		draw_label("(a)", x = 0.08, y = 0.84, color = "black", size = 12) +
-		draw_label("(b)", x = 0.53, y = 0.84, color = "black", size = 12) +
-		draw_label("(c)", x = 0.08, y = 0.465, color = "black", size = 12) +
-		draw_label("(d)", x = 0.53, y = 0.465, color = "black", size = 12) 
+  				axis.text.x = element_text(size = 16),
+  				axis.ticks.x = element_line(color = "lightgrey"))
 
+	## put all plots together ####
 
-	#### plot together ####
+	# add text labels to top row
 	
-	## time series temp
-		plot1 <- low_temp_time_lab + theme(plot.margin = unit(c(0.5, 0, 0, 1), "in"))
-		plot2 <- high_temp_time_lab + theme(plot.margin = unit(c(0.5, 1, 0, 0), "in"))
+	model_ids_low <- tibble(
+		year = c(2108, 2108, 2108, 1995, 1970), 
+		avg_temp = c(1.9, 0.9, 0.25, 1, 4.1), 
+		lab = c("cesm", "gfdl", "miroc", "hindcast", "(a)"),
+		scen_f = factor("low emission (ssp126)"),
+		cols = c("#6dc3a9", "#4e8d9c", "#97c3e5", "black", "black"))
+	
+	model_ids_high <- tibble(
+		year = c(2108, 2108, 2108, 1994, 1970), 
+		avg_temp = c(3.1, 2.2, 3.7, 1, 4.1), 
+		lab = c("cesm", "gfdl", "miroc", "hindcast", "(b)"),
+		scen_f = factor("high emission (ssp585)"),
+		cols = c("#ffabab", "#ff4040", "#ffb733", "black", "black"))
 
-		time_series_temp <- plot1 + plot2 + plot_layout(ncol = 2)
+	plot_temp_form_text <- 
+		temp_plot +
+		geom_text(data = model_ids_low,
+							label = model_ids_low$lab,
+							color = model_ids_low$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = model_ids_high,
+							label = model_ids_high$lab,
+							color = model_ids_high$cols, 
+							size = 6,
+							alpha = 0.5) +
+		ggtitle("Low emission (ssp126)                                   High emission (ssp585)") +
+		theme(plot.title = element_text(size = 22, face = "bold", color = "black"))
+	
+	habsuit_labs_dat_low <- tibble(
+		year = c(1970), 
+		mean_hab_suit = c(0.64), 
+		lab = c("(c)"),
+		scen_f = factor("low emission (ssp126)"),
+		cols = c("black"))
 
-	## time series hab suit
-		plot3 <- low_habsuit_time_lab + theme(plot.margin = unit(c(0, 0, 0, 0.5), "in"))
-		plot4 <- high_habsuit_time_lab + theme(plot.margin = unit(c(0, 1, 0, -0.05), "in"))
-	
-		time_series_habsuit <- plot3 + plot4 + plot_layout(ncol = 2)
+	habsuit_labs_dat_high <- tibble(
+		year = c(1970), 
+		mean_hab_suit = c(0.64), 
+		lab = c("(d)"),
+		scen_f = factor("high emission (ssp585)"),
+		cols = c("black"))
 
-  ## time series area
-		area_ts <- area_plot_labs + theme(plot.margin = unit(c(0, 1, 0, 0.5), "in"))
+	habsuit_plot_text <- 
+		habsuit_plot +
+		geom_text(data = habsuit_labs_dat_low,
+							label = habsuit_labs_dat_low$lab,
+							color = habsuit_labs_dat_low$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = habsuit_labs_dat_high,
+							label = habsuit_labs_dat_high$lab,
+							color = habsuit_labs_dat_high$cols, 
+							size = 6,
+							alpha = 0.5)
+	
+	# area
+	area_labs_dat_low_core <- tibble(
+		year = c(1970, 2110), 
+		area = c(550000, 550000), 
+		label = c("(e)", "core"),
+		cols = c("black", "#00345C"),
+		scen_f = factor("low emission\n(ssp126)"),
+		sp_hab_threshold = factor("core"))
 
-	## time series mean lat
-		meanlat_ts <- mean_latitude_plot_labs + theme(plot.margin = unit(c(0, 1, 0, 0.5), "in"))
+	area_labs_dat_low_potential <- tibble(
+		year = c(1970, 2105), 
+  	area = c(550000, 550000),
+		lab = c("(g)", "potential"),
+		cols = c("black", "#01579B"),
+		scen_f = factor("low emission\n(ssp126)"),
+		sp_hab_threshold = factor("potential"))
 	
-	# plot together
-	time_series_plots_top <- time_series_temp/time_series_habsuit
-		
-	time_series_plots_bot <- area_ts/meanlat_ts 
-	#+
-	#	plot_layout(widths = c(1, 1, 1.2, 1.2), heights = c(1,1,1,1))
-	
-	time_series_plots <- time_series_plots_top/time_series_plots_bot 
-	#+
-	 #plot_layout(ncol = 1, widths = c(1, 1.5), heights = c(1, 1.5))
-	
-	ggsave("./output/plots/time_series_plots.png",
-			 time_series_plots,
-			 width = 15, height = 20, units = "in")
-	
-	
+	area_labs_dat_high_core <- tibble(
+		year = c(1970, 2110), 
+		area = c(550000, 550000), 
+		lab = c("(f)", "core"),
+		cols = c("black", "#00345C"),
+		scen_f = factor("high emission\n(ssp585)"),
+		sp_hab_threshold = factor("core"))
 
+	area_labs_dat_high_potential <- tibble(
+		year = c(1970, 2105),
+		area = c(550000, 550000),
+		lab = c("(h)", "potential"),
+		cols = c("black", "#01579B"),
+		scen_f = factor("high emission\n(ssp585)"),
+		sp_hab_threshold = factor("potential"))
+
+	area_plot_text <- 
+		area_plot +
+		geom_text(data = area_labs_dat_low_core,
+							label = area_labs_dat_low_core$label,
+							color = area_labs_dat_low_core$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = area_labs_dat_low_potential,
+							label = area_labs_dat_low_potential$lab,
+							color = area_labs_dat_low_potential$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = area_labs_dat_high_core,
+							label = area_labs_dat_high_core$lab,
+							color = area_labs_dat_high_core$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = area_labs_dat_high_potential,
+							label = area_labs_dat_high_potential$lab,
+							color = area_labs_dat_high_potential$cols, 
+							size = 6,
+							alpha = 0.5) 
 	
+	# mean latitude
+	meanlat_labs_dat_low_core <- tibble(
+		year = c(1970, 2110), 
+		proj_mean_lat = c(59.5, 59.5), 
+		label = c("(i)", "core"),
+		cols = c("black", "#00345C"),
+		scen_f = factor("low emission\n(ssp126)"),
+		thresh = factor("core"))
+
+	meanlat_labs_dat_low_potential <- tibble(
+		year = c(1970, 2105),
+  	proj_mean_lat = c(59.5, 59.5), 
+		lab = c("(k)", "potential"),
+		cols = c("black", "#01579B"),
+		scen_f = factor("low emission\n(ssp126)"),
+		thresh = factor("potential"))
+	
+	meanlat_labs_dat_high_core <- tibble(
+		year = c(1970, 2110), 
+		proj_mean_lat = c(59.5, 59.5), 
+		lab = c("(j)", "core"),
+		cols = c("black", "#00345C"),
+		scen_f = factor("high emission\n(ssp585)"),
+		thresh = factor("core"))
+
+	meanlat_labs_dat_high_potential <- tibble(
+		year = c(1970, 2105),
+  	proj_mean_lat = c(59.5, 59.5), 
+		lab = c("(l)", "potential"),
+		cols = c("black", "#01579B"),
+		scen_f = factor("high emission\n(ssp585)"),
+		thresh = factor("potential"))
+
+	mean_lat_plot_text <- 
+		mean_latitude_plot +
+		geom_text(data = meanlat_labs_dat_low_core,
+							label = meanlat_labs_dat_low_core$label,
+							color = meanlat_labs_dat_low_core$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = meanlat_labs_dat_low_potential,
+							label = meanlat_labs_dat_low_potential$lab,
+							color = meanlat_labs_dat_low_potential$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = meanlat_labs_dat_high_core,
+							label = meanlat_labs_dat_high_core$lab,
+							color = meanlat_labs_dat_high_core$cols, 
+							size = 6,
+							alpha = 0.5) +
+		geom_text(data = meanlat_labs_dat_high_potential,
+							label = meanlat_labs_dat_high_potential$lab,
+							color = meanlat_labs_dat_high_potential$cols, 
+							size = 6,
+							alpha = 0.5)
+	
+	#### final plot ####
+	plot_ts <- 
+		plot_temp_form_text/
+		plot_spacer()/
+		habsuit_plot_text/
+		plot_spacer()/
+		area_plot_text/
+		plot_spacer()/
+		mean_lat_plot_text +
+		plot_layout(nrow = 7, 
+								widths = c(1,1,1,1,1,1,1), 
+								heights = c(0.5, -0.06, 0.5, -0.055, 1, -0.06, 1))
+	
+	ggsave(plot_ts, filename = "./output/plots/plot_ts.png",
+				 height = 30, width = 40, units = "cm")
 	

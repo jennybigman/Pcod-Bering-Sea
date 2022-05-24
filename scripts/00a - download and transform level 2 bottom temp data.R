@@ -32,6 +32,8 @@
 	# download temp array -- for some reason, only works without last two time steps
 	temp_array <- ncvar_get(nc, "temp", start = c(1,1,1), count = c(182,258,2662)) 
 
+  #temp_array<- ncvar_get(nc, "temp") doesn't work
+
   # name the dimensions
 	dim(temp_array)
 

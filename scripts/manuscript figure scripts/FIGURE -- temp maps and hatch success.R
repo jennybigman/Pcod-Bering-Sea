@@ -141,6 +141,9 @@
 	eggs<-eggs[eggs$Species=="Pcod",] #Pcod
 	eggs$pMax<-eggs$Phatch/max(eggs$Phatch)
 
+	res2 <- nls( Phatch ~ k/(1+((Temp_act-mu)/sigma)^2), start=c(mu=5,sigma=2,k=1) , data = eggs, weights=Ntot)
+	v2 <- summary(res2)$parameters[,"Estimate"]
+
 	cauchy <- function(x) v2[3]/(1+((x-v2[1])/v2[2])^2)
 
 	therm_response_curve <- 
