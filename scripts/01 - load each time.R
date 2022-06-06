@@ -96,7 +96,8 @@
   					 latitude = Lat,
   					 long_not_360 = case_when(
 						 longitude >= 180 ~ longitude - 360,
-						 longitude < 180 ~ longitude)) 
+						 longitude < 180 ~ longitude),
+						 projection = scenario) 
   
  ROMS_projected_dat_sf <-  ROMS_projected_dat %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
@@ -109,7 +110,7 @@
   ggsave_func <- function(x,y){
   	ggsave(plot = x,
     file = paste(y,".png",sep=""),
-    width = 3, height = 3, units = "in")
+    width = 10, height = 10, units = "in")
   }
   
 

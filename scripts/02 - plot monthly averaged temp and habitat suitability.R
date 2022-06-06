@@ -45,13 +45,13 @@
 	monthly_plot_list <- lapply(years, temp_monthly_plot_func)
   
   mo_name_func_year <- function(x){
-  	year_month <- paste0(x, "_temp_test")
+  	year_month <- paste0(x, "_temp")
   }
    
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/bottom temperature/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/bottom temperature/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -107,7 +107,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability gradient/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability gradient/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -170,7 +170,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability 90/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability 90/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -232,7 +232,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability 10/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability 10/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -294,7 +294,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability 50_90/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/habitat suitability 50_90/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -355,7 +355,7 @@
   names_year <- sapply(years, name_func_year)
   
 	func_file_path <- function(x){
-  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/faceted plots/", x)
+  	paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/faceted plots/", x)
   }
    
   plot_list_full <- sapply(names_year, func_file_path)
@@ -420,13 +420,12 @@
   names_year <- sapply(years, name_func_year)
   
 	func_file_path <- function(x){
-  	paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/faceted plots/", x)
+  	paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/faceted plots/", x)
   }
    
   plot_list_full <- sapply(names_year, func_file_path)
 				
 	mapply(ggsave_func, x = plot_list, y = plot_list_full)
-	
 	
 	
 	
@@ -530,7 +529,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/projections/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/projections/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -594,7 +593,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/projections/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/habitat suitability/projections/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -653,7 +652,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/temperature maps/gfdl/temp with var/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/temperature maps/gfdl/temp with var/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -717,7 +716,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/habitat suitability maps/gfdl/with var/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/habitat suitability maps/gfdl/with var/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -775,7 +774,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/temperature maps/miroc/temp with var/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/temperature maps/miroc/temp with var/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)
@@ -839,7 +838,7 @@
   month_names_year <- sapply(years, mo_name_func_year)
   
 	mo_name_func_file <- function(x){
-  	year_month <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/habitat suitability maps/miroc/with var/", x)
+  	year_month <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/projections/habitat suitability maps/miroc/with var/", x)
   }
    
   month_names <- sapply(month_names_year, mo_name_func_file)

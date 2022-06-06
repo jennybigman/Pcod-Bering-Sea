@@ -21,7 +21,7 @@
 	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
 	
 	# restrict dataset to only those months of spawning (January to June)
-	sp_months <- c(1:6)
+	sp_months <- c(1:4)
 	
 	ROMS_dat_hind$date <- as.Date(ROMS_dat_hind$DateTime) # date in Date format
 	ROMS_dat_hind$month <- month(ROMS_dat_hind$date) # month of year
@@ -38,8 +38,6 @@
   ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 2] <- "February"
 	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 3] <- "March"
 	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 4] <- "April"
-	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 5] <- "May "
-	ROMS_dat_hind_trim$month_name[ROMS_dat_hind_trim$month == 6] <- "June"
 
 		## remove any area where depth > 250m ####
 	

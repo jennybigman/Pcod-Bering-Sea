@@ -11,17 +11,12 @@
 	
 	# read in hindcast data
 	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv")
-	
-	# read in ROMS projected temperature data --- CHANGED THINGS AROUND SO IGNORE THIS
-	#cesm_dat_trim <- fread(file = here("data", "cesm_dat_trim.csv"))
-	#gfdl_dat_trim <- fread(file = here("data", "gfdl_dat_trim.csv"))
-	#miroc_dat_trim <- fread(file = here("data", "miroc_dat_trim.csv"))
-	
+
 	# read in ROMS projected temps but not trimmed to Ortiz regions --- NEED TO CHANGE THIS BACK TO TRIMMED DATA ONCE IT WORKS
 	cesm_dfs_trim <- fread("./data/cesm_dfs_trim.csv")
 	gfdl_dfs_trim <- fread("./data/gfdl_dfs_trim.csv")
 	miroc_dfs_trim <- fread("./data/miroc_dfs_trim.csv")
-	
+
 	# read in area and depth data 
 	area_df <- fread( "./data/ROMS_area_grid_cells.csv")
 	depth_df <- fread("./data/ROMS_depth_df.csv")
@@ -52,7 +47,7 @@
 	#2 calculate the mean of the projections during the reference years ####
 	
 	cesm_baseline_temp_dat <- cesm_dfs_trim %>% # changed this from cesm_dat_trim
-		filter(., year %in% baseline_years)
+		dplyr::filter(., year %in% baseline_years)
 	
 	# estimate a monthly-avg temp for each grid cell for each month 
 	# for the ref period 
@@ -63,11 +58,9 @@
 							sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
-	#cesm_dfs_trim <- cesm_dfs_trim %>% 
-	#	mutate(WOY = lubridate::week(DateTime))
 	
 	cesm_proj_temp_dat <- cesm_dfs_trim %>% 
-		group_by(projection, year, month, week, Lat, Lon) %>%
+		group_by(scenario, year, month, week, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 calculate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -76,7 +69,7 @@
 	# combine the monthly means for historical period and projected df into one df
 	cesm_delta_dat <- merge(cesm_proj_temp_dat, cesm_baseline_temp_dat_mo,
 											 by = c("Lat", "Lon", "month"))
-	
+
 	cesm_delta_dat <- cesm_delta_dat %>%
 		mutate(delta = (mo_avg_proj_temp - mean_proj_baseline))
 	
@@ -107,11 +100,11 @@
 								sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
-	gfdl_dfs_trim <- gfdl_dfs_trim %>% 
-		mutate(WOY = lubridate::week(DateTime))
+	#gfdl_dfs_trim <- gfdl_dfs_trim %>% 
+	#	mutate(WOY = lubridate::week(DateTime))
 	
 	gfdl_proj_temp_dat <- gfdl_dfs_trim %>% 
-		group_by(projection, year, month, WOY, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -145,18 +138,16 @@
 	# estimate a monthly-avg temp for each grid cell for each month 
 	# for the ref period 
 	# (so an avg temp for each month at each grid cell averaged across 1980 - 2014)
-	miroc_baseline_temp_dat_mo <- miroc_baseline_temp_dat %>%
+
+		miroc_baseline_temp_dat_mo <- miroc_baseline_temp_dat %>%
 		group_by(month, Lat, Lon) %>%
 		summarize(mean_proj_baseline = mean(temp),
 										sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
-	miroc_dfs_trim <- miroc_dfs_trim %>% 
-		mutate(WOY = lubridate::week(DateTime))
-	
 	miroc_proj_temp_dat <- miroc_dfs_trim %>% 
-		group_by(projection, year, month, WOY, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -190,6 +181,10 @@
 	gfdl_bc_temps$simulation <- "gfdl"
 	miroc_bc_temps$simulation <- "miroc"
 	
+	cesm_bc_temps$projection <- cesm_bc_temps$scenario
+	gfdl_bc_temps$projection <- gfdl_bc_temps$scenario
+	miroc_bc_temps$projection <- miroc_bc_temps$scenario
+
 	proj_temp_dat_all <- bind_rows(cesm_bc_temps, gfdl_bc_temps, miroc_bc_temps) ## this is not trimmed
 	
 	fwrite(proj_temp_dat_all, file = here("./data/ROMS_proj_temp_dat_all.csv"))

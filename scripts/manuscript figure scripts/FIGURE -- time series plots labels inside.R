@@ -1001,6 +1001,6 @@
 								widths = c(1,1,1,1,1,1,1), 
 								heights = c(0.5, -0.06, 0.5, -0.054, 1, -0.06, 1))
 	
-	ggsave(plot_ts_in, filename = "./output/plots/plot_ts_in2.png",
+	ggsave(plot_ts_in, filename = "./output/plots/plot_ts_in_test.png",
 				 height = 30, width = 40, units = "cm")
 	
