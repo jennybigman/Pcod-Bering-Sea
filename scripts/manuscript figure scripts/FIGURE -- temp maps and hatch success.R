@@ -178,7 +178,7 @@
 
  Figure1 <- plot1 + plot2 + plot3 + plot4 + plot_layout(ncol = 4)
 
- ggsave("./output/plots/Figure1.png",
+ ggsave("./output/plots/Figure1_test.png",
 			 Figure1,
 			 width = 16, height = 8, units = "in")
 	

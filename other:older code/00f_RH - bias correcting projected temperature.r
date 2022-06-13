@@ -16,7 +16,7 @@
 	#gfdl_dat_trim <- fread(file = here("data", "gfdl_dat_trim.csv"))
 	#miroc_dat_trim <- fread(file = here("data", "miroc_dat_trim.csv"))
 	
-	# read in ROMS projected temps but not trimmed to Ortiz regions --- NEED TO CHANGE THIS BACK TO TRIMMED DATA ONCE IT WORKS
+	# read in ROMS projected temps but not trimmed to Ortiz regions 
 	cesm_dfs_trim <- fread("./data/cesm_dfs_trim.csv")
 	gfdl_dfs_trim <- fread("./data/gfdl_dfs_trim.csv")
 	miroc_dfs_trim <- fread("./data/miroc_dfs_trim.csv")

@@ -11,3 +11,5 @@ temp_proj_sum_ssp126 <- temp_proj_sum %>%
 
 temp_proj_sum_ssp585 <- temp_proj_sum %>%
 	filter(projection == "ssp585")
+
+# mid century 

@@ -1,5 +1,16 @@
 # animate habitat suitability plots
 
+	#### load map ####
+	world_map_data <- ne_countries(scale = "medium", returnclass = "sf") 
+	
+	#### plotting function ####
+  ggsave_func <- function(x,y){
+  	ggsave(plot = x,
+    file = paste(y,".png",sep=""),
+    width = 10, height = 10, units = "in")
+  }
+  
+
 	## yearly ###
 
 	years_hind <- seq(from = 1970, to = 2020, by = 5)
@@ -324,7 +335,7 @@
 	
 	
 	# projections ####
-	years_proj <- seq(from = 2025, to = 2095, by = 5)
+	years_proj <- seq(from = 2019, to = 2099, by = 10)
 	
 	ROMS_projected_dat_trim <- ROMS_projected_dat %>% 
 		filter(year %in% years_proj) %>%
@@ -354,13 +365,7 @@
 					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 					coord_sf(crs = 3338) +
     	  	facet_grid(scen ~ simulation) +
-					scale_color_gradientn(colors = c("#B3E5FC","#B3E5FC",
-																					 "#3378af","#3378af",
-																					 "#00345C","#00345C"),
-																values = c(0, 0.499, 0.5, 0.899, 0.9, 1),
-																breaks = c(0.1, 0.5, 0.9),
-																labels = c(0.1, 0.5, 0.9),
-																limits = c(0, 1)) +
+					scale_color_viridis_c() +
  					scale_x_continuous(
  						breaks = c(-170, -160),
  						labels = c("-170˚", "-160˚"),
@@ -373,22 +378,20 @@
  						name = "Latitude",
  					) +
     	  	labs(colour = "Temperature ˚C") +
-    	  	ggtitle(paste0("Year: ", x)) + 
+    	  #	ggtitle(paste0("Year: ", x)) + 
  					theme_bw() +
 	 				theme(
-	 					legend.background = element_rect(fill = "black"),
-						legend.title = element_text(color = "white"),
-  					legend.text = element_text(color = "white"),
-	 					plot.title = element_text(size = 20, color = "white"),
-						legend.title.align = 0.5,
-	 					strip.background = element_blank(),
-					strip.text = element_text(size = 18, color = "white"),
-  				axis.text=element_text(size= 16, colour = "white"),
-  				axis.title= element_text(size=18, color = "white"),
-  				axis.line = element_line(color = "white"),
-  				axis.ticks = element_line(colour = "white"),
-  				panel.background = element_rect(fill = "black", color = "black"),
-  				plot.background = element_rect(fill = "black", color = "black"))
+				  #legend.position = "none",
+					plot.title = element_text(hjust = 0.5),
+					plot.tag.position = c(0.2, 0.87),
+					axis.text = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks.x = element_line(colour = "grey50"),
+  	  		axis.line = element_blank(),
+  	  		axis.title.x = element_text(size=14, color = "grey50"),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"),
+					plot.margin = margin(0, 0, 0, 0, "cm"),
+	 				strip.background = element_blank(),
+					strip.text = element_text(size = 18, color = "black"))
   	
     	  	
     	  plot

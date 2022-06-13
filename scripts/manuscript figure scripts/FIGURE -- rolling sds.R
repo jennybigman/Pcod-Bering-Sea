@@ -114,9 +114,8 @@
 	names(colors) <- unique(rolling_stats_proj$sim_proj)
 	
 	# order facets
-	rolling_stats_proj$scen_f = factor(rolling_stats_proj$scen, levels=c('low emission\n(ssp126)', 
-								
-																																			 																												 'high emission\n(ssp585)'))
+	rolling_stats_proj$scen_f = factor(rolling_stats_proj$scen, 
+																		 levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
 	#### plot ####
 	
 	rolling_sd_plot <-    

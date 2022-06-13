@@ -12,7 +12,7 @@
 	# read in hindcast data
 	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv")
 
-	# read in ROMS projected temps but not trimmed to Ortiz regions --- NEED TO CHANGE THIS BACK TO TRIMMED DATA ONCE IT WORKS
+	# read in ROMS projected temps but not trimmed to Ortiz regions 
 	cesm_dfs_trim <- fread("./data/cesm_dfs_trim.csv")
 	gfdl_dfs_trim <- fread("./data/gfdl_dfs_trim.csv")
 	miroc_dfs_trim <- fread("./data/miroc_dfs_trim.csv")
@@ -26,7 +26,7 @@
 
 	#1 calculate the mean of the hindcast during the reference years (needed for all models) ####
 	
-	baseline_years <- 1980:2014 # define baseline/ref years (here based on Cheng et al 2021) # change to 1990
+	baseline_years <- 1980:2014 # define baseline/ref years (here based on Cheng et al 2021) 
 	
 	ROMS_baseline_temp_dat <- ROMS_hindcast_dat %>% # select ref yrs from df
 		filter(., year %in% baseline_years)
@@ -46,7 +46,7 @@
 	
 	#2 calculate the mean of the projections during the reference years ####
 	
-	cesm_baseline_temp_dat <- cesm_dfs_trim %>% # changed this from cesm_dat_trim
+	cesm_baseline_temp_dat <- cesm_dfs_trim %>%
 		dplyr::filter(., year %in% baseline_years)
 	
 	# estimate a monthly-avg temp for each grid cell for each month 
@@ -58,11 +58,20 @@
 							sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
+	#projection_years <- 2015:2099 # can trim to 2021:2099
+	#
+	#cesm_proj_temp_dat <- cesm_dfs_trim %>% 
+	#	filter(., year %in% projection_years)
+#
+	#cesm_proj_temp_dat <- cesm_proj_temp_dat %>% 
+	#	group_by(scenario, year, month, Lat, Lon) %>%
+	#	summarise(mo_avg_proj_temp = mean(temp))
 	
 	cesm_proj_temp_dat <- cesm_dfs_trim %>% 
-		group_by(scenario, year, month, week, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
+
 	#4 calculate deltas (difference btw raw projected temp and mean proj temp across ####
 	# ref period)
 	
@@ -100,10 +109,17 @@
 								sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
-	#gfdl_dfs_trim <- gfdl_dfs_trim %>% 
-	#	mutate(WOY = lubridate::week(DateTime))
+
+#	projection_years <- 2015:2099 # can trim to 2021:2099
+#	
+#	gfdl_proj_temp_dat <- gfdl_dfs_trim %>%
+#		filter(., year %in% projection_years)
+#
+#	gfdl_proj_temp_dat <- gfdl_proj_temp_dat %>% 
+#		group_by(scenario, year, month, Lat, Lon) %>%
+#		summarise(mo_avg_proj_temp = mean(temp))
 	
-	gfdl_proj_temp_dat <- gfdl_dfs_trim %>% 
+gfdl_proj_temp_dat <- gfdl_dfs_trim %>% 
 		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
@@ -145,6 +161,14 @@
 										sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
+	#projection_years <- 2015:2099 # can trim to 2021:2099
+	#
+	#miroc_proj_temp_dat <- miroc_dfs_trim %>%
+	#	filter(., year %in% projection_years)
+
+	#miroc_proj_temp_dat <- miroc_proj_temp_dat %>% 
+	#	group_by(scenario, year, month, Lat, Lon) %>%
+	#	summarise(mo_avg_proj_temp = mean(temp))
 	
 	miroc_proj_temp_dat <- miroc_dfs_trim %>% 
 		group_by(scenario, year, month, Lat, Lon) %>%
@@ -664,3 +688,63 @@
 			 mo_bc_temp,
 			 width = 15, height = 10, units = "in")
 	
+		
+		##### plot frequency distributions of sd_ratios ####
+		ROMS_projected_dat <- tidyr::unite(ROMS_projected_dat,"sim_proj",
+															 simulation, projection, remove = F)
+
+		colors <- c("#ffabab", "#6dc3a9", "grey",  #  high, low, historical
+						    "#ff4040", "#4e8d9c", "grey",   
+						    "#ffb733", "#97c3e5", "grey" ) 
+
+		sim_proj <- unique(ROMS_projected_dat$sim_proj)
+	
+		names(colors) <- sim_proj
+
+		sd_ratios_plot <- ggplot(ROMS_projected_dat) +
+			geom_density(aes(x = sd_ratio, fill = sim_proj, group = sim_proj)) +
+			facet_grid(simulation ~ projection) +
+			scale_fill_manual(name = "sim_proj", values = colors) +
+			theme_bw() +
+			theme(legend.position = "none") +
+			ggtitle("ratio of standard deviations of hindcast/projection during reference period ")
+
+		ggsave("./output/plots/sd_ratios_plot.png",
+			 sd_ratios_plot,
+			 width = 15, height = 5, units = "in")
+	
+		delta_plot <- ggplot(ROMS_projected_dat) +
+			geom_density(aes(x = delta, fill = sim_proj, group = sim_proj)) +
+			facet_grid(simulation ~ projection) +
+			scale_fill_manual(name = "sim_proj", values = colors) +
+			theme_bw() +
+			theme(legend.position = "none") +
+			ggtitle("delta (difference between raw temp projection and mean of raw temp projection during ref period")
+
+		ggsave("./output/plots/delta_plot.png",
+			 delta_plot,
+			 width = 15, height = 5, units = "in")
+	
+		temp_bc_mean_plot <- ggplot(ROMS_projected_dat) +
+			geom_density(aes(x = bc_temp, fill = sim_proj, group = sim_proj)) +
+			facet_grid(simulation ~ projection) +
+			scale_fill_manual(name = "sim_proj", values = colors) +
+			theme_bw() +
+			theme(legend.position = "none") +
+			ggtitle("bias-corrected temp using just mean")
+
+		ggsave("./output/plots/temp_bc_mean_plot.png",
+			 temp_bc_mean_plot,
+			 width = 15, height = 5, units = "in")
+
+		temp_bc_meansd_plot <- ggplot(ROMS_projected_dat) +
+			geom_density(aes(x = bc_temp_sd, fill = sim_proj, group = sim_proj)) +
+			facet_grid(simulation ~ projection) +
+			scale_fill_manual(name = "sim_proj", values = colors) +
+			theme_bw() +			
+			theme(legend.position = "none") +
+			ggtitle("bias-corrected temp using mean and sd")
+
+		ggsave("./output/plots/temp_bc_meansd_plot.png",
+			 temp_bc_meansd_plot,
+			 width = 15, height = 5, units = "in")

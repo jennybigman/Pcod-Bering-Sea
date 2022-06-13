@@ -326,7 +326,7 @@
 	
 	# calculate rolling mean of mean 
   roll_mean_yr_func <- function(x) {
-  		roll_yr_mean <- rollmean(yr_stats$mean_sp_hab_suit, x, fill = NA)
+  		roll_yr_mean <- rollmean(yr_stats_hind$mean_sp_hab_suit, x, fill = NA)
 			roll_yr_mean
   }
   
@@ -360,7 +360,7 @@
   
   	for(i in 6:47){
   	win <- (i - 5):(i + x)
-  	sds[i] <- sd(yr_stats$mean_sp_hab_suit[win])
+  	sds[i] <- sd(yr_stats_hind$mean_sp_hab_suit[win])
   	}
   
 		sds
