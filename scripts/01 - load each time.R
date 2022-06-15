@@ -38,7 +38,7 @@
 	
 	# hindcast data
 	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv") %>% filter(., year != 2021)
-	hgkjh
+
 	ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
 	 mutate(grid_cell_id = paste0(latitude, longitude))
 	
@@ -67,15 +67,6 @@
   ROMS_projected_dat$month_name[ROMS_projected_dat$month == 2] <- "February"
 	ROMS_projected_dat$month_name[ROMS_projected_dat$month == 3] <- "March"
 	ROMS_projected_dat$month_name[ROMS_projected_dat$month == 4] <- "April"
-#	
-#	## add in area and depth
-#	
-#	area_depth_df <- ROMS_hindcast_dat %>%
-#		dplyr::select(latitude, longitude, depth, area_km2)
-#	
-#	ROMS_projected_dat <- merge(ROMS_projected_dat, area_depth_df,
-#															 by = c("latitude", "longitude"))
-#
 
 	# reorder for plotting
 	ROMS_hindcast_dat$month_name <- factor(ROMS_hindcast_dat$month_name)
@@ -85,7 +76,6 @@
   ROMS_projected_dat$month_name <- factor(ROMS_projected_dat$month_name)
   ROMS_projected_dat$month_name <- fct_reorder(ROMS_projected_dat$month_name, 
   																		ROMS_projected_dat$month)
-
 
   # convert to a shapefile
   ROMS_hindcast_dat_sf <- ROMS_hindcast_dat %>%

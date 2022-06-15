@@ -108,7 +108,9 @@
 	dir_out <- ("~/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/sequence/hindcast")
 
 	imgs <- list.files(dir_out, full.names = TRUE)
-	imgs <- imgs[1:11]
+	img1 <- imgs[1]
+	imgs <- imgs[3:12]
+	all_imgs <- append(img1, imgs)
 	img_list <- lapply(imgs, image_read)
 
 	## join the images together

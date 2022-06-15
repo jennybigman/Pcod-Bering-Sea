@@ -68,3 +68,28 @@
 			 width = 5, height = 5, units = "in")
 	
 	
+	recruit_habsuit_plot_bb <-
+		ggplot(data = recruit_habsuit_en, 
+					 aes(x = mean_hab_suit, y = log_raw_recruits)) +
+		geom_point(color = "white") +
+		scale_x_continuous(
+			breaks = c(0.2, 0.3, 0.4),
+			labels = c(0.2, 0.3, 0.4),
+			name = "Annual spawning habitat suitbility") +
+		scale_y_continuous(
+			breaks = c(18, 19, 20, 21),
+			labels = c(18, 19, 20, 21),
+			limits = c(18, 21),
+			name = "Log(abundance)") +
+		geom_errorbar(aes(x = mean_hab_suit, ymin = lower, ymax = upper), size = 4) +
+		annotate("text", label = "Pearson's correlation\ncoefficient = -0.25",
+						 y = 21, x = 0.4, size = 3, alpha = 0.7, color = "white") +
+		black_theme()
+			
+
+	ggsave("./output/plots/recruit_habsuit_plot_bb.png",
+			 recruit_habsuit_plot_bb,
+			 width = 5, height = 5, units = "in")
+	
+	
+	

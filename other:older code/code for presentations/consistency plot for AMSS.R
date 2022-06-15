@@ -90,7 +90,7 @@ consistency_hind_func05 <- function(x){
   names_hind_dec05 <- sapply(decades_hind, name_func_dec05)
   
 	file_path_hind_dec05 <- function(x){
-  	path <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/05/", x)
+  	path <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/05/", x)
   }
    
   names_hind_dec05_full <- sapply(names_hind_dec05, file_path_hind_dec05)
@@ -106,16 +106,17 @@ consistency_hind_func05 <- function(x){
 	
 	library(magick)
 			
-	dir_out <- "/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/05"
+	dir_out <- "/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/05"
 
 	imgs <- list.files(dir_out, full.names = TRUE)
+	imgs <- imgs[1:5]
 	img_list <- lapply(imgs, image_read)
 
 	## join the images together
 	img_joined <- image_join(img_list)
 			
 	## animate at 2 frames per second
-	img_animated <- image_animate(img_joined, fps = 2)
+	img_animated <- image_animate(img_joined, fps = 1)
 			
 	## view animated image
 	img_animated
@@ -188,7 +189,7 @@ consistency_hind_func09 <- function(x){
   names_hind_dec09 <- sapply(decades_hind, name_func_dec09)
   
 	file_path_hind_dec09 <- function(x){
-  	path <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/09/", x)
+  	path <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/09/", x)
   }
    
   names_hind_dec09_full <- sapply(names_hind_dec09, file_path_hind_dec09)
@@ -199,16 +200,17 @@ consistency_hind_func09 <- function(x){
 	
 	library(magick)
 			
-	dir_out <- "/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/09"
+	dir_out <- "/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/hindcast/09"
 
 	imgs <- list.files(dir_out, full.names = TRUE)
+	imgs <- imgs[1:5]
 	img_list <- lapply(imgs, image_read)
 
 	## join the images together
 	img_joined <- image_join(img_list)
 			
 	## animate at 2 frames per second
-	img_animated <- image_animate(img_joined, fps = 2)
+	img_animated <- image_animate(img_joined, fps = 1)
 			
 	## view animated image
 	img_animated
@@ -320,7 +322,7 @@ consistency_hind_func09 <- function(x){
   names_proj_dec05 <- sapply(decades_proj, name_func_dec05)
   
 	file_path_proj_dec05 <- function(x){
-  	path <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/05/", x)
+  	path <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/05/", x)
   }
    
   names_proj_dec05_full <- sapply(names_proj_dec05, file_path_proj_dec05)
@@ -338,16 +340,17 @@ consistency_hind_func09 <- function(x){
 	
 	library(magick)
 			
-	dir_out <- "/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/05"
+	dir_out <- "/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/05"
 
 	imgs <- list.files(dir_out, full.names = TRUE)
+	imgs <- imgs[1:8]
 	img_list <- lapply(imgs, image_read)
 
 	## join the images together
 	img_joined <- image_join(img_list)
 			
 	## animate at 2 frames per second
-	img_animated <- image_animate(img_joined, fps = 2)
+	img_animated <- image_animate(img_joined, fps = 1)
 			
 	## view animated image
 	img_animated
@@ -430,7 +433,7 @@ consistency_hind_func09 <- function(x){
   names_proj_dec09 <- sapply(decades_proj, name_func_dec09)
   
 	file_path_proj_dec09 <- function(x){
-  	path <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/09/", x)
+  	path <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/09/", x)
   }
    
   names_proj_dec09_full <- sapply(names_proj_dec09, file_path_proj_dec09)
@@ -448,16 +451,17 @@ consistency_hind_func09 <- function(x){
 	
 	library(magick)
 			
-	dir_out <- "/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/09"
+	dir_out <- "/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/animation/consistency/projection/09"
 
 	imgs <- list.files(dir_out, full.names = TRUE)
+	imgs <- imgs[1:8]
 	img_list <- lapply(imgs, image_read)
 
 	## join the images together
 	img_joined <- image_join(img_list)
 			
-	## animate at 2 frames per second
-	img_animated <- image_animate(img_joined, fps = 2)
+	## animate at 1 frames per second
+	img_animated <- image_animate(img_joined, fps = 1)
 			
 	## view animated image
 	img_animated
