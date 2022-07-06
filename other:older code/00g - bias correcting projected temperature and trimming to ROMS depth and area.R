@@ -10,7 +10,7 @@
 	#### read in data ####
 	
 	# read in hindcast data
-	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv")
+	ROMS_hindcast_dat  <- 	fread("./data/ROMS_hindcast_temp_dat.csv")
 
 	# read in ROMS projected temps but not trimmed to Ortiz regions 
 	cesm_dfs_trim <- fread("./data/cesm_dfs_trim.csv")
@@ -214,6 +214,11 @@ gfdl_proj_temp_dat <- gfdl_dfs_trim %>%
 	fwrite(proj_temp_dat_all, file = here("./data/ROMS_proj_temp_dat_all.csv"))
 	
 	#proj_temp_dat_all <- fread(file = here("./data/ROMS_proj_temp_dat_all.csv"))
+	
+	
+	
+	
+	
 	
 	## remove grid cells based on depth and location (keep those < 250 m and within Ortiz regions)
 	

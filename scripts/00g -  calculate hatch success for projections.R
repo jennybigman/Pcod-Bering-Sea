@@ -16,21 +16,15 @@
 	} 
     
 	ROMS_proj_temp_dat <- proj_temp_dat %>%
-		mutate(hatch_success_cauchy_novar = sapply(bc_temp, hatch_success_cauchy_func),
-					 hatch_success_cauchy_var = sapply(bc_temp_sd, hatch_success_cauchy_func),
-					 hatch_success_gaus_novar = sapply(bc_temp, hatch_success_gaus_func),
+		mutate(hatch_success_cauchy_var = sapply(bc_temp_sd, hatch_success_cauchy_func),
 					 hatch_success_gaus_var = sapply(bc_temp_sd, hatch_success_gaus_func))
 	
 	
 	# standardize hatch success (calculating spawning habitat suitability)
  
 	ROMS_projected_dat <- ROMS_proj_temp_dat %>%
-  	mutate(sp_hab_suit_novar = hatch_success_cauchy_novar/max(hatch_success_cauchy_novar),
-  				 sp_hab_suit_var = hatch_success_cauchy_var/max(hatch_success_cauchy_var))
+  	mutate(sp_hab_suit_var = hatch_success_cauchy_var/max(hatch_success_cauchy_var))
 	 
-	 ROMS_projected_dat_sum <- ROMS_projected_dat %>%
-	 	group_by(simulation, scenario, year) %>%
-	 	summarise(n())
-  
+
 	fwrite(ROMS_projected_dat, file = "./data/ROMS_projected_dat.csv")
 	

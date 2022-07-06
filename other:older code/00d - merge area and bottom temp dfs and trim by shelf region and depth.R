@@ -1,4 +1,3 @@
-# 00c original
 
 	# merge area and bottom temp dfs and trim by shelf region and depth
 
@@ -11,10 +10,14 @@
 	temp_df <- fread("./data/ROMS_all_temp.csv")
 	area_df <- fread( "./data/ROMS_area_grid_cells.csv")
 	depth_df <- fread("./data/ROMS_depth_df.csv")
-
-	# merge dfs
-	area_depth_df <- merge(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
+	domain_df <- fread("./data/ROMS_domain_df.csv")
 	
+	# merge
+	area_depth_df <- merge(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
+
+	area_depth_domain_df <- merge(area_depth_df, domain_df,
+													by = c("latitude", "longitude", "Xi", "Eta"))
+
 	ROMS_dat_hind <- merge(temp_df, area_depth_df, by = c("latitude", "longitude"),
 												 all = TRUE)
 	
@@ -43,7 +46,8 @@
 	
 	ROMS_dat_hind_trim <- ROMS_dat_hind_trim %>%
 			filter(., between(depth, 0, 250))
-	
+
+	                            	
 	#### trim df by shelf ####
 	
 	# add column of long not on 360 scale
@@ -85,7 +89,8 @@
 	plot(bsregions_no_15)
 	
 	bsregions_no_15_sf <- bsregions_no_15 %>% 	  
-		st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+		st_as_sf(coords = c("long", "lat"), crs = 4326) 
+	
 	poly_bsregions_no_15_sf <- st_union(bsregions_no_15_sf)
 	
 	plot(poly_bsregions_no_15_sf)
