@@ -147,13 +147,14 @@
 									color = sim_proj), alpha = 0.3) +
 		facet_wrap(~ scen_f) +
 		xlab("Year") + 
-		geom_vline(xintercept = 2020, color = "lightgrey") +
+		geom_segment(x = 2020, y = -1, xend = 2020, yend = 4.2,
+								 color = "lightgrey", size = 0.5) +
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
 	  	name = "Temperature (˚C)",
 	  	breaks = c(0, 2, 4),
 	  	labels = c(0, 2, 4),
-	  	limits = c(-0.8, 4.2)
+	  	limits = c(-0.8, 4.5)
 	  ) +
 		scale_x_continuous(
 	  	name = "Year",
@@ -274,7 +275,8 @@
 									color = sim_proj), alpha = 0.3) +
 		facet_wrap(~ scen_f) +
 		xlab("Year") + 
-		geom_vline(xintercept = 2020, color = "lightgrey") +
+		geom_segment(x = 2020, y = 0.1, xend = 2020, yend = 0.6,
+				color = "lightgrey", size = 0.5) +		
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
 	  	name = "Spawning habitat\nsuitability index",
@@ -558,8 +560,9 @@
 	  	labels = c(1,3,5),
 	  	limits = c(19000, 567000)) +
    	xlim(1970, 2110) +
-		geom_vline(xintercept = 2020, color = "lightgrey", alpha = 0.5) +
-    time_series_plot_theme() +
+		geom_segment(x = 2020, y = 19000, xend = 2020, yend = 480000,
+								 color = "lightgrey", size = 0.5) +
+		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
 	
 	#### mean latitude time series ####
@@ -821,11 +824,12 @@
 	  	name = "Mean latitude (˚N)",
 	  	breaks = c(56, 57, 58, 59),
 	  	labels = c(56, 57, 58, 59),
-	  	limits = c(55.2, 59.7)
+	  	limits = c(55.4, 59.7)
 	  ) +
    	xlim(1970, 2110) +
-		geom_vline(xintercept = 2020, color = "lightgrey", alpha = 0.5) +
-    time_series_plot_theme() +
+		geom_segment(x = 2020, y = 55, xend = 2020, yend = 59.3,
+								 color = "lightgrey", size = 0.5) +
+		time_series_plot_theme() +
   	theme(axis.title.x = element_text(size = 18),
   				axis.text.x = element_text(size = 16))
 
@@ -834,15 +838,15 @@
 	# add text labels to top row
 	
 	model_ids_low <- tibble(
-		year = c(2108, 2108, 2108, 1995, 1986.5), 
-		avg_temp = c(1.9, 0.9, 0.25, 1, 4), 
+		year = c(2108, 2108, 2108, 1995, 1983), 
+		avg_temp = c(2.1, 0.7, 0.1, 1, 4.4), 
 		lab = c("cesm", "gfdl", "miroc", "hindcast", "(a) Temperature (˚C)"),
 		scen_f = factor("low emission (ssp126)"),
 		cols = c("#6dc3a9", "#4e8d9c", "#97c3e5", "black", "black"))
 	
 	model_ids_high <- tibble(
-		year = c(2108, 2108, 2108, 1994, 1986.5), 
-		avg_temp = c(3.1, 2.2, 3.7, 1, 4), 
+		year = c(2108, 2108, 2108, 1994, 1983), 
+		avg_temp = c(3.7, 2.2, 3.1, 1, 4.4), 
 		lab = c("cesm", "gfdl", "miroc", "hindcast", "(b) Temperature (˚C)"),
 		scen_f = factor("high emission (ssp585)"),
 		cols = c("#ffabab", "#ff4040", "#ffb733", "black", "black"))
@@ -859,17 +863,17 @@
 							color = model_ids_high$cols, 
 							size = 6,
 							alpha = 0.5) +
-		ggtitle("                      Low emission (ssp126)                                                High emission (ssp585)") +
+		ggtitle("                                 Low emission (ssp126)                                                                             High emission (ssp585)") +
 		theme(plot.title = element_text(size = 22, face = "bold", color = "black"))
 	
 	habsuit_labs_dat_low <- tibble(
-		year = c(2003.5), 
-		mean_hab_suit = c(0.63), 
+		year = c(1997), 
+		mean_hab_suit = c(0.64), 
 		scen_f = factor("low emission (ssp126)"))
 
 	habsuit_labs_dat_high <- tibble(
-		year = c(2003.5), 
-		mean_hab_suit = c(0.63), 
+		year = c(1996.5), 
+		mean_hab_suit = c(0.64), 
 		scen_f = factor("high emission (ssp585)"))
 
 	habsuit_plot_text <- 
@@ -886,25 +890,25 @@
 		
 	# area
 	area_labs_dat_low_core <- tibble(
-		year = c(1999.3), 
+		year = c(1993), 
 		area = c(530000), 
 		scen_f = factor("low emission\n(ssp126)"),
 		sp_hab_threshold = factor("core"))
 
 	area_labs_dat_low_potential <- tibble(
-		year = c(2003.5), 
+		year = c(1997), 
 		area = c(530000), 
 		scen_f = factor("low emission\n(ssp126)"),
 		sp_hab_threshold = factor("potential"))
 	
 	area_labs_dat_high_core <- tibble(
-		year = c(1999), 
+		year = c(1993), 
 		area = c(530000), 
 		scen_f = factor("high emission\n(ssp585)"),
 		sp_hab_threshold = factor("core"))
 
 	area_labs_dat_high_potential <- tibble(
-		year = c(2003.5), 
+		year = c(1997), 
 		area = c(530000), 
 		scen_f = factor("high emission\n(ssp585)"),
 		sp_hab_threshold = factor("potential"))
@@ -934,7 +938,7 @@
 	
 	# mean latitude
 	meanlat_labs_dat_low_core <- tibble(
-		year = c(1992.5), 
+		year = c(1988), 
 		proj_mean_lat = c(59.5), 
 		label = c("(i) Core mean latitude (˚N)"),
 		cols = c("black"),
@@ -942,7 +946,7 @@
 		thresh = factor("core"))
 
 	meanlat_labs_dat_low_potential <- tibble(
-		year = c(1997.2),
+		year = c(1992),
   	proj_mean_lat = c(59.5), 
 		lab = c("(k) Potential mean latitude (˚N)"),
 		cols = c("black"),
@@ -950,7 +954,7 @@
 		thresh = factor("potential"))
 	
 	meanlat_labs_dat_high_core <- tibble(
-		year = c(1992.5), 
+		year = c(1988), 
 		proj_mean_lat = c(59.5), 
 		lab = c("(j) Core mean latitude (˚N)"),
 		cols = c("black"),
@@ -958,7 +962,7 @@
 		thresh = factor("core"))
 
 	meanlat_labs_dat_high_potential <- tibble(
-		year = c(1997),
+		year = c(1991),
   	proj_mean_lat = c(59.5), 
 		lab = c("(l) Potential mean latitude (˚N)"),
 		cols = c("black"),
@@ -999,8 +1003,8 @@
 		mean_lat_plot_text +
 		plot_layout(nrow = 7, 
 								widths = c(1,1,1,1,1,1,1), 
-								heights = c(0.5, -0.06, 0.5, -0.054, 1, -0.06, 1))
+								heights = c(0.5, -0.03, 0.5, -0.03, 1, -0.06, 1))
 	
 	ggsave(plot_ts_in, filename = "./output/plots/plot_ts_in_test.png",
-				 height = 30, width = 40, units = "cm")
+				 height = 60, width = 50, units = "cm")
 	

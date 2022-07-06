@@ -88,29 +88,28 @@
 		
 		map_mean_lats <- 
 		 	ggplot() +
-			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-			coord_sf(crs = 3338) +
- 			scale_x_continuous(
- 				breaks = c(-175, -170, -165, -160),
- 				labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 				name = "Longitude",
- 				limits = c(-1400000, 10000)) +
- 			scale_y_continuous(
- 				breaks = c(55, 60),
- 				limits = c(470000, 1900000),
- 				name = "Latitude") +
-  		geom_point(data = coords_hind_sf, aes(color = year, 
+			geom_point(data = coords_hind_sf, aes(color = year, 
   			geometry = geometry), alpha = 0.5, 
     		stat = "sf_coordinates") +
 			geom_point(data = coords_proj_sf, aes(color = year, 
   			geometry = geometry), alpha = 0.5, 
     		stat = "sf_coordinates") +
+			coord_sf(crs = 3338) +
+ 			scale_x_continuous(
+ 				breaks = c(-167, -169),
+ 				labels = c("-167˚", "-169˚"),
+ 				name = "Longitude",
+ 				limits = c(-1030000, -750000)) +
+ 			scale_y_continuous(
+ 				breaks = c(56, 57, 58),
+ 				limits = c(700000, 1090000),
+ 				name = "Latitude") +
 		facet_grid(thresh ~ scen_f) +
 		scale_color_viridis_c(
-			breaks = c(1980, 2020, 2060, 2099)
+			breaks = c(1970, 2030, 2090)
 		) +
 	  theme_bw() +
- 		theme(
+ 		theme(panel.spacing = unit(0.25, "lines"),
 			legend.title.align = 0.5,
  			panel.border = element_rect(color = "#666666"),
  			strip.text.x = element_text(size = 12, face = "bold",  color = "black"),
@@ -122,4 +121,4 @@
 
 		ggsave("./output/plots/mean_lats_map.png",
 			 map_mean_lats,
-			 width = 10, height = 5, units = "in")
+			 width = 5, height = 7, units = "in")

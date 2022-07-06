@@ -75,7 +75,7 @@
 		scale_x_continuous(
 			breaks = c(0.2, 0.3, 0.4),
 			labels = c(0.2, 0.3, 0.4),
-			name = "Annual spawning habitat suitbility") +
+			name = "Annual spawning habitat suitability") +
 		scale_y_continuous(
 			breaks = c(18, 19, 20, 21),
 			labels = c(18, 19, 20, 21),
@@ -89,7 +89,7 @@
 
 	ggsave("./output/plots/recruit_habsuit_plot_bb.png",
 			 recruit_habsuit_plot_bb,
-			 width = 5, height = 5, units = "in")
+			 width = 7, height = 5, units = "in")
 	
 	
 	
