@@ -14,7 +14,7 @@ data preprocessing -- do not need to run
 
 00d -  calculate hatch success for hindcasts
 
-00e = read projected temp data into R
+00e - read projected temp data into R
 
 00f - bias correct projected temps
 
