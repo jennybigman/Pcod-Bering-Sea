@@ -31,11 +31,12 @@
 	
 	yearly_temp_hind <- ROMS_hindcast_dat %>%
 		group_by(year) %>%
-    summarise(avg_temp = mean(temp)) 
+    summarise(avg_temp = mean(temp)) %>%
+		mutate(projection = "historical") # for rolling mean calcs
 	
 	yearly_temp_hind$avg_temp <- as.numeric(yearly_temp_hind$avg_temp)
 	
-	years_proj <- 2020:2099
+	years_proj <- 2021:2099
 	
 	yearly_temp_proj <- ROMS_projected_dat %>% 
 		filter(year %in% years_proj) %>%
@@ -58,85 +59,70 @@
 	
 	names(colors) <- unique(yearly_temp_proj$sim_proj)
 	
-	# order facets
-	yearly_temp_proj$scen_f = factor(yearly_temp_proj$scen, 
-																	 levels=c('low emission (ssp126)', 
-																						'high emission (ssp585)'))
-
 	# rolling means of temp
 	
-	# hind
-	means_hind <- NA
-  
-  for(i in 6:51){
-  	win <- (i - 5):(i + 5)
-  	means_hind[i] <- mean(yearly_temp_hind$avg_temp[win])
-  }
-  
-	years_hind <- c(1970:2020) # does this need to be 1980?
+	# summarize projected temp by projection, not sim
+	yearly_temp_proj_rm <- ROMS_projected_dat %>% 
+		filter(year %in% years_proj) %>%
+		group_by(projection, year) %>%
+   	summarise(avg_temp = mean(bc_temp_sd)) 
 	
-	rolling_mean_temp_hind <- as.data.frame(cbind(years_hind, means_hind)) 
+	yearly_temp_proj_rm_low <- bind_rows(yearly_temp_hind, yearly_temp_proj_rm) %>%
+		filter(projection %in% c("ssp126", "historical"))
 	
-	# proj
-	yearly_temp_proj_sum <- yearly_temp_proj %>%
-		group_by(year, scen_f) %>%
-		summarise(mean_temp = mean(avg_temp))
+	yearly_temp_proj_rm_high <- bind_rows(yearly_temp_hind, yearly_temp_proj_rm) %>%
+		filter(projection %in% c("ssp585", "historical"))
 	
-	yearly_temp_proj_sum_low <- yearly_temp_proj_sum %>%
-		filter(scen_f == "low emission (ssp126)")
 	
-	means_proj_low <- NA
-  
-  for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_low[i] <- mean(yearly_temp_proj_sum_low$mean_temp[win])
-  }
+	rolling_meantemp_func <- function(x){
+ 	
+  	means_proj <- NA
+  	
+  	for(i in 5:length(x$year)){
+  		win <- (i - 4):(i + 4)
+  		means_proj[i] <- mean(x$avg_temp[win]) }
+  		
+  	years_dat <- 1970:2099
+  	
+  	data.frame(means_proj, years_dat)
+  	
+  	}
 	
-	yearly_temp_proj_sum_high <- yearly_temp_proj_sum %>%
-		filter(scen_f == "high emission (ssp585)")
 	
-	means_proj_high <- NA
-  
-  for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_high[i] <- mean(yearly_temp_proj_sum_high$mean_temp[win])
-  }
+	rolling_means_temp <- lapply(list(yearly_temp_proj_rm_low, yearly_temp_proj_rm_high),
+															 rolling_meantemp_func)
 	
-	years_proj <- c(2020:2099) 
 	
-	rolling_mean_temp_proj <- as.data.frame(cbind(years_proj, means_proj_low, means_proj_high)) 
+	rolling_means_temp_low <- rolling_means_temp[[1]] %>%
+		mutate(projection = "ssp126")
 
-	rolling_mean_temp_low <- as.data.frame(cbind(years_proj, means_proj_low)) %>%
-		mutate(scen_f = "low emission (ssp126)") %>%
-		rename(means_proj = means_proj_low)
-
-	rolling_mean_temp_high <- as.data.frame(cbind(years_proj, means_proj_high)) %>%
-		mutate(scen_f = "high emission (ssp585)") %>%
-		rename(means_proj = means_proj_high)
-
-	rolling_mean_temp_proj <- rbind(rolling_mean_temp_low, 
-																	rolling_mean_temp_high)
+	rolling_means_temp_high <- rolling_means_temp[[2]] %>%
+		mutate(projection = "ssp585")
 	
-	rolling_mean_temp_proj$scen_f <- as.factor(rolling_mean_temp_proj$scen_f)
-	
+	rolling_means_temp <- bind_rows(rolling_means_temp_low, rolling_means_temp_high)
+
 	# order facets
 	yearly_temp_proj$scen_f = factor(yearly_temp_proj$scen, 
 																			levels=c('low emission (ssp126)',  
 																							 'high emission (ssp585)'))
 	
-	rolling_mean_temp_proj$scen_f = factor(rolling_mean_temp_proj$scen, 
-																			levels=c('low emission (ssp126)',  
-																							 'high emission (ssp585)'))
+	rolling_means_temp$scen <- NA
+		
+	rolling_means_temp$scen[rolling_means_temp$projection == "ssp126"] <- "low emission (ssp126)"
+	rolling_means_temp$scen[rolling_means_temp$projection == "ssp585"] <- "high emission (ssp585)"
+	
+	rolling_means_temp$scen_f = factor(rolling_means_temp$scen, 
+																		levels=c('low emission (ssp126)',  
+																						 'high emission (ssp585)'))
 
 	#### temp plots ####
 	
 	temp_plot <- 
 	 	ggplot(yearly_temp_proj, aes(year, avg_temp)) +
-		geom_line(data = rolling_mean_temp_hind, 
-   						aes(x = years_hind, y = means_hind), 
-   						color = light_black) +
-		geom_line(data = rolling_mean_temp_proj, 
-   						aes(x = years_proj, y = means_proj), 
+		geom_segment(x = 2020, y = -1, xend = 2020, yend = 4.2,
+								 color = "lightgrey", size = 0.5) +
+		geom_line(data = rolling_means_temp, 
+   						aes(x = years_dat, y = means_proj), 
    						color = light_black) +
    	geom_line(data = yearly_temp_hind, 
    						aes(x = year, y = avg_temp), 
@@ -147,8 +133,6 @@
 									color = sim_proj), alpha = 0.3) +
 		facet_wrap(~ scen_f) +
 		xlab("Year") + 
-		geom_segment(x = 2020, y = -1, xend = 2020, yend = 4.2,
-								 color = "lightgrey", size = 0.5) +
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
 	  	name = "Temperature (˚C)",
@@ -168,9 +152,10 @@
 	
 	yearly_hab_dat_hind <- ROMS_hindcast_dat %>%
 		group_by(year) %>%
-    summarise(mean_hab_suit = mean(sp_hab_suit))
+    summarise(mean_hab_suit = mean(sp_hab_suit))  %>%
+		mutate(projection = "historical") # for rolling mean calcs
 	
-	years_proj <- 2020:2099
+	years_proj <- 2021:2099
 
 	yearly_hab_dat_proj <- ROMS_projected_dat %>% 
 		filter(year %in% years_proj) %>%
@@ -195,76 +180,69 @@
 	
 	## rolling means of spawning habitat suitability ##
 	
-	# hind
-	means_hind <- NA
-  
-  for(i in 6:51){
-  	win <- (i - 5):(i + 5)
-  	means_hind[i] <- mean(yearly_hab_dat_hind$mean_hab_suit[win])
-  }
-  
-	years_hind <- c(1970:2020) 
+	# summarize projected temp by projection, not sim
+	yearly_hab_dat_proj_rm <- ROMS_projected_dat %>% 
+		filter(year %in% years_proj) %>%
+		group_by(projection, year) %>%
+   	summarise(mean_hab_suit = mean(sp_hab_suit_var)) 
 	
-	rolling_mean_habsuit_hind <- as.data.frame(cbind(years_hind, means_hind)) 
+	yearly_hab_dat_proj_rm_low <- bind_rows(yearly_hab_dat_hind, yearly_hab_dat_proj_rm) %>%
+		filter(projection %in% c("ssp126", "historical"))
 	
-	# proj
-	yearly_hab_dat_proj_sum <- yearly_hab_dat_proj %>%
-		group_by(year, scen) %>%
-		summarise(mean_hab_suit = mean(mean_hab_suit))
+	yearly_hab_dat_proj_rm_high <- bind_rows(yearly_hab_dat_hind, yearly_hab_dat_proj_rm) %>%
+		filter(projection %in% c("ssp585", "historical"))
 	
-	yearly_hab_dat_proj_sum_low <- yearly_hab_dat_proj_sum %>%
-		filter(scen == "low emission (ssp126)")
 	
-	means_proj_low <- NA
-  
-  for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_low[i] <- mean(yearly_hab_dat_proj_sum_low$mean_hab_suit[win])
-  }
+	rolling_meanhabsuit_func <- function(x){
+ 	
+  	means_proj <- NA
+  	
+  	for(i in 5:length(x$year)){
+  		win <- (i - 4):(i + 4)
+  		means_proj[i] <- mean(x$mean_hab_suit[win]) }
+  		
+  	years_dat <- 1970:2099
+  	
+  	data.frame(means_proj, years_dat)
+  	
+  	}
 	
-	yearly_hab_dat_proj_sum_high <- yearly_hab_dat_proj_sum %>%
-		filter(scen == "high emission (ssp585)")
 	
-	means_proj_high <- NA
-  
-  for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_high[i] <- mean(yearly_hab_dat_proj_sum_high$mean_hab_suit[win])
-  }
+	rolling_means_habsuit <- lapply(list(yearly_hab_dat_proj_rm_low, yearly_hab_dat_proj_rm_high),
+															 rolling_meanhabsuit_func)
 	
-	years_proj <- c(2020:2099) 
 	
-	rolling_mean_habsuit_low <- as.data.frame(cbind(years_proj, means_proj_low)) %>%
-		mutate(scen = "low emission (ssp126)") %>%
-		rename(means_proj = means_proj_low)
+	rolling_means_habsuit_low <- rolling_means_habsuit[[1]] %>%
+		mutate(projection = "ssp126")
 
-	rolling_mean_habsuit_high <- as.data.frame(cbind(years_proj, means_proj_high)) %>%
-		mutate(scen = "high emission (ssp585)")  %>%
-		rename(means_proj = means_proj_high)
+	rolling_means_habsuit_high <- rolling_means_habsuit[[2]] %>%
+		mutate(projection = "ssp585")
 	
-	rolling_mean_habsuit_proj <- rbind(rolling_mean_habsuit_low, 
-																		 rolling_mean_habsuit_high)
-	
-	rolling_mean_habsuit_proj$scen_f <- as.factor(rolling_mean_habsuit_proj$scen)
-	
+	rolling_means_habsuit <- bind_rows(rolling_means_habsuit_low, rolling_means_habsuit_high)
+
 	# order facets
 	yearly_hab_dat_proj$scen_f = factor(yearly_hab_dat_proj$scen, 
 																			levels=c('low emission (ssp126)',  
 																							 'high emission (ssp585)'))
 	
-	rolling_mean_habsuit_proj$scen_f = factor(rolling_mean_habsuit_proj$scen, 
-																			levels=c('low emission (ssp126)',  
-																							 'high emission (ssp585)'))
+	rolling_means_habsuit$scen <- NA
+		
+	rolling_means_habsuit$scen[rolling_means_habsuit$projection == "ssp126"] <- "low emission (ssp126)"
+	rolling_means_habsuit$scen[rolling_means_habsuit$projection == "ssp585"] <- "high emission (ssp585)"
 	
+	rolling_means_habsuit$scen_f = factor(rolling_means_habsuit$scen, 
+																		levels=c('low emission (ssp126)',  
+																						 'high emission (ssp585)'))
+
+
 	#### habitat suitability plot ####
 	
 	habsuit_plot <- 
 	 	ggplot(data = yearly_hab_dat_proj, aes(x = year, y = mean_hab_suit)) +
-		geom_line(data = rolling_mean_habsuit_hind, 
-   						aes(x = years_hind, y = means_hind), 
-   						color = light_black) +
-		geom_line(data = rolling_mean_habsuit_proj, 
-   						aes(x = years_proj, y = means_proj), 
+		geom_segment(x = 2020, y = 0.1, xend = 2020, yend = 0.6,
+				color = "lightgrey", size = 0.5) +		
+		geom_line(data = rolling_means_habsuit, 
+   						aes(x = years_dat, y = means_proj), 
    						color = light_black) +
    	geom_line(data = yearly_hab_dat_hind, 
    						aes(x = year, y = mean_hab_suit), 
@@ -275,8 +253,6 @@
 									color = sim_proj), alpha = 0.3) +
 		facet_wrap(~ scen_f) +
 		xlab("Year") + 
-		geom_segment(x = 2020, y = 0.1, xend = 2020, yend = 0.6,
-				color = "lightgrey", size = 0.5) +		
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
 	  	name = "Spawning habitat\nsuitability index",
@@ -308,7 +284,8 @@
 	c_area_hind_dat_sum_yr <- c_area_hind_dat_sum %>%
 		group_by(year) %>%
 		summarize(area = sum(area_km2)) %>% 
-		mutate(sp_hab_threshold = "core")
+		mutate(sp_hab_threshold = "core")  %>%
+		mutate(projection = "historical") # for rolling mean calcs
 	
 	# potential habitat = sum of area where sps >= 0.5
 	
@@ -322,7 +299,8 @@
 	p_area_hind_dat_sum_yr <- p_area_hind_dat_sum %>%
 		group_by(year) %>%
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
-		mutate(sp_hab_threshold = "potential")
+		mutate(sp_hab_threshold = "potential")  %>%
+		mutate(projection = "historical") # for rolling mean calcs
 
 	# join together 
 	
@@ -370,139 +348,89 @@
 	
 	## rolling means of area ##
 	
-	# hind
-	hind_area_yr_core <- hind_area_yr %>%
-		filter(., sp_hab_threshold == "core")
-	
-	means_hind_core <- NA
-  
-  for(i in 6:51){
-  	win <- (i - 5):(i + 5)
-  	means_hind_core[i] <- mean(hind_area_yr_core$area[win])
-  }
-  
-	hind_area_yr_pot <- hind_area_yr %>%
-		filter(., sp_hab_threshold == "potential")
-	
-	means_hind_pot <- NA
-  
-  for(i in 6:51){
-  	win <- (i - 5):(i + 5)
-  	means_hind_pot[i] <- mean(hind_area_yr_pot$area[win])
-  }
-	
-	years_hind <- c(1970:2020) 
-	
-	core <- rep("core", 51)
-	potential <- rep("potential", 51)
-	
-	means_core <- as.data.frame(cbind(means_hind_core, core, years_hind)) %>%
-		rename(area = means_hind_core, 
-					 sp_hab_threshold = core,
-					 year = years_hind)
-	
-	means_pot <- as.data.frame(cbind(means_hind_pot, potential, years_hind)) %>%
-		rename(area = means_hind_pot, 
-					 sp_hab_threshold = potential,
-					  year = years_hind)
-	
-	rolling_area_hind <- rbind(means_core, means_pot)
-	
-	rolling_area_hind$area <- as.numeric(rolling_area_hind$area)
-	rolling_area_hind$year <- as.numeric(rolling_area_hind$year)
+	# core
 
-	# proj
-	proj_area_yr_sum <- proj_area_yr %>%
-		group_by(year, projection, sp_hab_threshold) %>%
-		summarise(mean_area = mean(area))
-	
-	proj_area_yr_sum_core <- proj_area_yr_sum %>%
-		filter(sp_hab_threshold == "core")
-	
-	proj_area_yr_sum_pot <- proj_area_yr_sum %>%
-		filter(sp_hab_threshold == "potential")
+	c_area_proj_dat_sum_yr_rm <- c_area_proj_dat_sum %>%
+		group_by(projection, year) %>%
+		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
+		mutate(sp_hab_threshold = "core")
 
-	proj_area_yr_sum_core_low <- proj_area_yr_sum_core %>%
-		filter(projection == "ssp126") 
+	c_area_proj_dat_sum_yr_rm_low <- bind_rows(c_area_hind_dat_sum_yr, c_area_proj_dat_sum_yr_rm) %>%
+		filter(projection %in% c("ssp126", "historical"))
+		
+	c_area_proj_dat_sum_yr_rm_high <- bind_rows(c_area_hind_dat_sum_yr, c_area_proj_dat_sum_yr_rm) %>%
+		filter(projection %in% c("ssp585", "historical"))
 	
-	proj_area_yr_sum_pot_low <- proj_area_yr_sum_pot %>%
-		filter(projection == "ssp126")
+	rolling_c_area_func <- function(x){
+ 	
+  	means_proj <- NA
+  	
+  	for(i in 5:length(x$year)){
+  		win <- (i - 4):(i + 4)
+  		means_proj[i] <- mean(x$area[win]) }
+  		
+  	years_dat <- 1970:2099
+  	
+  	data.frame(means_proj, years_dat)
+  	
+  	}
+	
+	rolling_means_c_area <- lapply(list(c_area_proj_dat_sum_yr_rm_low, c_area_proj_dat_sum_yr_rm_high),
+															 rolling_c_area_func)
+	
+	rolling_means_c_area_low <- rolling_means_c_area[[1]] %>%
+		mutate(projection = "ssp126")
 
+	rolling_means_c_area_high <- rolling_means_c_area[[2]] %>%
+		mutate(projection = "ssp585")
 	
-	means_proj_core_low <- NA
-	means_proj_pot_low <- NA
+	rolling_means_c_area <- bind_rows(rolling_means_c_area_low, rolling_means_c_area_high)
 
-  for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_core_low[i] <- mean(proj_area_yr_sum_core_low$mean_area[win])
-  }
-	
-	for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_pot_low[i] <- mean(proj_area_yr_sum_pot_low$mean_area[win])
-  }
-	
-	
-	proj_area_yr_sum_core_high <- proj_area_yr_sum_core %>%
-		filter(projection == "ssp585") 
-	
-	proj_area_yr_sum_pot_high <- proj_area_yr_sum_pot %>%
-		filter(projection == "ssp585")
+	# potential
 
-	means_proj_core_high <- NA
-	means_proj_pot_high <- NA
+	p_area_proj_dat_sum_yr_rm <- p_area_proj_dat_sum %>%
+		group_by(projection, year) %>%
+		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
+		mutate(sp_hab_threshold = "potential")
 
-  
-  for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_core_high[i] <- mean(proj_area_yr_sum_core_high$mean_area[win])
-  }
+	p_area_proj_dat_sum_yr_rm_low <- bind_rows(p_area_hind_dat_sum_yr, p_area_proj_dat_sum_yr_rm) %>%
+		filter(projection %in% c("ssp126", "historical"))
+		
+	p_area_proj_dat_sum_yr_rm_high <- bind_rows(p_area_hind_dat_sum_yr, p_area_proj_dat_sum_yr_rm) %>%
+		filter(projection %in% c("ssp585", "historical"))
 	
-	for(i in 6:80){
-  	win <- (i - 5):(i + 5)
-  	means_proj_pot_high[i] <- mean(proj_area_yr_sum_pot_high$mean_area[win])
-  }
+	rolling_p_area_func <- function(x){
+ 	
+  	means_proj <- NA
+  	
+  	for(i in 5:length(x$year)){
+  		win <- (i - 4):(i + 4)
+  		means_proj[i] <- mean(x$area[win]) }
+  		
+  	years_dat <- 1970:2099
+  	
+  	data.frame(means_proj, years_dat)
+  	
+  	}
 	
-	years_proj <- c(2020:2099) 
 	
-	core <- rep("core", 80)
-	potential <- rep("potential", 80)
-	low <- rep("low emission\n(ssp126)", 80)
-	high <- rep("high emission\n(ssp585)", 80)
+	rolling_means_p_area <- lapply(list(p_area_proj_dat_sum_yr_rm_low, p_area_proj_dat_sum_yr_rm_high),
+															 rolling_p_area_func)
+	
+	rolling_means_p_area_low <- rolling_means_p_area[[1]] %>%
+		mutate(projection = "ssp126")
 
-
-	core_low <- as.data.frame(cbind(means_proj_core_low, core, low, years_proj)) %>% 
-		rename(area = means_proj_core_low, 
-					 sp_hab_threshold = core,
-					 projection = low,
-					 year = years_proj)
+	rolling_means_p_area_high <- rolling_means_p_area[[2]] %>%
+		mutate(projection = "ssp585")
 	
-	core_high <- as.data.frame(cbind(means_proj_core_high, core, high, years_proj)) %>%
-		rename(area = means_proj_core_high, 
-					 sp_hab_threshold = core,
-					 projection = high,
-					 year = years_proj)
+	rolling_means_p_area <- bind_rows(rolling_means_p_area_low, rolling_means_p_area_high)
 
-	pot_low <- as.data.frame(cbind(means_proj_pot_low, potential, low, years_proj)) %>% 
-		rename(area = means_proj_pot_low, 
-					 sp_hab_threshold = potential,
-					 projection = low,
-					 year = years_proj)
+	# add them together
+	rolling_means_c_area$sp_hab_threshold <- "core"
+	rolling_means_p_area$sp_hab_threshold <- "potential"
 	
-	pot_high <- as.data.frame(cbind(means_proj_pot_high, potential, high, years_proj)) %>%
-		rename(area = means_proj_pot_high, 
-					 sp_hab_threshold = potential,
-					 projection = high,
-					 year = years_proj)
-
-	
-	rolling_area_proj <- rbind(core_low, core_high,
-														 pot_low, pot_high)
-
-	rolling_area_proj$area <- as.numeric(rolling_area_proj$area)
-	rolling_area_proj$year <- as.numeric(rolling_area_proj$year)
-
-	
+	rolling_means_area <- bind_rows(rolling_means_c_area, rolling_means_p_area)
+		
 	# for plotting by scenario
 		
 	proj_area_yr <- proj_area_yr %>% filter(., projection != "historical")
@@ -512,11 +440,7 @@
 	proj_area_yr$scen[proj_area_yr$projection == "ssp126"] <- "low emission\n(ssp126)"
 	proj_area_yr$scen[proj_area_yr$projection == "ssp585"] <- "high emission\n(ssp585)"
 	
-	rolling_area_proj$scen <- NA
-		
-	rolling_area_proj$scen <- rolling_area_proj$projection 
-	rolling_area_proj$scen <- rolling_area_proj$projection 
-
+	
 	proj_area_yr <- tidyr::unite(proj_area_yr,"sim_proj",
 															 simulation, projection, remove = F)
 
@@ -528,22 +452,24 @@
 	
 	names(colors) <- unique(proj_area_yr$sim_proj)
 	
+	rolling_means_area$scen <- NA
+		
+	rolling_means_area$scen[rolling_means_area$projection == "ssp126"] <- "low emission\n(ssp126)"
+	rolling_means_area$scen[rolling_means_area$projection == "ssp585"] <- "high emission\n(ssp585)"
+
 	# order factors for plotting
 	proj_area_yr$scen_f = factor(proj_area_yr$scen, 
 													levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
 	
-	rolling_area_proj$scen_f = factor(rolling_area_proj$scen, 
+	rolling_means_area$scen_f = factor(rolling_means_area$scen, 
 																	levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
 	
 	#### area plots ####
 	
 	area_plot <-    
    	ggplot(data = proj_area_yr, aes(year, area)) +
-		geom_line(data = rolling_area_hind, 
-   						aes(x = year, y = area), 
-   						color = light_black) +
-		geom_line(data = rolling_area_proj, 
-   						aes(x = year, y = area), 
+		geom_line(data = rolling_means_area, 
+   						aes(x = years_dat, y = means_proj), 
    						color = light_black) +
 	 	geom_line(aes(year, area), alpha = 0.3,
             data = hind_area_yr %>% filter(sp_hab_threshold == "potential"), color = "black") +

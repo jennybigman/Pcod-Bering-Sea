@@ -53,9 +53,11 @@ hist20_consistency09 <-
 	 	theme(
 	 		legend.position = "none",
 			panel.border = element_rect(color = "#666666"),
- 			axis.ticks = element_blank(),
- 			axis.title = element_blank(),
- 			axis.text = element_blank(),
+ 			axis.ticks.y = element_blank(),
+ 			axis.title.y = element_blank(),
+ 			axis.text.y = element_blank(),
+			axis.text.x = element_text(size = 8,  color = "#666666"),	
+  		axis.title.x = element_text(size = 10,  color = "#666666"),
  			plot.margin = unit(c(0, 0, 0, 0), "in"))
 
 	

@@ -37,14 +37,14 @@
 	#### load and transform data ####
 	
 	# hindcast data
-	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv") %>% filter(., year != 2021)
+	ROMS_hindcast_dat  <- fread(file = here("./data/ROMS_hindcast_dat.csv")) %>% filter(., year != 2021)
 
 	ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
 	 mutate(grid_cell_id = paste0(latitude, longitude))
 	
 	grid_cells <- ROMS_hindcast_dat %>%
 	 distinct(grid_cell_id) %>%
-	 mutate(ID = 1:5024)
+	 mutate(ID = 1: length(unique(ROMS_hindcast_dat$grid_cell_id)))
 
 	ROMS_hindcast_dat <- merge(ROMS_hindcast_dat, grid_cells, by = "grid_cell_id")
 
@@ -105,8 +105,8 @@
   
 
 	# for plotting
-  breaks_x <- c(-175, -170, -165, -160)
-	labels_x <- c("-175˚", "-170˚", "-165˚", "-160˚") 
+  breaks_x <- c(-170, -160)
+	labels_x <- c("-170˚", "-160˚") 
 	limits_x <- c(-1400000, -150000)
 	
 	breaks_y <- c(55, 60)

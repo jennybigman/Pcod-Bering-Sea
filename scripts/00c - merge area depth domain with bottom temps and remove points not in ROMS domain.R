@@ -39,20 +39,20 @@
 	ROMS_dat_hind_trim$week <- week(ROMS_dat_hind_trim$date) # week of year
 	ROMS_dat_hind_trim$year <- year(ROMS_dat_hind_trim$date)
 	
-	ROMS_dat_hind_trim_mo <- ROMS_dat_hind_trim %>%
+	ROMS_hindcast_temp_dat <- ROMS_dat_hind_trim %>%
 		filter(month %in% sp_months)
 
   # add name of month for plotting
-	ROMS_dat_hind_trim_mo$month_name <- NA
+	ROMS_hindcast_temp_dat$month_name <- NA
      
-  ROMS_dat_hind_trim_mo$month_name[ROMS_dat_hind_trim_mo$month == 1] <- "January"
-  ROMS_dat_hind_trim_mo$month_name[ROMS_dat_hind_trim_mo$month == 2] <- "February"
-	ROMS_dat_hind_trim_mo$month_name[ROMS_dat_hind_trim_mo$month == 3] <- "March"
-	ROMS_dat_hind_trim_mo$month_name[ROMS_dat_hind_trim_mo$month == 4] <- "April"
+  ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 1] <- "January"
+  ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 2] <- "February"
+	ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 3] <- "March"
+	ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 4] <- "April"
 
 	
 	### plot to see if this works ####
-	ROMS_dat_hind_trim_sum <- ROMS_dat_hind_trim_mo %>%
+	ROMS_dat_hind_trim_sum <- ROMS_hindcast_temp_dat %>%
 		group_by(latitude, longitude) %>%
 		summarize(mean_temp = mean(temp))
 	
@@ -81,7 +81,7 @@
  	
 		 
 	# save
-	fwrite(ROMS_dat_hind_trim_mo, "./data/ROMS_hindcast_temp_dat.csv")
+	fwrite(ROMS_hindcast_temp_dat, "./data/ROMS_hindcast_temp_dat.csv")
 
 	
 	

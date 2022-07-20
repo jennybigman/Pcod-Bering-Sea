@@ -20,15 +20,33 @@
 	
 	# read in ROMS projected temps but not trimmed to Ortiz regions --- NEED TO CHANGE THIS BACK TO TRIMMED DATA ONCE IT WORKS
 	cesm_dfs_trim <- fread("./data/cesm_dfs_trim.csv")
-	gfdl_dfs_trim <- fread("./data/gfdl_dfs_trim.csv")
+	
+	gfdl_dfs_trim <- fread("./data/gfdl_dfs_trim.csv") %>%
+		mutate(longitude = Lon,
+					 latitude = Lat)
+	
 	miroc_dfs_trim <- fread("./data/miroc_dfs_trim.csv")
 	
 	# read in area and depth data 
 	area_df <- fread( "./data/ROMS_area_grid_cells.csv")
 	depth_df <- fread("./data/ROMS_depth_df.csv")
-
+	domain_df <- fread("./data/ROMS_domain_df.csv") %>%
+		mutate(Lon = longitude,
+					 Lat = latitude)
+	
 	area_depth_df <- merge(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta")) %>%
 		dplyr::select(latitude, longitude, depth, area_km2)
+	
+	# add domains to temp data to bias correct at the domain level
+	cesm_dfs_trim <- merge(cesm_dfs_trim, domain_df,
+												 by = c("latitude", "longitude")) # is this Lat/Lon or latitude/longitude
+	
+	gfdl_dfs_trim <- merge(gfdl_dfs_trim, domain_df,
+												 by = c("Lat", "Lon"))
+
+	miroc_dfs_trim <- merge(miroc_dfs_trim, domain_df,
+													 by = c("Lat", "Lon"))
+
 
 	#1 calculate the mean of the hindcast during the reference years (needed for all models) ####
 	
@@ -43,7 +61,7 @@
 	ROMS_baseline_temp_dat_mo <- ROMS_baseline_temp_dat %>% 
 		mutate(Lon = longitude,
 					 Lat = latitude) %>%
-		group_by(month, Lat, Lon) %>%
+		group_by(month, domain) %>%
 		summarize(mean_mo_baseline_temp = mean(temp),
 							sd_mo_baseline_temp = sd(temp))
 	
@@ -59,14 +77,14 @@
 	# for the ref period 
 	# (so an avg temp for each month at each grid cell averaged across 1980 - 2014)
 	cesm_baseline_temp_dat_mo <- cesm_baseline_temp_dat %>%
-		group_by(month, Lat, Lon) %>%
+		group_by(month, domain) %>%
 		summarize(mean_proj_baseline = mean(temp),
 							sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
 	cesm_proj_temp_dat <- cesm_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon, domain) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 calculate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -74,21 +92,22 @@
 	
 	# combine the monthly means for historical period and projected df into one df
 	cesm_delta_dat <- merge(cesm_proj_temp_dat, cesm_baseline_temp_dat_mo,
-											 by = c("Lat", "Lon", "month"))
+											 by = c("domain", "month"))
 	
 	cesm_delta_dat <- cesm_delta_dat %>%
 		mutate(delta = (mo_avg_proj_temp - mean_proj_baseline))
 	
 	#5 add deltas mean of the hindcast during the reference years (step 1)
 	cesm_bc_temps <- merge(ROMS_baseline_temp_dat_mo, cesm_delta_dat,
-											 by = c("Lat", "Lon", "month"))
+											 by = c("domain", "month"))
 	
-	cesm_bc_temps <- cesm_bc_temps %>%
+	cesm_bc_temps_holsman <- cesm_bc_temps %>%
 		mutate(sd_ratio = sd_mo_baseline_temp/sd_proj_baseline,
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 	
-	
+	fwrite(cesm_bc_temps_holsman, file = "./data/cesm_bc_temps_holsman.csv")
+
 	#### GFDL ####
 	
 	#2 calculate the mean of the projections during the reference years ####
@@ -100,14 +119,14 @@
 	# for the ref period 
 	# (so an avg temp for each month at each grid cell averaged across 1980 - 2014)
 	gfdl_baseline_temp_dat_mo <- gfdl_baseline_temp_dat %>%
-		group_by(month, Lat, Lon) %>%
+		group_by(month, domain) %>%
 		summarize(mean_proj_baseline = mean(temp),
 								sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
 	gfdl_proj_temp_dat <- gfdl_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon, domain) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -115,21 +134,22 @@
 	
 	# combine the monthly means for historical period and projected df into one df
 	gfdl_delta_dat <- merge(gfdl_proj_temp_dat, gfdl_baseline_temp_dat_mo,
-											 by = c("Lat", "Lon", "month"))
+											 by = c("domain", "month"))
 	
 	gfdl_delta_dat <- gfdl_delta_dat %>%
 		mutate(delta = (mo_avg_proj_temp - mean_proj_baseline))
 	
 	#5 add deltas mean of the hindcast during the reference years (step 1)
 	gfdl_bc_temps <- merge(ROMS_baseline_temp_dat_mo, gfdl_delta_dat,
-											 by = c("Lat", "Lon", "month"))
+											 by = c("domain", "month"))
 	
-	gfdl_bc_temps <- gfdl_bc_temps %>%
+	gfdl_bc_temps_holsman <- gfdl_bc_temps %>%
 		mutate(sd_ratio = sd_mo_baseline_temp/sd_proj_baseline,
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 	
-	
+	fwrite(gfdl_bc_temps_holsman, file = "./data/gfdl_bc_temps_holsman.csv")
+
 	#### MIROC ####
 
 	#2 calculate the mean of the projections during the reference years ####
@@ -141,14 +161,14 @@
 	# for the ref period 
 	# (so an avg temp for each month at each grid cell averaged across 1980 - 2014)
 	miroc_baseline_temp_dat_mo <- miroc_baseline_temp_dat %>%
-		group_by(month, Lat, Lon) %>%
+		group_by(month, domain) %>%
 		summarize(mean_proj_baseline = mean(temp),
 										sd_proj_baseline = sd(temp))
 
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
 	miroc_proj_temp_dat <- miroc_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon, domain) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -156,33 +176,58 @@
 	
 	# combine the monthly means for historical period and projected df into one df
 	miroc_delta_dat <- merge(miroc_proj_temp_dat, miroc_baseline_temp_dat_mo,
-											 by = c("Lat", "Lon", "month"))
+											 by = c("domain", "month"))
 	
 	miroc_delta_dat <- miroc_delta_dat %>%
 		mutate(delta = (mo_avg_proj_temp - mean_proj_baseline))
 	
 	#5 add deltas mean of the hindcast during the reference years (step 1)
 	miroc_bc_temps <- merge(ROMS_baseline_temp_dat_mo, miroc_delta_dat,
-											 by = c("Lat", "Lon", "month"))
+											 by = c("domain", "month"))
 	
-	miroc_bc_temps <- miroc_bc_temps %>%
+	miroc_bc_temps_holsman <- miroc_bc_temps %>%
 		mutate(sd_ratio = sd_mo_baseline_temp/sd_proj_baseline,
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 
 	
+	fwrite(miroc_bc_temps_holsman, file = "./data/miroc_bc_temps_holsman.csv")
+
 	
 	#### add together ####
+	cesm_bc_temps_holsman <- fread(file = "./data/cesm_bc_temps_holsman.csv") %>%
+		mutate(projection = scenario)
+	gfdl_bc_temps_holsman <- fread(file = "./data/gfdl_bc_temps_holsman.csv")  %>%
+		mutate(projection = scenario)
+	miroc_bc_temps_holsman <- fread(file = "./data/miroc_bc_temps_holsman.csv")  %>%
+		mutate(projection = scenario)
 	
-	cesm_bc_temps$simulation <- "cesm"
-	gfdl_bc_temps$simulation <- "gfdl"
-	miroc_bc_temps$simulation <- "miroc"
+	cesm_bc_temps_holsman$simulation <- "cesm"
+	gfdl_bc_temps_holsman$simulation <- "gfdl"
+	miroc_bc_temps_holsman$simulation <- "miroc"
 	
-	proj_temp_dat_all_Holsman <- bind_rows(cesm_bc_temps, gfdl_bc_temps, miroc_bc_temps) ## this is not trimmed
+	proj_temp_dat_all_Holsman <- bind_rows(cesm_bc_temps_holsman, gfdl_bc_temps_holsman, miroc_bc_temps_holsman) ## this is not trimmed
 	
 	fwrite(proj_temp_dat_all_Holsman, file = here("./data/ROMS_proj_temp_dat_all_Holsman.csv"))
 	
+	sort(unique(proj_temp_dat_all_Holsman$domain))
+	
+	proj_temp_dat_all_Holsman <- proj_temp_dat_all_Holsman %>%
+		mutate(latitude = Lat,
+					 longitude = Lon)
+					 
+	proj_temp_dat_all_Holsman <- merge(area_depth_df, proj_temp_dat_all_Holsman,
+																by = c("latitude", "longitude"))
+	
+	proj_temp_dat_Holsman <- proj_temp_dat_all_Holsman %>%
+		filter(., between(depth, 0, 250))
 
+	fwrite(proj_temp_dat_Holsman, "./data/proj_temp_dat_Holsman.csv")
+
+	
+	
+	
+	
 	
 	## remove grid cells based on depth and location (keep those < 250 m and within Ortiz regions)
 	

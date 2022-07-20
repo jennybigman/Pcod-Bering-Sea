@@ -21,14 +21,8 @@
 					 hatch_success_gaus = sapply(temp, hatch_success_gaus_func))
 
 	# standardize hatch success (calculating spawning habitat suitability)
-	ROMS_hindcast_temp_dat <- ROMS_hindcast_temp_dat %>%
-  	mutate(sp_hab_suit = hatch_success_cauchy/max(hatch_success_cauchy))
-  
-  # remove cols hat aren't needed
 	ROMS_hindcast_dat <- ROMS_hindcast_temp_dat %>%
-		rename(Xi = Xi.x,
-					 Eta = Eta.x) %>%
-		dplyr::select(-Xi.y, -Eta.y)
+  	mutate(sp_hab_suit = hatch_success_cauchy/max(hatch_success_cauchy))
 	
 	# save file
 	fwrite(ROMS_hindcast_dat, file = "./data/ROMS_hindcast_dat.csv")
