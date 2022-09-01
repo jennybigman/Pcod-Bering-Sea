@@ -108,7 +108,7 @@
 	
 	# low emissions scenario
 	march_temp_proj_ssp126 <- march_temp_proj %>%
-		filter(projection == "ssp126")
+		filter(projection == "SSP126")
 
 	march_avg_temps_proj_ssp126 <-
 		ggplot() +
@@ -135,7 +135,7 @@
  			name = "Latitude") +
     labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
 		labs(tag = "(b)") +
-		ggtitle("Low emission (ssp126):\n2080 - 2099") +
+		ggtitle("Low emission (SSP126):\n2080 - 2099") +
 		theme_bw() +
 		white_map_theme() +
 		theme(legend.position = "none",
@@ -154,7 +154,7 @@
 	# high emissions scenario
 	
 	march_temp_proj_ssp585 <- march_temp_proj %>%
-		filter(projection == "ssp585")
+		filter(projection == "SSP585")
 
 	march_avg_temps_proj_ssp585 <-
 		ggplot() +
@@ -181,7 +181,7 @@
  			name = "Latitude") +
     labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
 		labs(tag = "(c)") +
-		ggtitle("High emission (ssp585):\n2080 - 2099") +
+		ggtitle("High emission (SSP585):\n2080 - 2099") +
 		theme_bw() +
 		white_map_theme() +
 		theme(legend.title.align = 0.5,
@@ -203,13 +203,13 @@
 	
  #### plot together ####
 
- plot1 <- march_avg_temps_hind #+ theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
+ plot1 <- march_avg_temps_hind + theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
 
- plot2 <- march_avg_temps_proj_ssp126 + theme(plot.margin = unit(c(0.2, 0.04, 0.2, 0), "in"))
+ plot2 <- march_avg_temps_proj_ssp126 + theme(plot.margin = unit(c(0.2, -0.05, 0.2, 0), "in"))
 
- plot3 <- march_avg_temps_proj_ssp585 #+ theme(plot.margin = unit(c(0.2, 0, 0.2, -0.05), "in"))
+ plot3 <- march_avg_temps_proj_ssp585 + theme(plot.margin = unit(c(0.2, 0, 0.2, -0.05), "in"))
 
- plot4 <- therm_response_curve #+ theme(plot.margin = unit(c(0.2, 0.2, 0.2, -0.05), "in"))
+ plot4 <- therm_response_curve + theme(plot.margin = unit(c(0.2, 0.2, 0.2, 0.04), "in"))
 
  Figure1_dll <- plot1 + plot2 + plot3 + plot4 + plot_layout(ncol = 4)
 
@@ -217,7 +217,17 @@
 			 Figure1_dll,
 			 width = 16, height = 8, units = "in")
 
-	#### opposite colors ####
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 	#### opposite colors ####
  
 	#### panel b: map of historical averaged temps in march ####
 
@@ -286,7 +296,7 @@
  			name = "Latitude") +
     labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
 		labs(tag = "(b)") +
-		ggtitle("Low emission (ssp126):\n2080 - 2099") +
+		ggtitle("Low emission (SSP126):\n2080 - 2099") +
 		theme_bw() +
 		white_map_theme() +
 		theme(legend.position = "none",
@@ -328,7 +338,7 @@
  			name = "Latitude") +
     labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
 		labs(tag = "(c)") +
-		ggtitle("High emission (ssp585):\n2080 - 2099") +
+		ggtitle("High emission (SSP585):\n2080 - 2099") +
 		theme_bw() +
 		white_map_theme() +
 		theme(legend.title.align = 0.5,

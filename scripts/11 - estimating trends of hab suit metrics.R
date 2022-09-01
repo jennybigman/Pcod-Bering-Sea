@@ -3,6 +3,10 @@
 	#### temperature ####
 	
 	# hindcast
+	yearly_temp_hind <- ROMS_hindcast_dat %>%
+		group_by(year) %>%
+    summarise(avg_temp = mean(temp))
+
 	hind_temp_lm <- lm(avg_temp ~ year, data = yearly_temp_hind)
 	confint(hind_temp_lm)
 	summary(hind_temp_lm)
@@ -13,6 +17,13 @@
 	
 	
 	# projection
+	years_proj <- 2020:2099
+
+	yearly_temp_proj <- ROMS_projected_dat %>% 
+		filter(year %in% years_proj) %>%
+		group_by(simulation, projection, year) %>%
+   	summarise(avg_temp = mean(bc_temp_sd)) 
+
 	proj_temp_lm <- lme4::lmer(avg_temp ~ year * projection + (1 | simulation), data = yearly_temp_proj)
 	confint(proj_temp_lm)
 	summary(proj_temp_lm)
@@ -78,6 +89,17 @@
  
   
 	#### spawning habitat suitability ####
+  yearly_hab_dat_hind <- ROMS_hindcast_dat %>%
+		group_by(year) %>%
+    summarise(mean_hab_suit = mean(sp_hab_suit))
+	
+	years_proj <- 2020:2099
+
+	yearly_hab_dat_proj <- ROMS_projected_dat %>% 
+		filter(year %in% years_proj) %>%
+		group_by(simulation, projection, year) %>%
+   	summarise(mean_hab_suit = mean(sp_hab_suit_var))
+
 	max(yearly_hab_dat_hind$mean_hab_suit) - min(yearly_hab_dat_hind$mean_hab_suit)
   
   range(yearly_hab_dat_hind$mean_hab_suit)
@@ -168,25 +190,90 @@
 	
 	
 	#### area ####
+	c_area_hind_dat <- ROMS_hindcast_dat %>%
+		filter(sp_hab_suit >= 0.9) 
 	
+	c_area_hind_dat_sum <- c_area_hind_dat %>%
+		group_by(latitude, longitude, year) %>%
+		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
+
+	c_area_hind_dat_sum_yr <- c_area_hind_dat_sum %>%
+		group_by(year) %>%
+		summarize(area = sum(area_km2)) %>% 
+		mutate(sp_hab_threshold = "core",
+					 area_scl = rescale(area))
+	
+	# potential habitat = sum of area where sps >= 0.5
+	
+	p_area_hind_dat <- ROMS_hindcast_dat %>%
+		filter(sp_hab_suit >= 0.5) 
+	
+	p_area_hind_dat_sum <- p_area_hind_dat %>%
+		group_by(latitude, longitude, year) %>%
+		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
+
+	p_area_hind_dat_sum_yr <- p_area_hind_dat_sum %>%
+		group_by(year) %>%
+		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
+		mutate(sp_hab_threshold = "potential",
+					 area_scl = rescale(area))
+
+
 	# hindcast core
-	core_area_hind_lm <- lm(area ~ year, data = c_area_hind_dat_sum_yr)
+	core_area_hind_lm <- lm(area_scl ~ year, data = c_area_hind_dat_sum_yr)
 	confint(core_area_hind_lm)
 	summary(core_area_hind_lm)
 
 	# hindcast potential
-	pot_area_hind_lm <- lm(area ~ year, data = p_area_hind_dat_sum_yr)
+	pot_area_hind_lm <- lm(area_scl ~ year, data = p_area_hind_dat_sum_yr)
 	confint(pot_area_hind_lm)
 	summary(pot_area_hind_lm)
 
 	# projection core
-	core_area_proj_lm <- lme4::lmer(area ~ year * projection + (1 | simulation), 
+	
+	years_proj <- 2021:2099
+	
+	ROMS_projected_dat_proj <- ROMS_projected_dat %>%
+		filter(year %in% years_proj)
+	
+	# with bias-corrected temperature using variance ratio
+	
+	c_area_proj_dat <- ROMS_projected_dat_proj %>%
+		filter(sp_hab_suit_var >= 0.9) 
+
+	c_area_proj_dat_sum <- c_area_proj_dat %>%
+		group_by(simulation, projection, latitude, longitude, year) %>%
+		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
+	
+	c_area_proj_dat_sum_yr <- c_area_proj_dat_sum %>%
+		group_by(simulation, projection, year) %>%
+		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
+		mutate(sp_hab_threshold = "core",
+					 area_scl = rescale(area))
+
+
+	# potential habitat = sum of area where sps >= 0.5
+	p_area_proj_dat <- ROMS_projected_dat_proj %>%
+		filter(sp_hab_suit_var >= 0.5) 
+
+	p_area_proj_dat_sum <- p_area_proj_dat %>%
+		group_by(simulation, projection, latitude, longitude, year) %>%
+		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
+	
+	p_area_proj_dat_sum_yr <- p_area_proj_dat_sum %>%
+		group_by(simulation, projection, year) %>%
+		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
+		mutate(sp_hab_threshold = "potential",
+					 area_scl = rescale(area))
+	
+	# models
+	core_area_proj_lm <- lme4::lmer(area_scl ~ year * projection + (1 | simulation), 
 																 data = c_area_proj_dat_sum_yr)
 	confint(core_area_proj_lm)
 	summary(core_area_proj_lm)
 
 	# projection potential
-	pot_area_proj_lm <- lme4::lmer(area ~ year * projection + (1 | simulation), 
+	pot_area_proj_lm <- lme4::lmer(area_scl ~ year * projection + (1 | simulation), 
 																 data = p_area_proj_dat_sum_yr)
 	confint(pot_area_proj_lm)
 	summary(pot_area_proj_lm)
@@ -342,6 +429,29 @@
 	
 	#### mean latitude ####
 	
+		hind_mean_lat_yr <- function(x){
+		
+		new_dat <- ROMS_hindcast_dat %>%
+			filter(., sp_hab_suit >= x)
+		
+		new_dat_sum <- new_dat %>%
+			group_by(year) %>%
+			summarise(hist_mean_lat = mean(latitude)) 
+
+		new_dat_sum		
+	}
+	
+	sp_hab_thresholds <- c(0.5, 0.9)
+	
+	hind_mean_lats_yr <- lapply(sp_hab_thresholds, hind_mean_lat_yr)
+	
+	hind_mean_lats_yr_0.5 <- hind_mean_lats_yr[[1]] %>%
+		mutate(sp_hab_threshold = 0.5)
+
+	hind_mean_lats_yr_0.9 <- hind_mean_lats_yr[[2]]	%>%
+		mutate(sp_hab_threshold = 0.9)
+	
+
 	# hindcast core
 	hind_meanlat_core_lm <- lm(hist_mean_lat ~ year, data = hind_mean_lats_yr_0.9)
 	confint(hind_meanlat_core_lm)

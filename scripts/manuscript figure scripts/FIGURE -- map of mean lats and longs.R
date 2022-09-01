@@ -64,11 +64,11 @@
 			
 	coords_proj_sf$scen <- NA
 	
-	coords_proj_sf$scen[coords_proj_sf$projection == "ssp126"] <- "low emission\n(ssp126)"
-	coords_proj_sf$scen[coords_proj_sf$projection == "ssp585"] <- "high emission\n(ssp585)"
+	coords_proj_sf$scen[coords_proj_sf$projection == "SSP126"] <- "low emission\n(SSP126)"
+	coords_proj_sf$scen[coords_proj_sf$projection == "SSP585"] <- "high emission\n(SSP585)"
 
 	coords_proj_sf$scen_f = factor(coords_proj_sf$scen, 
-																		levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+																		levels=c('low emission\n(SSP126)', 'high emission\n(SSP585)'))
 	
 
 
@@ -83,7 +83,7 @@
 	
 	
 	coords_proj_sf$scen_f = factor(coords_proj_sf$scen, 
-																		levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+																		levels=c('low emission\n(SSP126)', 'high emission\n(SSP585)'))
 
 		
 		map_mean_lats <- 

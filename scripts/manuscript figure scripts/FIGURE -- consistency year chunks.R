@@ -112,21 +112,21 @@
 	# add in scenario as factor
 	ROMS_projected_dat_yr_sum_05_sf$scen <- NA
 	
-  ROMS_projected_dat_yr_sum_05_sf$scen[ROMS_projected_dat_yr_sum_05_sf$projection == "ssp126"] <- "low\nemission\n(ssp126)"
-	ROMS_projected_dat_yr_sum_05_sf$scen[ROMS_projected_dat_yr_sum_05_sf$projection == "ssp585"] <- "high\nemission\n(ssp585)"
+  ROMS_projected_dat_yr_sum_05_sf$scen[ROMS_projected_dat_yr_sum_05_sf$projection == "SSP126"] <- "low\nemission\n(SSP126)"
+	ROMS_projected_dat_yr_sum_05_sf$scen[ROMS_projected_dat_yr_sum_05_sf$projection == "SSP585"] <- "high\nemission\n(SSP585)"
 	
 	ROMS_projected_dat_yr_sum_05_sf$scen_f = factor(ROMS_projected_dat_yr_sum_05_sf$scen, 
-																									levels=c('low\nemission\n(ssp126)', 
-																											     'high\nemission\n(ssp585)'))
+																									levels=c('low\nemission\n(SSP126)', 
+																											     'high\nemission\n(SSP585)'))
 
 	ROMS_projected_dat_yr_sum_09_sf$scen <- NA
 	
-  ROMS_projected_dat_yr_sum_09_sf$scen[ROMS_projected_dat_yr_sum_09_sf$projection == "ssp126"] <- "low\nemission\n(ssp126)"
-	ROMS_projected_dat_yr_sum_09_sf$scen[ROMS_projected_dat_yr_sum_09_sf$projection == "ssp585"] <- "high\nemission\n(ssp585)"
+  ROMS_projected_dat_yr_sum_09_sf$scen[ROMS_projected_dat_yr_sum_09_sf$projection == "SSP126"] <- "low\nemission\n(SSP126)"
+	ROMS_projected_dat_yr_sum_09_sf$scen[ROMS_projected_dat_yr_sum_09_sf$projection == "SSP585"] <- "high\nemission\n(SSP585)"
 	
 	ROMS_projected_dat_yr_sum_09_sf$scen_f = factor(ROMS_projected_dat_yr_sum_09_sf$scen, 
-																									levels=c('low\nemission\n(ssp126)', 
-																											     'high\nemission\n(ssp585)'))
+																									levels=c('low\nemission\n(SSP126)', 
+																											     'high\nemission\n(SSP585)'))
 
 	# potential habitat
 	
@@ -227,7 +227,7 @@
 	
 	legend <- 	
 		ggplot() +
-		geom_sf(data = ROMS_hindcast_dat_dec_yr_sum_05_sf, aes(color = pct_yrs))  +
+		geom_sf(data = ROMS_projected_dat_yr_sum_05_sf, aes(color = pct_yrs))  +
 		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
@@ -314,7 +314,7 @@
   # current
 	current20_consistency09 <-	
 		ggplot() +
-		geom_sf(data = ROMS_hindcast_dat_dec_yr_sum_09_sf, aes(color = pct_yrs))  +
+		geom_sf(data = ROMS_hindcast_dat_dec_current_yr_sum_09_sf, aes(color = pct_yrs))  +
 		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
@@ -381,7 +381,7 @@
 	
 	legend <- 	
 		ggplot() +
-		geom_sf(data = ROMS_hindcast_dat_dec_yr_sum_09_sf, aes(color = pct_yrs))  +
+		geom_sf(data = ROMS_hindcast_dat_dec_current_yr_sum_09_sf, aes(color = pct_yrs))  +
 		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c(breaks = c(0,25,50,75,100)) +

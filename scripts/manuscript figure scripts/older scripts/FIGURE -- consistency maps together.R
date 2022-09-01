@@ -121,21 +121,21 @@
 		# add in scenario as factor
 	ROMS_proj_yr_sum_05_sf$scen <- NA
 	
-  ROMS_proj_yr_sum_05_sf$scen[ROMS_proj_yr_sum_05_sf$projection == "ssp126"] <- "low\nemission\n(ssp126)"
-	ROMS_proj_yr_sum_05_sf$scen[ROMS_proj_yr_sum_05_sf$projection == "ssp585"] <- "high\nemission\n(ssp585)"
+  ROMS_proj_yr_sum_05_sf$scen[ROMS_proj_yr_sum_05_sf$projection == "SSP126"] <- "low\nemission\n(SSP126)"
+	ROMS_proj_yr_sum_05_sf$scen[ROMS_proj_yr_sum_05_sf$projection == "SSP585"] <- "high\nemission\n(SSP585)"
 	
 	ROMS_proj_yr_sum_05_sf$scen_f = factor(ROMS_proj_yr_sum_05_sf$scen, 
-																				 levels=c('low\nemission\n(ssp126)', 
-																								  'high\nemission\n(ssp585)'))
+																				 levels=c('low\nemission\n(SSP126)', 
+																								  'high\nemission\n(SSP585)'))
 
 	ROMS_proj_yr_sum_09_sf$scen <- NA
 	
-  ROMS_proj_yr_sum_09_sf$scen[ROMS_proj_yr_sum_09_sf$projection == "ssp126"] <- "low\nemission\n(ssp126)"
-	ROMS_proj_yr_sum_09_sf$scen[ROMS_proj_yr_sum_09_sf$projection == "ssp585"] <- "high\nemission\n(ssp585)"
+  ROMS_proj_yr_sum_09_sf$scen[ROMS_proj_yr_sum_09_sf$projection == "SSP126"] <- "low\nemission\n(SSP126)"
+	ROMS_proj_yr_sum_09_sf$scen[ROMS_proj_yr_sum_09_sf$projection == "SSP585"] <- "high\nemission\n(SSP585)"
 	
 	ROMS_proj_yr_sum_09_sf$scen_f = factor(ROMS_proj_yr_sum_09_sf$scen, 
-																				 levels=c('low\nemission\n(ssp126)', 
-																									'high\nemission\n(ssp585)'))
+																				 levels=c('low\nemission\n(SSP126)', 
+																									'high\nemission\n(SSP585)'))
 
 	#### core plots ####
 
@@ -164,7 +164,7 @@
  			axis.text = element_text(size = 8,  color = "#666666"),	
   		axis.title = element_text(size = 10,  color = "#666666"),
  			axis.ticks = element_line(color = "#666666"),
- 			plot.margin = unit(c(0.05, 0, 0, 0), "in"))
+ 			plot.margin = unit(c(0.25, 0, 0, 0), "in"))
 
   # current
 	current20_consistency09 <-	
@@ -193,7 +193,7 @@
  			axis.ticks.y = element_blank(),
  			axis.title.y = element_blank(),
  			axis.text.y = element_blank(),
- 			plot.margin = unit(c(0.05, -0.05, 0, 0), "in"))
+ 			plot.margin = unit(c(0.25, -0.05, 0, 0), "in"))
 
 	
 	last20_consistency09 <-	
@@ -259,7 +259,7 @@
 			axis.text.y = element_blank(),
   		axis.title.y = element_blank(),
  			axis.ticks.y = element_blank(),
- 			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
+ 			plot.margin = unit(c(0.25,-0.1, 0, 0), "in"))
 
 	current20_consistency05 <-	
 		ggplot() +
@@ -288,7 +288,7 @@
 			axis.text.y = element_blank(),
   		axis.title.y = element_blank(),
  			axis.ticks.y = element_blank(),
- 			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
+ 			plot.margin = unit(c(0.25,-0.1, 0, 0), "in"))
 
 	
 	last20_consistency05 <-	

@@ -33,8 +33,6 @@
 		group_by(year) %>%
     summarise(avg_temp = mean(temp)) 
 	
-	yearly_temp_hind$avg_temp <- as.numeric(yearly_temp_hind$avg_temp)
-	
 	years_proj <- 2020:2099
 	
 	yearly_temp_proj <- ROMS_projected_dat %>% 
@@ -44,8 +42,8 @@
 	
 	yearly_temp_proj$scen <- NA
 		
-	yearly_temp_proj$scen[yearly_temp_proj$projection == "ssp126"] <- "low emission (ssp126)"
-	yearly_temp_proj$scen[yearly_temp_proj$projection == "ssp585"] <- "high emission (ssp585)"
+	yearly_temp_proj$scen[yearly_temp_proj$projection == "SSP126"] <- "low emission (SSP126)"
+	yearly_temp_proj$scen[yearly_temp_proj$projection == "SSP585"] <- "high emission (SSP585)"
 	
 	yearly_temp_proj <- tidyr::unite(yearly_temp_proj,"sim_proj",
 															 simulation, projection, remove = F)
@@ -60,8 +58,8 @@
 	
 	# order facets
 	yearly_temp_proj$scen_f = factor(yearly_temp_proj$scen, 
-																	 levels=c('low emission (ssp126)', 
-																						'high emission (ssp585)'))
+																	 levels=c('low emission (SSP126)', 
+																						'high emission (SSP585)'))
 
 	# rolling means of temp
 	
@@ -83,7 +81,7 @@
 		summarise(mean_temp = mean(avg_temp))
 	
 	yearly_temp_proj_sum_low <- yearly_temp_proj_sum %>%
-		filter(scen_f == "low emission (ssp126)")
+		filter(scen_f == "low emission (SSP126)")
 	
 	means_proj_low <- NA
   
@@ -93,7 +91,7 @@
   }
 	
 	yearly_temp_proj_sum_high <- yearly_temp_proj_sum %>%
-		filter(scen_f == "high emission (ssp585)")
+		filter(scen_f == "high emission (SSP585)")
 	
 	means_proj_high <- NA
   
@@ -107,11 +105,11 @@
 	rolling_mean_temp_proj <- as.data.frame(cbind(years_proj, means_proj_low, means_proj_high)) 
 
 	rolling_mean_temp_low <- as.data.frame(cbind(years_proj, means_proj_low)) %>%
-		mutate(scen_f = "low emission (ssp126)") %>%
+		mutate(scen_f = "low emission (SSP126)") %>%
 		rename(means_proj = means_proj_low)
 
 	rolling_mean_temp_high <- as.data.frame(cbind(years_proj, means_proj_high)) %>%
-		mutate(scen_f = "high emission (ssp585)") %>%
+		mutate(scen_f = "high emission (SSP585)") %>%
 		rename(means_proj = means_proj_high)
 
 	rolling_mean_temp_proj <- rbind(rolling_mean_temp_low, 
@@ -121,12 +119,12 @@
 	
 	# order facets
 	yearly_temp_proj$scen_f = factor(yearly_temp_proj$scen, 
-																			levels=c('low emission (ssp126)',  
-																							 'high emission (ssp585)'))
+																			levels=c('low emission (SSP126)',  
+																							 'high emission (SSP585)'))
 	
 	rolling_mean_temp_proj$scen_f = factor(rolling_mean_temp_proj$scen, 
-																			levels=c('low emission (ssp126)',  
-																							 'high emission (ssp585)'))
+																			levels=c('low emission (SSP126)',  
+																							 'high emission (SSP585)'))
 
 	#### temp plots ####
 	
@@ -179,8 +177,8 @@
 
 	yearly_hab_dat_proj$scen <- NA
 		
-	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "ssp126"] <- "low emission (ssp126)"
-	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "ssp585"] <- "high emission (ssp585)"
+	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "SSP126"] <- "low emission (SSP126)"
+	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "SSP585"] <- "high emission (SSP585)"
 	
 	yearly_hab_dat_proj <- tidyr::unite(yearly_hab_dat_proj,"sim_proj",
 															 simulation, projection, remove = F)
@@ -213,7 +211,7 @@
 		summarise(mean_hab_suit = mean(mean_hab_suit))
 	
 	yearly_hab_dat_proj_sum_low <- yearly_hab_dat_proj_sum %>%
-		filter(scen == "low emission (ssp126)")
+		filter(scen == "low emission (SSP126)")
 	
 	means_proj_low <- NA
   
@@ -223,7 +221,7 @@
   }
 	
 	yearly_hab_dat_proj_sum_high <- yearly_hab_dat_proj_sum %>%
-		filter(scen == "high emission (ssp585)")
+		filter(scen == "high emission (SSP585)")
 	
 	means_proj_high <- NA
   
@@ -235,11 +233,11 @@
 	years_proj <- c(2020:2099) 
 	
 	rolling_mean_habsuit_low <- as.data.frame(cbind(years_proj, means_proj_low)) %>%
-		mutate(scen = "low emission (ssp126)") %>%
+		mutate(scen = "low emission (SSP126)") %>%
 		rename(means_proj = means_proj_low)
 
 	rolling_mean_habsuit_high <- as.data.frame(cbind(years_proj, means_proj_high)) %>%
-		mutate(scen = "high emission (ssp585)")  %>%
+		mutate(scen = "high emission (SSP585)")  %>%
 		rename(means_proj = means_proj_high)
 	
 	rolling_mean_habsuit_proj <- rbind(rolling_mean_habsuit_low, 
@@ -249,12 +247,12 @@
 	
 	# order facets
 	yearly_hab_dat_proj$scen_f = factor(yearly_hab_dat_proj$scen, 
-																			levels=c('low emission (ssp126)',  
-																							 'high emission (ssp585)'))
+																			levels=c('low emission (SSP126)',  
+																							 'high emission (SSP585)'))
 	
 	rolling_mean_habsuit_proj$scen_f = factor(rolling_mean_habsuit_proj$scen, 
-																			levels=c('low emission (ssp126)',  
-																							 'high emission (ssp585)'))
+																			levels=c('low emission (SSP126)',  
+																							 'high emission (SSP585)'))
 	
 	#### habitat suitability plot ####
 	
@@ -423,10 +421,10 @@
 		filter(sp_hab_threshold == "potential")
 
 	proj_area_yr_sum_core_low <- proj_area_yr_sum_core %>%
-		filter(projection == "ssp126") 
+		filter(projection == "SSP126") 
 	
 	proj_area_yr_sum_pot_low <- proj_area_yr_sum_pot %>%
-		filter(projection == "ssp126")
+		filter(projection == "SSP126")
 
 	
 	means_proj_core_low <- NA
@@ -444,10 +442,10 @@
 	
 	
 	proj_area_yr_sum_core_high <- proj_area_yr_sum_core %>%
-		filter(projection == "ssp585") 
+		filter(projection == "SSP585") 
 	
 	proj_area_yr_sum_pot_high <- proj_area_yr_sum_pot %>%
-		filter(projection == "ssp585")
+		filter(projection == "SSP585")
 
 	means_proj_core_high <- NA
 	means_proj_pot_high <- NA
@@ -467,8 +465,8 @@
 	
 	core <- rep("core", 80)
 	potential <- rep("potential", 80)
-	low <- rep("low emission\n(ssp126)", 80)
-	high <- rep("high emission\n(ssp585)", 80)
+	low <- rep("low emission\n(SSP126)", 80)
+	high <- rep("high emission\n(SSP585)", 80)
 
 
 	core_low <- as.data.frame(cbind(means_proj_core_low, core, low, years_proj)) %>% 
@@ -509,8 +507,8 @@
 		
 	proj_area_yr$scen <- NA
 		
-	proj_area_yr$scen[proj_area_yr$projection == "ssp126"] <- "low emission\n(ssp126)"
-	proj_area_yr$scen[proj_area_yr$projection == "ssp585"] <- "high emission\n(ssp585)"
+	proj_area_yr$scen[proj_area_yr$projection == "SSP126"] <- "low emission\n(SSP126)"
+	proj_area_yr$scen[proj_area_yr$projection == "SSP585"] <- "high emission\n(SSP585)"
 	
 	rolling_area_proj$scen <- NA
 		
@@ -530,10 +528,10 @@
 	
 	# order factors for plotting
 	proj_area_yr$scen_f = factor(proj_area_yr$scen, 
-													levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+													levels=c('low emission\n(SSP126)', 'high emission\n(SSP585)'))
 	
 	rolling_area_proj$scen_f = factor(rolling_area_proj$scen, 
-																	levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+																	levels=c('low emission\n(SSP126)', 'high emission\n(SSP585)'))
 	
 	#### area plots ####
 	
@@ -688,10 +686,10 @@
 		filter(sp_hab_threshold == 0.5)
 
 	proj_mlat_yr_sum_core_low <- proj_mlat_yr_sum_core %>%
-		filter(projection == "ssp126") 
+		filter(projection == "SSP126") 
 	
 	proj_mlat_yr_sum_pot_low <- proj_mlat_yr_sum_pot %>%
-		filter(projection == "ssp126")
+		filter(projection == "SSP126")
 
 	means_proj_core_low <- NA
 	means_proj_pot_low <- NA
@@ -709,10 +707,10 @@
 	
 	
 	proj_mlat_yr_sum_core_high <- proj_mlat_yr_sum_core %>%
-		filter(projection == "ssp585") 
+		filter(projection == "SSP585") 
 	
 	proj_mlat_yr_sum_pot_high <- proj_mlat_yr_sum_pot %>%
-		filter(projection == "ssp585")
+		filter(projection == "SSP585")
 
 	means_proj_core_high <- NA
 	means_proj_pot_high <- NA
@@ -730,8 +728,8 @@
 	
 	core <- rep("core", 80)
 	potential <- rep("potential", 80)
-	low <- rep("low emission\n(ssp126)", 80)
-	high <- rep("high emission\n(ssp585)", 80)
+	low <- rep("low emission\n(SSP126)", 80)
+	high <- rep("high emission\n(SSP585)", 80)
 
 
 	core_low <- as.data.frame(cbind(means_proj_core_low, core, low, years_proj)) %>% 
@@ -768,8 +766,8 @@
 	# for plotting by scenario
 	proj_mean_lat_yr$scen <- NA
 		
-	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "ssp126"] <- "low emission\n(ssp126)"
-	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "ssp585"] <- "high emission\n(ssp585)"
+	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "SSP126"] <- "low emission\n(SSP126)"
+	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "SSP585"] <- "high emission\n(SSP585)"
 	
 	proj_mean_lat_yr <- tidyr::unite(proj_mean_lat_yr,"sim_proj",
 															 simulation, projection, remove = F)
@@ -796,9 +794,9 @@
 		mutate(thresh = sp_hab_threshold)
 	
 	proj_mean_lat_yr$scen_f = factor(proj_mean_lat_yr$scen, 
-															 levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+															 levels=c('low emission\n(SSP126)', 'high emission\n(SSP585)'))
 	rolling_mean_lat_proj$scen_f = factor(rolling_mean_lat_proj$scen, 
-																		levels=c('low emission\n(ssp126)', 'high emission\n(ssp585)'))
+																		levels=c('low emission\n(SSP126)', 'high emission\n(SSP585)'))
 	
 	#### mean latitude plot ####
 	
@@ -840,15 +838,15 @@
 	model_ids_low <- tibble(
 		year = c(2108, 2108, 2108, 1995, 1983), 
 		avg_temp = c(2.1, 0.7, 0.1, 1, 4.4), 
-		lab = c("cesm", "gfdl", "miroc", "hindcast", "(a) Temperature (˚C)"),
-		scen_f = factor("low emission (ssp126)"),
+		lab = c("CESM", "GFDL", "MIROC", "hindcast", "(a) Temperature (˚C)"),
+		scen_f = factor("low emission (SSP126)"),
 		cols = c("#6dc3a9", "#4e8d9c", "#97c3e5", "black", "black"))
 	
 	model_ids_high <- tibble(
 		year = c(2108, 2108, 2108, 1994, 1983), 
 		avg_temp = c(3.7, 2.2, 3.1, 1, 4.4), 
-		lab = c("cesm", "gfdl", "miroc", "hindcast", "(b) Temperature (˚C)"),
-		scen_f = factor("high emission (ssp585)"),
+		lab = c("CESM", "GFDL", "MIROC", "hindcast", "(b) Temperature (˚C)"),
+		scen_f = factor("high emission (SSP585)"),
 		cols = c("#ffabab", "#ff4040", "#ffb733", "black", "black"))
 
 	plot_temp_form_text <- 
@@ -863,18 +861,18 @@
 							color = model_ids_high$cols, 
 							size = 6,
 							alpha = 0.5) +
-		ggtitle("                                 Low emission (ssp126)                                                                             High emission (ssp585)") +
+		ggtitle("                                 Low emission (SSP126)                                                                             High emission (SSP585)") +
 		theme(plot.title = element_text(size = 22, face = "bold", color = "black"))
 	
 	habsuit_labs_dat_low <- tibble(
 		year = c(1997), 
 		mean_hab_suit = c(0.64), 
-		scen_f = factor("low emission (ssp126)"))
+		scen_f = factor("low emission (SSP126)"))
 
 	habsuit_labs_dat_high <- tibble(
 		year = c(1996.5), 
 		mean_hab_suit = c(0.64), 
-		scen_f = factor("high emission (ssp585)"))
+		scen_f = factor("high emission (SSP585)"))
 
 	habsuit_plot_text <- 
 		habsuit_plot +
@@ -887,30 +885,29 @@
 						color = "black",
 						alpha = 0.5, size = 6)
 		
-		
 	# area
 	area_labs_dat_low_core <- tibble(
 		year = c(1993), 
 		area = c(530000), 
-		scen_f = factor("low emission\n(ssp126)"),
+		scen_f = factor("low emission\n(SSP126)"),
 		sp_hab_threshold = factor("core"))
 
 	area_labs_dat_low_potential <- tibble(
 		year = c(1997), 
 		area = c(530000), 
-		scen_f = factor("low emission\n(ssp126)"),
+		scen_f = factor("low emission\n(SSP126)"),
 		sp_hab_threshold = factor("potential"))
 	
 	area_labs_dat_high_core <- tibble(
 		year = c(1993), 
 		area = c(530000), 
-		scen_f = factor("high emission\n(ssp585)"),
+		scen_f = factor("high emission\n(SSP585)"),
 		sp_hab_threshold = factor("core"))
 
 	area_labs_dat_high_potential <- tibble(
 		year = c(1997), 
 		area = c(530000), 
-		scen_f = factor("high emission\n(ssp585)"),
+		scen_f = factor("high emission\n(SSP585)"),
 		sp_hab_threshold = factor("potential"))
 
 	area_plot_text <- 
@@ -942,7 +939,7 @@
 		proj_mean_lat = c(59.5), 
 		label = c("(i) Core mean latitude (˚N)"),
 		cols = c("black"),
-		scen_f = factor("low emission\n(ssp126)"),
+		scen_f = factor("low emission\n(SSP126)"),
 		thresh = factor("core"))
 
 	meanlat_labs_dat_low_potential <- tibble(
@@ -950,7 +947,7 @@
   	proj_mean_lat = c(59.5), 
 		lab = c("(k) Potential mean latitude (˚N)"),
 		cols = c("black"),
-		scen_f = factor("low emission\n(ssp126)"),
+		scen_f = factor("low emission\n(SSP126)"),
 		thresh = factor("potential"))
 	
 	meanlat_labs_dat_high_core <- tibble(
@@ -958,7 +955,7 @@
 		proj_mean_lat = c(59.5), 
 		lab = c("(j) Core mean latitude (˚N)"),
 		cols = c("black"),
-		scen_f = factor("high emission\n(ssp585)"),
+		scen_f = factor("high emission\n(SSP585)"),
 		thresh = factor("core"))
 
 	meanlat_labs_dat_high_potential <- tibble(
@@ -966,7 +963,7 @@
   	proj_mean_lat = c(59.5), 
 		lab = c("(l) Potential mean latitude (˚N)"),
 		cols = c("black"),
-		scen_f = factor("high emission\n(ssp585)"),
+		scen_f = factor("high emission\n(SSP585)"),
 		thresh = factor("potential"))
 
 	mean_lat_plot_text <- 

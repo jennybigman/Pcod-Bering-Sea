@@ -44,26 +44,26 @@
 	# add in scenario as factor
 	yearly_hab_dat_proj_last$scen <- NA
 	
-  yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "ssp126"] <- "low\nemission\n(ssp126)"
-	yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "ssp585"] <- "high\nemission\n(ssp585)"
+  yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "SSP126"] <- "low\nemission\n(SSP126)"
+	yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "SSP585"] <- "high\nemission\n(SSP585)"
 	
 	yearly_hab_dat_proj_last$scen_f = factor(yearly_hab_dat_proj_last$scen, 
-																					levels=c('low\nemission\n(ssp126)', 
-																									 'high\nemission\n(ssp585)'))
+																					levels=c('low\nemission\n(SSP126)', 
+																									 'high\nemission\n(SSP585)'))
 
 	yearly_hab_dat_proj_last$scen <- NA
 	
-  yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "ssp126"] <- "low\nemission\n(ssp126)"
-	yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "ssp585"] <- "high\nemission\n(ssp585)"
+  yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "SSP126"] <- "low\nemission\n(SSP126)"
+	yearly_hab_dat_proj_last$scen[yearly_hab_dat_proj_last$projection == "SSP585"] <- "high\nemission\n(SSP585)"
 	
 	
 	yearly_hab_dat_proj_last$scen_f = factor(yearly_hab_dat_proj_last$scen, 
-																						 levels=c('low\nemission\n(ssp126)', 
-																											'high\nemission\n(ssp585)'))
+																						 levels=c('low\nemission\n(SSP126)', 
+																											'high\nemission\n(SSP585)'))
 	
 	yearly_hab_dat_proj_last$scen_f = factor(yearly_hab_dat_proj_last$scen, 
-																						 levels=c('low\nemission\n(ssp126)', 
-																											'high\nemission\n(ssp585)'))
+																						 levels=c('low\nemission\n(SSP126)', 
+																											'high\nemission\n(SSP585)'))
 
 
 	#### plots ####
