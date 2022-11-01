@@ -11,11 +11,6 @@
 	# read in hindcast data
 	ROMS_hindcast_dat  <- fread(file = "./data/ROMS_hindcast_dat.csv")
 	
-	# read in ROMS projected temperature data --- CHANGED THINGS AROUND SO IGNORE THIS
-	#cesm_dat_trim <- fread(file = here("data", "cesm_dat_trim.csv"))
-	#gfdl_dat_trim <- fread(file = here("data", "gfdl_dat_trim.csv"))
-	#miroc_dat_trim <- fread(file = here("data", "miroc_dat_trim.csv"))
-	
 	# read in ROMS projected temps but not trimmed to Ortiz regions --- NEED TO CHANGE THIS BACK TO TRIMMED DATA ONCE IT WORKS
 	cesm_dfs_trim <- fread("./data/cesm_dfs_trim.csv")
 	gfdl_dfs_trim <- fread("./data/gfdl_dfs_trim.csv")
@@ -50,7 +45,7 @@
 	
 	#2 calculate the mean of the projections during the reference years ####
 	
-	cesm_baseline_temp_dat <- cesm_dfs_trim %>% # changed this from cesm_dat_trim
+	cesm_baseline_temp_dat <- cesm_dfs_trim %>% 
 		filter(., year %in% baseline_years)
 	
 	# estimate a monthly-avg temp for each grid cell for each month 
@@ -64,7 +59,7 @@
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
 	cesm_proj_temp_dat <- cesm_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 calculate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -81,17 +76,18 @@
 	cesm_bc_temps <- merge(ROMS_baseline_temp_dat_mo, cesm_delta_dat,
 											 by = c("Lat", "Lon", "month"))
 	
-	cesm_bc_temps <- cesm_bc_temps %>%
+	cesm_bc_temps_cell <- cesm_bc_temps %>%
 		mutate(sd_ratio = sd_mo_baseline_temp/sd_proj_baseline,
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 	
+	save(cesm_bc_temps_cell, file = "./data/cesm_bc_temps_cell.csv")
 	
 	#### GFDL ####
 	
 	#2 calculate the mean of the projections during the reference years ####
 	
-	gfdl_baseline_temp_dat <- gfdl_dfs_trim %>% ### changed this from gfdl_dat_trim #####
+	gfdl_baseline_temp_dat <- gfdl_dfs_trim %>% 
 		filter(., year %in% baseline_years)
 	
 	# estimate a monthly-avg temp for each grid cell for each month 
@@ -105,7 +101,7 @@
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
 	gfdl_proj_temp_dat <- gfdl_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -122,17 +118,18 @@
 	gfdl_bc_temps <- merge(ROMS_baseline_temp_dat_mo, gfdl_delta_dat,
 											 by = c("Lat", "Lon", "month"))
 	
-	gfdl_bc_temps <- gfdl_bc_temps %>%
+	gfdl_bc_temps_cell <- gfdl_bc_temps %>%
 		mutate(sd_ratio = sd_mo_baseline_temp/sd_proj_baseline,
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 	
-	
+	save(gfdl_bc_temps_cell, file = "./data/gfdl_bc_temps_cell.csv")
+
 	#### MIROC ####
 
 	#2 calculate the mean of the projections during the reference years ####
 	
-	miroc_baseline_temp_dat <- miroc_dfs_trim %>%  ### changed this from miroc_dat_trim #####
+	miroc_baseline_temp_dat <- miroc_dfs_trim %>%  
 		filter(., year %in% baseline_years)
 	
 	# estimate a monthly-avg temp for each grid cell for each month 
@@ -146,7 +143,7 @@
 	#3 estimate the monthly-averaged temps for each grid cell for each yr for projected yrs ####
 	
 	miroc_proj_temp_dat <- miroc_dfs_trim %>% 
-		group_by(projection, year, month, Lat, Lon) %>%
+		group_by(scenario, year, month, Lat, Lon) %>%
 		summarise(mo_avg_proj_temp = mean(temp))
 	
 	#4 estimate deltas (difference btw raw projected temp and mean proj temp across ####
@@ -163,23 +160,152 @@
 	miroc_bc_temps <- merge(ROMS_baseline_temp_dat_mo, miroc_delta_dat,
 											 by = c("Lat", "Lon", "month"))
 	
-	miroc_bc_temps <- miroc_bc_temps %>%
+	miroc_bc_temps_cell <- miroc_bc_temps %>%
 		mutate(sd_ratio = sd_mo_baseline_temp/sd_proj_baseline,
 					 bc_temp = delta + mean_mo_baseline_temp,
 					 bc_temp_sd = (sd_ratio * delta) + mean_mo_baseline_temp)
 
-	
+	save(miroc_bc_temps_cell, file = "./data/miroc_bc_temps_cell.csv")
 	
 	#### add together ####
 	
-	cesm_bc_temps$simulation <- "cesm"
-	gfdl_bc_temps$simulation <- "gfdl"
-	miroc_bc_temps$simulation <- "miroc"
+	cesm_bc_temps_cell$simulation <- "cesm"
+	gfdl_bc_temps_cell$simulation <- "gfdl"
+	miroc_bc_temps_cell$simulation <- "miroc"
 	
-	proj_temp_dat_all <- bind_rows(cesm_bc_temps, gfdl_bc_temps, miroc_bc_temps) ## this is not trimmed
+	proj_temp_dat_all_cell <- bind_rows(cesm_bc_temps_cell, 
+																			gfdl_bc_temps_cell,
+																			miroc_bc_temps_cell) ## this is not trimmed
 	
-	fwrite(proj_temp_dat_all, file = here("./data/ROMS_proj_temp_dat_all.csv"))
+	fwrite(proj_temp_dat_all_cell, file = here("./data/ROMS_proj_temp_dat_all_cell.csv"))
 	
+	#### spatially map the SD ratios ####
+	
+	# cesm
+	cesm_bc_temps_cell_sum <- cesm_bc_temps_cell %>%
+			group_by(Lat, Lon) %>%
+			summarize(mean_sd_ratio = mean(sd_ratio)) %>%
+  		 mutate(long_not_360 = case_when(
+						 Lon >= 180 ~ Lon - 360,
+						 Lon < 180 ~ Lon)) 
+  
+	cesm_bc_temps_cell_sum_sf <- cesm_bc_temps_cell_sum %>% 
+  	st_as_sf(coords = c("long_not_360", "Lat"), crs = 4326, remove = FALSE)
+  
+	variance_ratio_map_cesm <-
+			ggplot() +
+			geom_sf(data = cesm_bc_temps_cell_sum_sf, aes(color = mean_sd_ratio))  +
+			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+			coord_sf(crs = 3338) +
+			scale_color_viridis_c() +
+ 			scale_x_continuous(
+ 			 breaks = c(-170, -160),
+			 labels = c("-170˚", "-160˚"),
+			 limits = c(-1400000, 10000),
+ 				name = "Longitude") +
+ 			scale_y_continuous(
+ 				breaks = breaks_y,
+ 				limits = limits_y,
+ 				name = "Latitude") +
+    	labs(colour = "variance ratio") +
+			theme_bw() +
+			theme(plot.title = element_text(hjust = 0.5),
+						plot.tag.position = c(0.2, 0.87),
+						axis.text = element_text(size = 12, colour = "grey50"),
+  		  		axis.ticks.x = element_line(colour = "grey50"),
+  		  		axis.line = element_blank(),
+  		  		axis.title.x = element_text(size=14, color = "grey50"),
+  		  		panel.border = element_rect(fill = NA, color = "grey50"),
+						plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+	 ggsave("./output/plots/variance_ratio_map_cesm.png",
+			 variance_ratio_map_cesm,
+			 width = 8, height = 8, units = "in")
+
+	#gfdl
+	gfdl_bc_temps_cell_sum <- gfdl_bc_temps_cell %>%
+			group_by(Lat, Lon) %>%
+			summarize(mean_sd_ratio = mean(sd_ratio)) %>%
+  		 mutate(long_not_360 = case_when(
+						 Lon >= 180 ~ Lon - 360,
+						 Lon < 180 ~ Lon)) 
+  
+	gfdl_bc_temps_cell_sum_sf <- gfdl_bc_temps_cell_sum %>% 
+  	st_as_sf(coords = c("long_not_360", "Lat"), crs = 4326, remove = FALSE)
+  
+	variance_ratio_map_gfdl <-
+			ggplot() +
+			geom_sf(data = gfdl_bc_temps_cell_sum_sf, aes(color = mean_sd_ratio))  +
+			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+			coord_sf(crs = 3338) +
+			scale_color_viridis_c() +
+ 			scale_x_continuous(
+ 			 breaks = c(-170, -160),
+			 labels = c("-170˚", "-160˚"),
+			 limits = c(-1400000, 10000),
+ 				name = "Longitude") +
+ 			scale_y_continuous(
+ 				breaks = breaks_y,
+ 				limits = limits_y,
+ 				name = "Latitude") +
+    	labs(colour = "variance ratio") +
+			theme_bw() +
+			theme(plot.title = element_text(hjust = 0.5),
+						plot.tag.position = c(0.2, 0.87),
+						axis.text = element_text(size = 12, colour = "grey50"),
+  		  		axis.ticks.x = element_line(colour = "grey50"),
+  		  		axis.line = element_blank(),
+  		  		axis.title.x = element_text(size=14, color = "grey50"),
+  		  		panel.border = element_rect(fill = NA, color = "grey50"),
+						plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+	 ggsave("./output/plots/variance_ratio_map_gfdl.png",
+			 variance_ratio_map_gfdl,
+			 width = 8, height = 8, units = "in")
+
+	
+	# miroc
+	miroc_bc_temps_cell_sum <- miroc_bc_temps_cell %>%
+			group_by(Lat, Lon) %>%
+			summarize(mean_sd_ratio = mean(sd_ratio)) %>%
+  		 mutate(long_not_360 = case_when(
+						 Lon >= 180 ~ Lon - 360,
+						 Lon < 180 ~ Lon)) 
+  
+	miroc_bc_temps_cell_sum_sf <- miroc_bc_temps_cell_sum %>% 
+  	st_as_sf(coords = c("long_not_360", "Lat"), crs = 4326, remove = FALSE)
+  
+	variance_ratio_map_miroc <-
+			ggplot() +
+			geom_sf(data = miroc_bc_temps_cell_sum_sf, aes(color = mean_sd_ratio))  +
+			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+			coord_sf(crs = 3338) +
+			scale_color_viridis_c() +
+ 			scale_x_continuous(
+ 			 breaks = c(-170, -160),
+			 labels = c("-170˚", "-160˚"),
+			 limits = c(-1400000, 10000),
+ 				name = "Longitude") +
+ 			scale_y_continuous(
+ 				breaks = breaks_y,
+ 				limits = limits_y,
+ 				name = "Latitude") +
+    	labs(colour = "variance ratio") +
+			theme_bw() +
+			theme(plot.title = element_text(hjust = 0.5),
+						plot.tag.position = c(0.2, 0.87),
+						axis.text = element_text(size = 12, colour = "grey50"),
+  		  		axis.ticks.x = element_line(colour = "grey50"),
+  		  		axis.line = element_blank(),
+  		  		axis.title.x = element_text(size=14, color = "grey50"),
+  		  		panel.border = element_rect(fill = NA, color = "grey50"),
+						plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+	 ggsave("./output/plots/variance_ratio_map_miroc.png",
+			 variance_ratio_map_miroc,
+			 width = 8, height = 8, units = "in")
+		
+
 
 	
 	## remove grid cells based on depth and location (keep those < 250 m and within Ortiz regions)

@@ -42,15 +42,15 @@
 		scale_x_continuous(
 			breaks = c(0.2, 0.3, 0.4),
 			labels = c(0.2, 0.3, 0.4),
-			name = "Annual spawning habitat suitbility") +
+			name = "Annual spawning habitat suitability") +
 		scale_y_continuous(
 			breaks = c(18, 19, 20, 21),
 			labels = c(18, 19, 20, 21),
 			limits = c(18, 21),
 			name = "Log(abundance)") +
-		geom_errorbar(aes(x = mean_hab_suit, ymin = lower, ymax = upper), size = 4) +
+		#geom_errorbar(aes(x = mean_hab_suit, ymin = lower, ymax = upper), size = 4) +
 		theme_bw() +
-		annotate("text", label = "Pearson's correlation\ncoefficient = -0.25",
+		annotate("text", label = "Pearson's correlation\ncoefficient = -0.16",
 						 y = 21, x = 0.4, size = 3, alpha = 0.7) +
 		theme(
 			axis.text = element_text(size = 10, colour = "grey50"),

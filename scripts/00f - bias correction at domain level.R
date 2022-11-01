@@ -766,6 +766,16 @@
 			facet_grid(simulation ~ projection) +
 			scale_fill_manual(name = "sim_proj", values = colors) +
 			theme_bw() +
+			scale_y_continuous(
+				breaks = c(0, 0.25, 0.5, 0.75),
+				labels = c(0, 0.25, 0.5, 0.75),
+				limits = c(0, 0.75)
+			) +
+			scale_x_continuous(
+				breaks = c(-4, 0, 4, 8, 12),
+				labels = c(-4, 0, 4, 8, 12),
+				limits = c(-4.5, 14)
+			) +
 			theme(legend.position = "none") +
 			ggtitle("bias-corrected temp using just mean")
 
@@ -777,6 +787,16 @@
 			geom_density(aes(x = bc_temp_sd, fill = sim_proj, group = sim_proj)) +
 			facet_grid(simulation ~ projection) +
 			scale_fill_manual(name = "sim_proj", values = colors) +
+			scale_y_continuous(
+				breaks = c(0, 0.25, 0.5, 0.75),
+				labels = c(0, 0.25, 0.5, 0.75),
+				limits = c(0, 0.75)
+			) +
+			scale_x_continuous(
+				breaks = c(-4, 0, 4, 8, 12),
+				labels = c(-4, 0, 4, 8, 12),
+				limits = c(-4.5, 14)
+			) +
 			theme_bw() +			
 			theme(legend.position = "none") +
 			ggtitle("bias-corrected temp using mean and sd")
@@ -784,3 +804,39 @@
 		ggsave("./output/plots/temp_bc_meansd_plot.png",
 			 temp_bc_meansd_plot,
 			 width = 15, height = 5, units = "in")
+		
+		# spatially plot variance ratio
+		ROMS_projected_dat_sf_sum <- ROMS_projected_dat_sf %>%
+			group_by(latitude, longitude) %>%
+			summarize(mean_sd_ratio = mean(sd_ratio))
+			
+		colfunc <- colorRampPalette(c("#005b96", "#b2cddf"))
+		rev_cols <- colfunc(6)
+
+		variance_ratio_map_region <-
+			ggplot() +
+			geom_sf(data = ROMS_projected_dat_sf_sum, aes(color = mean_sd_ratio))  +
+			geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+			coord_sf(crs = 3338) +
+			scale_color_viridis_c() +
+ 			scale_x_continuous(
+ 			 breaks = c(-170, -160),
+			 labels = c("-170˚", "-160˚"),
+			 limits = c(-1400000, 10000),
+ 				name = "Longitude") +
+ 			scale_y_continuous(
+ 				breaks = breaks_y,
+ 				limits = limits_y,
+ 				name = "Latitude") +
+    	labs(colour = "variance ratio") +
+			theme_bw() +
+			theme(plot.title = element_text(hjust = 0.5),
+						plot.tag.position = c(0.2, 0.87),
+						axis.text = element_text(size = 12, colour = "grey50"),
+  		  		axis.ticks.x = element_line(colour = "grey50"),
+  		  		axis.line = element_blank(),
+  		  		axis.title.x = element_text(size=14, color = "grey50"),
+  		  		panel.border = element_rect(fill = NA, color = "grey50"),
+						plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+		

@@ -28,6 +28,10 @@
 	
 	hind_mean_lat_yr <- bind_rows(hind_mean_lats_yr_0.5, hind_mean_lats_yr_0.9) 
 	
+	# mean latitude for both core and potential habitat during historical period
+	mean_lat_hist <- hind_mean_lat_yr %>%
+		group_by(sp_hab_threshold) %>%
+		dplyr::summarize(mean_lat = mean(hist_mean_lat))
 	
 	#### projections ####
 	
@@ -59,6 +63,17 @@
 	
 	proj_mean_lat_yr <- tidyr::unite(proj_mean_lat_yr,"sim_proj",
 																			 simulation, projection, remove = F)
+	
+	# mean lat for core and potential habitat in 2100 
+	mean_lat_proj <- proj_mean_lat_yr %>%
+		filter(year == 2099) %>%
+		group_by(sp_hab_threshold, projection) %>%
+		dplyr::summarise(mean_lat_proj = mean(proj_mean_lat))
+	
+	mean_lat_proj <- merge(mean_lat_proj, mean_lat_hist, by = "sp_hab_threshold")
+	
+	mean_lat_proj <- mean_lat_proj %>%
+		mutate(lat_increase = mean_lat - mean_lat_proj)
 
 #	proj_mean_lats_yr_var_df_plot <- proj_mean_lats_yr_var_df %>%
 #		filter(!str_detect(sim_proj, "_historical"))

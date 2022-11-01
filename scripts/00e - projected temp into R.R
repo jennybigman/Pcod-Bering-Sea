@@ -7,19 +7,23 @@
 	library(data.table)
 	library(sf)
 	
-	# set up lat/lons from area grid file
+	## set up lat/lons from area grid file
 
-	# download from server
-	url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
-  opendap_area  <- "dodsC/extended_grid/Bering10K_extended_grid.nc"
+	## download from server
+	#url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
+  #opendap_area  <- "dodsC/extended_grid/Bering10K_extended_grid.nc"
   
-  nc <- nc_open(paste(url_base,opendap_area,sep=""))
+  #nc <- nc_open(paste(url_base,opendap_area,sep=""))
   
-  # create objects for known lats and longs and xi and eta axes
-  lats <- ncvar_get(nc,"lat_rho")
-  lons <- ncvar_get(nc,"lon_rho")
+  ## create objects for known lats and longs and xi and eta axes
+  #lats <- ncvar_get(nc,"lat_rho")
+  #lons <- ncvar_get(nc,"lon_rho")
  
-	nc_close(nc)
+	#nc_close(nc)
+	
+	# above isn't working because of the nc file connection, use already-downloaded
+	# lat/lons from area dataframe
+	
 
   #### CESM simulations ####
   
@@ -46,9 +50,15 @@
   
   cesm_hist_dfs <- bind_rows(cesm_hist_df_list)
   
+  # below code needed because nc file connection to obtain lat/lons not working
+  cesm_hist_dfs <- cesm_hist_dfs %>%
+  	mutate(Xi = xi_rho,
+  				 Eta = eta_rho) %>% 
+  	left_join(area_df, by = c("Xi", "Eta"))
+  
   # add in lat/longs matched to xi/eta 
-	cesm_hist_dfs$Lon <- lons[cbind(cesm_hist_dfs$xi_rho, cesm_hist_dfs$eta_rho)]
-	cesm_hist_dfs$Lat <- lats[cbind(cesm_hist_dfs$xi_rho, cesm_hist_dfs$eta_rho)]
+	#cesm_hist_dfs$Lon <- lons[cbind(cesm_hist_dfs$xi_rho, cesm_hist_dfs$eta_rho)]
+	#cesm_hist_dfs$Lat <- lats[cbind(cesm_hist_dfs$xi_rho, cesm_hist_dfs$eta_rho)]
 
 	# create object for time axis
 	cesm_hist_dfs$DateTime <- as.POSIXct(cesm_hist_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
@@ -75,8 +85,13 @@
   cesm_ssp126_dfs <- bind_rows(cesm_ssp126_df_list)
   
   # add in lat/longs matched to xi/eta 
-	cesm_ssp126_dfs$Lon <- lons[cbind(cesm_ssp126_dfs$xi_rho, cesm_ssp126_dfs$eta_rho)]
-	cesm_ssp126_dfs$Lat <- lats[cbind(cesm_ssp126_dfs$xi_rho, cesm_ssp126_dfs$eta_rho)]
+	#cesm_ssp126_dfs$Lon <- lons[cbind(cesm_ssp126_dfs$xi_rho, cesm_ssp126_dfs$eta_rho)]
+	#cesm_ssp126_dfs$Lat <- lats[cbind(cesm_ssp126_dfs$xi_rho, cesm_ssp126_dfs$eta_rho)]
+ 
+  cesm_ssp126_dfs <- cesm_ssp126_dfs %>%
+  	mutate(Xi = xi_rho,
+  				 Eta = eta_rho) %>% 
+  	left_join(area_df, by = c("Xi", "Eta"))
 
 	# create object for time axis
 	cesm_ssp126_dfs$DateTime <- as.POSIXct(cesm_ssp126_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
@@ -104,8 +119,13 @@
   cesm_ssp585_dfs <- bind_rows(cesm_ssp585_df_list)
   
   # add in lat/longs matched to xi/eta 
-	cesm_ssp585_dfs$Lon <- lons[cbind(cesm_ssp585_dfs$xi_rho, cesm_ssp585_dfs$eta_rho)]
-	cesm_ssp585_dfs$Lat <- lats[cbind(cesm_ssp585_dfs$xi_rho, cesm_ssp585_dfs$eta_rho)]
+	#cesm_ssp585_dfs$Lon <- lons[cbind(cesm_ssp585_dfs$xi_rho, cesm_ssp585_dfs$eta_rho)]
+	#cesm_ssp585_dfs$Lat <- lats[cbind(cesm_ssp585_dfs$xi_rho, cesm_ssp585_dfs$eta_rho)]
+
+  cesm_ssp585_dfs <- cesm_ssp585_dfs %>%
+  	mutate(Xi = xi_rho,
+  				 Eta = eta_rho) %>% 
+  	left_join(area_df, by = c("Xi", "Eta"))
 
 	# create object for time axis
 	cesm_ssp585_dfs$DateTime <- as.POSIXct(cesm_ssp585_dfs$ocean_time, origin = "1900-01-01", tz = "GMT")
@@ -135,128 +155,6 @@
 	
   fwrite(cesm_dfs_trim, "./data/cesm_dfs_trim.csv")
 	
-
-  # cesm plots ####
-  
-  # yearly plot
-	
-	# summarize by year
-  #cesm_dat_trim_sum <- cesm_dat_trim %>%
-	#	filter(., scenario != "historical") %>%
-	#	group_by(scenario, Lat, Lon, year) %>%
-	#	summarise(mean_temp = mean(temp))
-#
-  ## convert to sf object
-  #cesm_dat_trim_sum_sf <- cesm_dat_trim_sum %>% 
-	#		mutate(latitude = Lat,
-	#			long_not_360 = case_when(
-	#				Lon >= 180 ~ Lon - 360,
-	#				Lon < 180 ~ Lon)) %>%
-  #		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326)
-  #	
-#
-  #cesm_yr_plot_func <- function(x){
-	#	
-	#			new_dat <- cesm_dfs_trim_sum_sf %>% filter(., year == x)
-  #  
-  #  	  plot <- 
-  #  	  	ggplot() +
-	#				geom_sf(data = new_dat, aes(color = mean_temp))  +
-	#				geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-  #				facet_wrap(~ scenario) +
-	#				coord_sf(crs = 3338) +
-	#				scale_color_viridis_c() +
- 	#				scale_x_continuous(
- 	#					breaks = c(-175, -170, -165, -160),
- 	#					labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 	#					name = "Longitude",
- 	#					limits = c(-1400000, -150000)
- 	#				) +
- 	#				scale_y_continuous(
- 	#					breaks = c(55, 60),
- 	#					limits = c(470000, 1900000),
- 	#					name = "Latitude",
- 	#				) +
-  #  	  	labs(colour = "bottom temp C") +
-	#				theme_bw() +
- 	#				theme(
- 	#					axis.text = element_text(size = 12),	
-  #					axis.title = element_text(size = 14),
-  #					legend.title.align=0.5)
-  #  	  
-   # 	  plot
-    	  
-#	}
-#	
-#	years <- unique(cesm_dfs_trim_sum_sf$year)
-#	
-#	yr_plot_list <- lapply(years, cesm_yr_plot_func)
-#  
-#  yr_name_func_year <- function(x){
-#  	year_name <- paste0(x, "_cesm_yr_btemp.png")
-#  }
-#   
-#  names_year <- sapply(years, yr_name_func_year)
-#  
-#	yr_name_func_file <- function(x){
-#  	year_file_name <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/cesm plots/", x)
-#  }
-#   
-#  yearly_names <- sapply(names_year, yr_name_func_file)
-#
-#	plot_list <- mapply(ggsave_func, x = yr_plot_list, y = yearly_names)
-#
-#	
-	# plot: summary by decade
-
-#	cesm_dat_trim_sum_decade_sf <- cesm_dat_trim_sum_sf %>%
-#		mutate(decade = case_when(
-#			between(year, 2010, 2019) ~ "2010s",
-#			between(year, 2020, 2029) ~ "2020s",
-#			between(year, 2030, 2039) ~ "2030s",
-#			between(year, 2040, 2049) ~ "2040s",
-#			between(year, 2050, 2059) ~ "2050s",
-#			between(year, 2060, 2069) ~ "2060s",
-#			between(year, 2070, 2079) ~ "2070s",
-#			between(year, 2080, 2089) ~ "2080s",
-#			between(year, 2090, 2099) ~ "2090s"))
-#
-#	plot_cesm_decade <- 
-#  		ggplot() +
-#					geom_sf(data = cesm_dat_trim_sum_decade_sf, 
-#									aes(color = mean_temp))  +
-#					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-#					coord_sf(crs = 3338) +
-#  		    facet_grid(scenario ~ decade) +
-#					scale_color_viridis_c() +
-# 					scale_x_continuous(
-# 						breaks = c(-175, -170, -165, -160),
-# 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
-# 						name = "Longitude",
-# 						limits = c(-1400000, -150000)
-# 					) +
-# 					scale_y_continuous(
-# 						breaks = c(55, 60),
-# 						limits = c(470000, 1900000),
-# 						name = "Latitude",
-# 					) +
-#    	  	labs(colour = "bottom temp C") +
-#					theme_bw() +
-# 					theme(
-# 						strip.text = element_text(size = 14, face = "bold"),
-# 						strip.background = element_blank(),
-# 						axis.text = element_text(size = 12),	
-#  					axis.title = element_text(size = 14),
-#  					legend.title = element_text(hjust = 0.5, size = 12),
-# 						plot.title = element_text(size = 18, face = "bold")
-# 						)
-#  	
-#		ggsave("./output/plots/plot_cesm_decade.png",
-#			plot_cesm_decade,
-#			width = 15, height = 10, units = "in")
-#	
-		
-
 	
 	#### GFDL simulations ####
   
@@ -369,110 +267,7 @@
 	
 	fwrite(gfdl_dfs_trim, "./data/gfdl_dfs_trim.csv")
 
-  #### gfdl plots ####
   
-  # yearly plots
-  
- #gfdl_yr_plot_func <- function(x){
-	#	
-	#			new_dat <- gfdl_dfs_trim_sum_sf %>% filter(., year == x)
-  #  
-  #  	  plot <- 
-  #  	  	ggplot() +
-	#				geom_sf(data = new_dat, aes(color = mean_temp))  +
-	#				geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-  #  	  	facet_grid(~ scenario) +
-	#				coord_sf(crs = 3338) +
-	#				scale_color_viridis_c() +
- 	#				scale_x_continuous(
- 	#					breaks = c(-175, -170, -165, -160),
- 	#					labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 	#					name = "Longitude",
- 	#					limits = c(-1400000, -150000)
- 	#				) +
- 	#				scale_y_continuous(
- 	#					breaks = c(55, 60),
- 	#					limits = c(470000, 1900000),
- 	#					name = "Latitude",
- 	#				) +
-  #  	  	labs(colour = "bottom temp C") +
-	#				theme_bw() +
- 	#				theme(
- 	#					axis.text = element_text(size = 12),	
-  #					axis.title = element_text(size = 14),
-  #					legend.title.align=0.5)
-  #  	  
-  #  	  plot
-  #  	  
-	#}
-	#
-	#years <- unique(gfdl_dfs_trim_sum_sf$year)
-	#
-	#yr_plot_list <- lapply(years, gfdl_yr_plot_func)
-  #
-  #yr_name_func_year <- function(x){
-  #	year_name <- paste0(x, "_gfdl_yr_btemp.png")
-  #}
-  # 
-  #names_year <- sapply(years, yr_name_func_year)
-  #
-	#yr_name_func_file <- function(x){
-  #	year_file_name <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/gfdl plots/", x)
-  #}
-  # 
-  #yearly_names <- sapply(names_year, yr_name_func_file)
-#
-	#plot_list <- mapply(ggsave_func, x = yr_plot_list, y = yearly_names)
-#
-	## plot: summary by decade
-#
-	#gfdl_dat_trim_sum_decade_sf <- gfdl_dat_trim_sum_sf %>%
-	#	mutate(decade = case_when(
-	#		between(year, 2010, 2019) ~ "2010s",
-	#		between(year, 2020, 2029) ~ "2020s",
-	#		between(year, 2030, 2039) ~ "2030s",
-	#		between(year, 2040, 2049) ~ "2040s",
-	#		between(year, 2050, 2059) ~ "2050s",
-	#		between(year, 2060, 2069) ~ "2060s",
-	#		between(year, 2070, 2079) ~ "2070s",
-	#		between(year, 2080, 2089) ~ "2080s",
-	#		between(year, 2090, 2099) ~ "2090s"))
-	#
-	#plot_gfdl_decade <- 
-  #		ggplot() +
-	#				geom_sf(data = gfdl_dat_trim_sum_decade_sf, 
-	#								aes(color = mean_temp))  +
-	#				geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-	#				coord_sf(crs = 3338) +
-  #		    facet_grid(scenario ~ decade) +
-	#				scale_color_viridis_c() +
- 	#				scale_x_continuous(
- 	#					breaks = c(-175, -170, -165, -160),
- 	#					labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 	#					name = "Longitude",
- 	#					limits = c(-1400000, -150000)
- 	#				) +
- 	#				scale_y_continuous(
- 	#					breaks = c(55, 60),
- 	#					limits = c(470000, 1900000),
- 	#					name = "Latitude",
- 	#				) +
-  #  	  	labs(colour = "bottom temp C") +
-	#				theme_bw() +
- 	#				theme(
- 	#					strip.text = element_text(size = 14, face = "bold"),
- 	#					strip.background = element_blank(),
- 	#					axis.text = element_text(size = 12),	
-  #					axis.title = element_text(size = 14),
-  #					legend.title = element_text(hjust = 0.5, size = 12),
- 	#					plot.title = element_text(size = 18, face = "bold")
- 	#					)
-  #	
-	#	ggsave("./output/plots/plot_gfdl_decade.png",
-	#		plot_gfdl_decade,
-	#		width = 15, height = 10, units = "in")
-	
-	
 	#### MIROC simulations ####
 
   # read in files
@@ -586,105 +381,4 @@
 	fwrite(miroc_dfs_trim, "./data/miroc_dfs_trim.csv")
 	
   	
-  # miroc plots ####
   
-  # yearly plots
-  
-  #miroc_yr_plot_func <- function(x){
-	#	
-	#			new_dat <- miroc_dfs_trim_sum_sf %>% filter(., year == x)
-  #  
-  #  	  plot <- 
-  #  	  	ggplot() +
-	#				geom_sf(data = new_dat, aes(color = mean_temp))  +
-	#				geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-  #  	  	facet_grid(~ scenario) +
-	#				coord_sf(crs = 3338) +
-	#				scale_color_viridis_c() +
- 	#				scale_x_continuous(
- 	#					breaks = c(-175, -170, -165, -160),
- 	#					labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 	#					name = "Longitude",
- 	#					limits = c(-1400000, -150000)
- 	#				) +
- 	#				scale_y_continuous(
- 	#					breaks = c(55, 60),
- 	#					limits = c(470000, 1900000),
- 	#					name = "Latitude",
- 	#				) +
-  #  	  	labs(colour = "bottom temp C") +
-	#				theme_bw() +
- 	#				theme(
- 	#					axis.text = element_text(size = 12),	
-  #					axis.title = element_text(size = 14),
-  #					legend.title.align=0.5)
-  #  	  
-  #  	  plot
-  #  	  
-	#}
-	#
-	#years <- unique(miroc_dfs_trim_sum_sf$year)
-	#
-	#yr_plot_list <- lapply(years, miroc_yr_plot_func)
-  #
-  #yr_name_func_year <- function(x){
-  #	year_name <- paste0(x, "_miroc_yr_btemp.png")
-  #}
-  # 
-  #names_year <- sapply(years, yr_name_func_year)
-  #
-	#yr_name_func_file <- function(x){
-  #	year_file_name <- paste0("/Users/jenniferbigman/My Drive/NOAA AFSC Postdoc/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/yearly plots/projected temps/miroc plots/", x)
-  #}
-  # 
-  #yearly_names <- sapply(names_year, yr_name_func_file)
-#
-	#plot_list <- mapply(ggsave_func, x = yr_plot_list, y = yearly_names)
-#
-	## plot: summary by decade
-#
-	#miroc_dat_trim_sum_decade_sf <- miroc_dat_trim_sum_sf %>%
-	#	mutate(decade = case_when(
-	#		between(year, 2010, 2019) ~ "2010s",
-	#		between(year, 2020, 2029) ~ "2020s",
-	#		between(year, 2030, 2039) ~ "2030s",
-	#		between(year, 2040, 2049) ~ "2040s",
-	#		between(year, 2050, 2059) ~ "2050s",
-	#		between(year, 2060, 2069) ~ "2060s",
-	#		between(year, 2070, 2079) ~ "2070s",
-	#		between(year, 2080, 2089) ~ "2080s",
-	#		between(year, 2090, 2099) ~ "2090s"))
-	#
-	#plot_miroc_decade <- 
-  #		ggplot() +
-	#				geom_sf(data = miroc_dat_trim_sum_decade_sf, 
-	#								aes(color = mean_temp))  +
-	#				geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
-	#				coord_sf(crs = 3338) +
-  #		    facet_grid(scenario ~ decade) +
-	#				scale_color_viridis_c() +
- 	#				scale_x_continuous(
- 	#					breaks = c(-175, -170, -165, -160),
- 	#					labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 	#					name = "Longitude",
- 	#					limits = c(-1400000, -150000)
- 	#				) +
- 	#				scale_y_continuous(
- 	#					breaks = c(55, 60),
- 	#					limits = c(470000, 1900000),
- 	#					name = "Latitude",
- 	#				) +
-  #  	  	labs(colour = "bottom temp C") +
-	#				theme_bw() +
- 	#				theme(
- 	#					strip.text = element_text(size = 14, face = "bold"),
- 	#					strip.background = element_blank(),
- 	#					axis.text = element_text(size = 12),	
-  #					axis.title = element_text(size = 14),
-  #					legend.title = element_text(hjust = 0.5, size = 12),
- 	#					plot.title = element_text(size = 18, face = "bold")
- 	#					)
-  #	
-	#	ggsave("./output/plots/plot_miroc_decade.png",
-	#		plot_miroc_decade,
-	#		width = 15, height = 10, units = "in")#

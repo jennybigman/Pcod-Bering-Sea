@@ -12,9 +12,11 @@
 	 mutate(grid_cell_id = paste0(latitude, longitude))
 	
 	grid_cells <- ROMS_hindcast_dat_gc %>%
-	 distinct(grid_cell_id) %>%
-	 mutate(ID = 1:5024)
-
+	 distinct(grid_cell_id) 
+	
+	grid_cells <- grid_cells %>%
+	 mutate(ID = 1:nrow(grid_cells))
+	
 	ROMS_hindcast_dat_gc <- merge(ROMS_hindcast_dat_gc, grid_cells, by = "grid_cell_id")
 	
 	max_mo_func <- function(x, y){
@@ -27,7 +29,7 @@
 	}
 	
 	years_hind <- unique(ROMS_hindcast_dat_gc$year)
-	grid_cells_hind <- unique(ROMS_hindcast_dat_gc$ID)
+	grid_cells_hind <- (ROMS_hindcast_dat_gc$ID)
 	year_cells <- expand_grid(years_hind, grid_cells_hind)
 	
 	phen_dat_hist <- mapply(max_mo_func,

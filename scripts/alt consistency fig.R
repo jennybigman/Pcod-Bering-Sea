@@ -155,7 +155,7 @@
  			axis.text = element_text(size = 8,  color = "#666666"),	
   		axis.title = element_text(size = 10,  color = "#666666"),
  			axis.ticks = element_line(color = "#666666"),
- 			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
+ 			plot.margin = unit(c(0.1, 0, 0.1, 0.1), "in"))
 
 	current20_consistency05 <-	
 		ggplot() +
@@ -185,7 +185,7 @@
 			axis.text.y = element_blank(),
   		axis.title.y = element_blank(),
  			axis.ticks.y = element_blank(),
- 			plot.margin = unit(c(0.05,-0.1, 0, 0), "in"))
+ 			plot.margin = unit(c(0.1, 0, 0.1, -0.05), "in"))
 
 	
 	last20_consistency05 <-	

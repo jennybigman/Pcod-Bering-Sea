@@ -6,7 +6,7 @@
   
   # set up download from server 
   url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
-  opendap_area  <- "dodsC/extended_grid/Bering10K_extended_grid.nc"
+  opendap_area  <- "dodsC/ancillary/Bering10K_extended_grid.nc"
   
   nc <- nc_open(paste(url_base,opendap_area,sep=""))
   
@@ -37,48 +37,9 @@
   # save df
   fwrite(domain_df, "./data/ROMS_domain_df.csv")
 
-  #### play with corners ####
+  domain_df <- fread(here("./data/ROMS_domain_df.csv"))
   
-  # set up download from server 
-  url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
-  opendap_area  <- "dodsC/extended_grid/Bering10K_extended_grid.nc"
-  
-  nc <- nc_open(paste(url_base,opendap_area,sep=""))
-  
-  # create objects for known lats and longs and xi and eta axes
-  
-  # psi (corners)
-  lats_psi <- ncvar_get(nc,"lat_psi")
-  lons_psi <- ncvar_get(nc,"lon_psi")
-  
-  # rho (center)
-  lats_rho <- ncvar_get(nc,"lat_rho")
-  lons_rho <- ncvar_get(nc,"lon_rho")
-  
-  xi_axis  <- seq(1,181) # Hardcoded axis length, ROMS coordinates
-  eta_axis <- seq(1,257) # Hardcoded axis length, ROMS coordinates
 
-  domain_df <- reshape2::melt(domain_array, 
-                  varnames=c("Xi", "Eta"), 
-                  value.name="domain") %>%
-  						filter(Xi < 181) %>%
-  						filter(Eta < 257)
-  		
-
-  # add lat/long cols
-  
-  domain_df$longitude_corner <- lons_psi[cbind(domain_df$Xi,domain_df$Eta)]
-  domain_df$latitude_corner <- lats_psi[cbind(domain_df$Xi,domain_df$Eta)]
-
-  #domain_df$longitude_center <- lons_rho[cbind(domain_df$Xi,domain_df$Eta)]
-  #domain_df$latitude_center <- lats_rho[cbind(domain_df$Xi,domain_df$Eta)]
-
-  domain_df_sf <- domain_df %>%
-  	mutate(long_corner_not_360 = case_when(
-					 longitude_corner >= 180 ~ longitude_corner - 360,
-					 longitude_corner < 180 ~ longitude_corner)) %>%
-  	st_as_sf(coords = c("long_corner_not_360", "latitude_corner"), crs = 4326, remove = FALSE)
-	
   # plot domains with sf
   ggplot() +
   geom_sf(data = domain_df_sf, aes(color = domain)) +

@@ -1,5 +1,18 @@
 # bathmetry to ggplots 
+	library(marmap)
+	
+	# other packages needed
+	ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+	}
 
+	packages <- c("tidyr", "rgdal", "dplyr", "ggplot2", "ggmap", "lattice", "stringr", "MASS",  "PerformanceAnalytics", "pvclust", "visreg", "Hmisc", "tibble", "ade4", "vegan", "ellipse", "FactoMineR","leaps", "readxl", "sf","maps", "mapdata", "sp", "gstat", "mapplots", "raster", "leaflet", "mapview", "splancs", "marmap")
+	ipak(packages) 
+
+	# load bs regions
 	bsregions <- readOGR("./other:older code/Mapping Code - Bigman/Ortiz Regions", layer="BSIERP_regions_2012")
 
 	# get bathymetry data

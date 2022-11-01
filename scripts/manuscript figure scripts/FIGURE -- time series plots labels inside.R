@@ -124,8 +124,8 @@
 	
 	rolling_mean_temp_proj$scen_f = factor(rolling_mean_temp_proj$scen, 
 																			levels=c('low emission (SSP126)',  
-																							 'high emission (SSP585)'))
-
+																							 'high emission (SSP585)')
+	
 	#### temp plots ####
 	
 	temp_plot <- 

@@ -97,7 +97,7 @@
 			coord_sf(crs = 3338) +
  			scale_x_continuous(
  				breaks = c(-167, -169),
- 				labels = c("-167˚", "-169˚"),
+ 				labels = c("-167˚W", "-169˚W"),
  				name = "Longitude",
  				limits = c(-1030000, -750000)) +
  			scale_y_continuous(
