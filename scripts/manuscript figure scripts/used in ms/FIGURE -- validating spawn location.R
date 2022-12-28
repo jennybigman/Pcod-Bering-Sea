@@ -144,6 +144,10 @@
 			 larval_yr_plot_LATLON,
 			 width = 5, height = 5, units = "in")
 		
+		 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure8.png",
+			 larval_yr_plot_LATLON,
+			 width = 5, height = 5, units = "in")
+
 		### try a fuzzy join to merge stations
 		
 		library(fuzzyjoin)
@@ -260,5 +264,47 @@
 		ggsave("./output/plots/larval_yr_plot_LATLON_2016.png",
 			 larval_yr_plot_LATLON_fuzz,
 			 width = 5, height = 5, units = "in")
+
+		
+		##### plot a uniform grid #####
+		
+		uniform_grid <- read_csv(here("./data/CoreGridStationsLarval_SEBS_withArea.csv"))
+		
+		uniform_grid_sf <- uniform_grid %>%
+			mutate(LON_not_360 = case_when(
+				LON >= 180 ~ LON - 360,
+				LON < 180 ~ LON)) %>%
+		st_as_sf(coords = c("LON_not_360", "LAT"), crs = 4326, remove = FALSE)
+	
+		
+		ggplot() +
+		geom_sf(data = length_dat_sf, 
+						aes(color = CORRECTED_LENGTH, 
+								size = LARVALCATCHPER10M2),
+						alpha = 0.5) +
+		geom_sf(data = uniform_grid_sf) +
+		scale_color_viridis_c() +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+ 		scale_x_continuous(
+ 			breaks = breaks_x,
+ 			labels =labels_x,
+ 			name = "Longitude",
+ 			limits = limits_x) +
+ 		scale_y_continuous(
+ 			breaks = breaks_y,
+ 			limits = limits_y,
+ 			name = "Latitude") +
+		labs(color = "length (mm)", size = expression(paste("catch (per 10m"^{2}*")"))) +
+		theme_bw() +
+		theme(
+			legend.title = element_text(size = 8),
+  		legend.title.align=0.5,
+  		legend.text = element_text(size = 6),
+ 			axis.text = element_text(size = 8, colour = "grey50"),
+  	  axis.ticks = element_line(colour = "grey50"),
+  	  axis.line = element_line(colour = "grey50"),
+			axis.title = element_text(size = 10, color = "grey50"),
+  	  panel.border = element_rect(fill = NA, color = "grey50"))
 
 		

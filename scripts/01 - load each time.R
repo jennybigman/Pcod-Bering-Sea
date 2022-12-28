@@ -27,6 +27,7 @@
 	library(ggtext)
 	library(ggpubr)
 	library(glue)
+	library(MuMIn)
 
 	# turn off spherical geometry
 	sf_use_s2(FALSE)
@@ -81,7 +82,7 @@
   ROMS_projected_dat$month_name <- fct_reorder(ROMS_projected_dat$month_name, 
   																		ROMS_projected_dat$month)
 
-  # convert to a shapefile
+  # convert to an sf object
   ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
   		 mutate(long_not_360 = case_when(
 						 longitude >= 180 ~ longitude - 360,
@@ -105,10 +106,10 @@
 	world_map_data <- ne_countries(scale = "medium", returnclass = "sf") 
 	
 	#### plotting function ####
-  ggsave_func <- function(x,y){
+  ggsave_func <- function(x,y,w = 10,h = 10){
   	ggsave(plot = x,
     file = paste(y,".png",sep=""),
-    width = 10, height = 10, units = "in")
+    width = w, height = h, units = "in")
   }
   
 

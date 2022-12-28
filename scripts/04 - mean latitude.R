@@ -33,6 +33,9 @@
 		group_by(sp_hab_threshold) %>%
 		dplyr::summarize(mean_lat = mean(hist_mean_lat))
 	
+	mean_lat_hind_core <- mean_lat_hist[2,2]
+	mean_lat_hind_pot <- mean_lat_hist[1,2]
+	
 	#### projections ####
 	
 	# bias-corrected temp with variance ratio
@@ -68,7 +71,7 @@
 	mean_lat_proj <- proj_mean_lat_yr %>%
 		filter(year == 2099) %>%
 		group_by(sp_hab_threshold, projection) %>%
-		dplyr::summarise(mean_lat_proj = mean(proj_mean_lat))
+		dplyr::summarise(mean_lat_proj = max(proj_mean_lat))
 	
 	mean_lat_proj <- merge(mean_lat_proj, mean_lat_hist, by = "sp_hab_threshold")
 	

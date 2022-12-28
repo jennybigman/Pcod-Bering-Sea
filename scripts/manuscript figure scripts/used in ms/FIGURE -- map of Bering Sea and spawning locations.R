@@ -79,7 +79,7 @@
 	
 
 
-	bering_sea_map_form <- bering_sea_map +
+	Figure1 <- bering_sea_map +
 		annotate("text", x = -171, y = 53.5, label = "Aleutian Islands", size = 2, angle = 20) +
 		annotate("text", x = -168.5, y = 57.4, label = "Pribilof", size = 2) +
 		annotate("text", x = -168.5, y = 57, label = "Islands", size = 2) +
@@ -97,3 +97,6 @@
 			 bering_sea_map_form,
 			 width = 4, height = 4, units = "in")
  
+	  ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure1.png",
+			 Figure1,
+			 width = 4, height = 4, units = "in")

@@ -39,28 +39,41 @@
 
   domain_df <- fread(here("./data/ROMS_domain_df.csv"))
   
+  area_df <- fread( "./data/ROMS_area_grid_cells.csv")
+	depth_df <- fread("./data/ROMS_depth_df.csv")
 
-  # plot domains with sf
-  ggplot() +
-  geom_sf(data = domain_df_sf, aes(color = domain)) +
-  scale_x_continuous(
-  		limits = c(-150, -179),
- 			name = "Longitude") +
- 		scale_y_continuous(
- 			breaks = c(50, 60, 70),
- 			limits = c(48, 70),
- 			name = "Latitude") 
-  
-  domain_df_sf0 <- domain_df_sf %>%
+	# merge
+	area_depth_df <- merge(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
+
+	area_depth_domain_df <- merge(area_depth_df, domain_df,
+													by = c("latitude", "longitude", "Xi", "Eta"))
+
+  area_depth_domain_df_sf <- area_depth_domain_df %>%
+  		mutate(long_not_360 = case_when(
+						 longitude >= 180 ~ longitude - 360,
+						 longitude < 180 ~ longitude))  %>%
+  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
+	
+  area_depth_domain_df_sf <- area_depth_domain_df_sf %>%
   	filter(domain > 0)
   
-  ggplot() +
-  geom_sf(data = domain_df_sf0, aes(color = domain)) +
-  scale_x_continuous(
-  		limits = c(-150, -179),
- 			name = "Longitude") +
- 		scale_y_continuous(
- 			breaks = c(50, 60, 70),
- 			limits = c(48, 70),
- 			name = "Latitude") 
+  area_depth_domain_df_sf <- area_depth_domain_df_sf %>%
+		filter(., between(depth, 0, 250))
   
+  area_depth_domain_df_sf$domain_f <- as.factor(area_depth_domain_df_sf$domain)
+  
+  domain_map <- 
+  	ggplot() +
+  	geom_sf(data = area_depth_domain_df_sf, aes(color = domain_f)) +
+  	coord_sf(crs = 3338) +
+ 		scale_y_continuous(
+ 				breaks = c(52, 56, 60, 64),
+ 				name = "Latitude") +
+  	scale_x_continuous(
+ 			breaks = c(-160, - 170),
+ 			name = "Longitude")
+  
+  ggsave(here("./output/plots/domain_map.png"),
+			 domain_map,
+			 width = 4, height = 4, units = "in")
+

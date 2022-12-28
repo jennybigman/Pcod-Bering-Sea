@@ -13,8 +13,11 @@
 
 	c_area_hind_dat_sum_yr <- c_area_hind_dat_sum %>%
 		group_by(year) %>%
-		summarize(area = sum(area_km2)) %>% 
+		dplyr::summarize(area = sum(area_km2)) %>% 
 		mutate(sp_hab_threshold = "core")
+
+	# avg core area 1970 - 2020
+	c_area_hind_avg <- mean(c_area_hind_dat_sum_yr$area)
 
 	# potential habitat = sum of area where sps >= 0.5
 	
@@ -27,8 +30,11 @@
 
 	p_area_hind_dat_sum_yr <- p_area_hind_dat_sum %>%
 		group_by(year) %>%
-		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
+		dplyr::summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "potential")
+	
+	# avg potential area 1970 - 2020
+	p_area_hind_avg <- mean(p_area_hind_dat_sum_yr$area)
 	
 	# join together 
 	
@@ -57,7 +63,15 @@
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "core")
 
+	# max area core
+	c_area_proj_max <- c_area_proj_dat_sum_yr %>%
+		group_by(scenario) %>%
+		dplyr::summarize(max_area = max(area))
 
+	# percent increase
+	c_area_low <- ((c_area_proj_max[1,2]) - c_area_hind_avg)/c_area_hind_avg
+	c_area_high <- ((c_area_proj_max[2,2]) - c_area_hind_avg)/c_area_hind_avg
+	
 	# potential habitat = sum of area where sps >= 0.5
 	
 	p_area_proj_dat <- ROMS_projected_dat_proj %>%
@@ -72,6 +86,15 @@
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "potential")
 	
+	# max area pot
+	p_area_proj_max <- p_area_proj_dat_sum_yr %>%
+		group_by(scenario) %>%
+		dplyr::summarize(max_area = max(area))
+
+	# percent increase
+	p_area_low <- ((p_area_proj_max[1,2]) - p_area_hind_avg)/p_area_hind_avg
+	p_area_high <- ((p_area_proj_max[2,2]) - p_area_hind_avg)/p_area_hind_avg
+
 	# join together
 	
 	proj_area_yr <- bind_rows(c_area_proj_dat_sum_yr, p_area_proj_dat_sum_yr)

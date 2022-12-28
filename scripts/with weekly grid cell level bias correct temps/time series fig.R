@@ -1,3 +1,6 @@
+
+#### time series plot but with bc-temps at weekly/grid cell level
+
 # time series plot with y-axis labels inside
 
 	time_series_plot_theme <- function(t = 0,
@@ -35,18 +38,18 @@
 	
 	years_proj <- 2020:2099
 	
-	yearly_temp_proj <- ROMS_projected_dat %>% 
+	yearly_temp_proj <- proj_mo_dfs %>% 
 		filter(year %in% years_proj) %>%
-		group_by(simulation, projection, year) %>%
-   	summarise(avg_temp = mean(bc_temp_sd)) 
+		group_by(simulation, scenario, year) %>%
+   	summarise(avg_temp = mean(bc_temp_mo)) 
 	
 	yearly_temp_proj$scen <- NA
 		
-	yearly_temp_proj$scen[yearly_temp_proj$projection == "SSP126"] <- "low emission (SSP126)"
-	yearly_temp_proj$scen[yearly_temp_proj$projection == "SSP585"] <- "high emission (SSP585)"
+	yearly_temp_proj$scen[yearly_temp_proj$scenario == "ssp126"] <- "low emission (SSP126)"
+	yearly_temp_proj$scen[yearly_temp_proj$scenario == "ssp585"] <- "high emission (SSP585)"
 	
 	yearly_temp_proj <- tidyr::unite(yearly_temp_proj,"sim_proj",
-															 simulation, projection, remove = F)
+															 simulation, scenario, remove = F)
 
 	colors <- c("#6dc3a9", "#ff7373", # cesm low, cesm high
 						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
@@ -124,12 +127,12 @@
 	
 	rolling_mean_temp_proj$scen_f = factor(rolling_mean_temp_proj$scen, 
 																			levels=c('low emission (SSP126)',  
-																							 'high emission (SSP585)')
+																							 'high emission (SSP585)'))
 	
 	#### temp plots ####
 	
-	temp_plot <- 
-	 	ggplot(yearly_temp_proj, aes(year, avg_temp)) +
+	temp_plot_wkgc <- 
+	 	ggplot() +
 		geom_line(data = rolling_mean_temp_hind, 
    						aes(x = years_hind, y = means_hind), 
    						color = light_black) +
@@ -161,7 +164,11 @@
 		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
 
+	#ggplot_build(temp_plot_wkgc)$layout$panel_scales_y[[1]]$range$range
 
+	ggsave(file = "./scripts/with weekly grid cell level bias correct temps/temp_ts_wkgc.png", 
+				 temp_plot_wkgc)
+	
 	#### habitat suitability ####
 	
 	yearly_hab_dat_hind <- ROMS_hindcast_dat %>%
@@ -170,18 +177,18 @@
 	
 	years_proj <- 2020:2099
 
-	yearly_hab_dat_proj <- ROMS_projected_dat %>% 
+	yearly_hab_dat_proj <- proj_mo_dfs %>% 
 		filter(year %in% years_proj) %>%
-		group_by(simulation, projection, year) %>%
-   	summarise(mean_hab_suit = mean(sp_hab_suit_var))
+		group_by(simulation, scenario, year) %>%
+   	summarise(mean_hab_suit = mean(sp_hab_suit))
 
 	yearly_hab_dat_proj$scen <- NA
 		
-	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "SSP126"] <- "low emission (SSP126)"
-	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "SSP585"] <- "high emission (SSP585)"
+	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$scenario == "ssp126"] <- "low emission (SSP126)"
+	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$scenario == "ssp585"] <- "high emission (SSP585)"
 	
 	yearly_hab_dat_proj <- tidyr::unite(yearly_hab_dat_proj,"sim_proj",
-															 simulation, projection, remove = F)
+															 simulation, scenario, remove = F)
 
 	colors <- c("#6dc3a9", "#ffabab", # cesm low, cesm high
 						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
@@ -256,8 +263,8 @@
 	
 	#### habitat suitability plot ####
 	
-	habsuit_plot <- 
-	 	ggplot(data = yearly_hab_dat_proj, aes(x = year, y = mean_hab_suit)) +
+	habsuit_plot_wkgc <- 
+	 	ggplot() +
 		geom_line(data = rolling_mean_habsuit_hind, 
    						aes(x = years_hind, y = means_hind), 
    						color = light_black) +
@@ -289,7 +296,11 @@
 		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
 
-	
+	#ggplot_build(habsuit_plot_wkgc)$layout$panel_scales_y[[1]]$range$range
+
+	ggsave(file = "./scripts/with weekly grid cell level bias correct temps/habsuit_plot_wkgc.png", 
+				 habsuit_plot_wkgc)
+
 	#### area time series ####
 	
 	## hindcast ##
@@ -331,34 +342,34 @@
 	# remove historical years for plotting for presentations
 	years_proj <- 2021:2099
 	
-	ROMS_projected_dat_proj <- ROMS_projected_dat %>%
+	proj_mo_dfs_trim <- proj_mo_dfs %>%
 		filter(year %in% years_proj)
 	
 	# with bias-corrected temperature using variance ratio
 	
-	c_area_proj_dat <- ROMS_projected_dat_proj %>%
-		filter(sp_hab_suit_var >= 0.9) 
+	c_area_proj_dat <- proj_mo_dfs_trim %>%
+		filter(sp_hab_suit >= 0.9) 
 
 	c_area_proj_dat_sum <- c_area_proj_dat %>%
-		group_by(simulation, projection, latitude, longitude, year) %>%
+		group_by(simulation, scenario, latitude, longitude, year) %>%
 		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
 	
 	c_area_proj_dat_sum_yr <- c_area_proj_dat_sum %>%
-		group_by(simulation, projection, year) %>%
+		group_by(simulation, scenario, year) %>%
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "core")
 
 	# potential habitat = sum of area where sps >= 0.5
 	
-	p_area_proj_dat <- ROMS_projected_dat_proj %>%
-		filter(sp_hab_suit_var >= 0.5) 
+	p_area_proj_dat <- proj_mo_dfs_trim %>%
+		filter(sp_hab_suit >= 0.5) 
 
 	p_area_proj_dat_sum <- p_area_proj_dat %>%
-		group_by(simulation, projection, latitude, longitude, year) %>%
+		group_by(simulation, scenario, latitude, longitude, year) %>%
 		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
 	
 	p_area_proj_dat_sum_yr <- p_area_proj_dat_sum %>%
-		group_by(simulation, projection, year) %>%
+		group_by(simulation, scenario, year) %>%
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "potential")
 	
@@ -411,7 +422,7 @@
 
 	# proj
 	proj_area_yr_sum <- proj_area_yr %>%
-		group_by(year, projection, sp_hab_threshold) %>%
+		group_by(year, scenario, sp_hab_threshold) %>%
 		summarise(mean_area = mean(area))
 	
 	proj_area_yr_sum_core <- proj_area_yr_sum %>%
@@ -421,10 +432,10 @@
 		filter(sp_hab_threshold == "potential")
 
 	proj_area_yr_sum_core_low <- proj_area_yr_sum_core %>%
-		filter(projection == "SSP126") 
+		filter(scenario == "ssp126") 
 	
 	proj_area_yr_sum_pot_low <- proj_area_yr_sum_pot %>%
-		filter(projection == "SSP126")
+		filter(scenario == "ssp126")
 
 	
 	means_proj_core_low <- NA
@@ -440,12 +451,11 @@
   	means_proj_pot_low[i] <- mean(proj_area_yr_sum_pot_low$mean_area[win])
   }
 	
-	
 	proj_area_yr_sum_core_high <- proj_area_yr_sum_core %>%
-		filter(projection == "SSP585") 
+		filter(scenario == "ssp585") 
 	
 	proj_area_yr_sum_pot_high <- proj_area_yr_sum_pot %>%
-		filter(projection == "SSP585")
+		filter(scenario == "ssp585")
 
 	means_proj_core_high <- NA
 	means_proj_pot_high <- NA
@@ -472,25 +482,25 @@
 	core_low <- as.data.frame(cbind(means_proj_core_low, core, low, years_proj)) %>% 
 		rename(area = means_proj_core_low, 
 					 sp_hab_threshold = core,
-					 projection = low,
+					 scenario = low,
 					 year = years_proj)
 	
 	core_high <- as.data.frame(cbind(means_proj_core_high, core, high, years_proj)) %>%
 		rename(area = means_proj_core_high, 
 					 sp_hab_threshold = core,
-					 projection = high,
+					 scenario = high,
 					 year = years_proj)
 
 	pot_low <- as.data.frame(cbind(means_proj_pot_low, potential, low, years_proj)) %>% 
 		rename(area = means_proj_pot_low, 
 					 sp_hab_threshold = potential,
-					 projection = low,
+					 scenario = low,
 					 year = years_proj)
 	
 	pot_high <- as.data.frame(cbind(means_proj_pot_high, potential, high, years_proj)) %>%
 		rename(area = means_proj_pot_high, 
 					 sp_hab_threshold = potential,
-					 projection = high,
+					 scenario = high,
 					 year = years_proj)
 
 	
@@ -503,20 +513,20 @@
 	
 	# for plotting by scenario
 		
-	proj_area_yr <- proj_area_yr %>% filter(., projection != "historical")
+	proj_area_yr <- proj_area_yr %>% filter(., scenario != "historical")
 		
 	proj_area_yr$scen <- NA
 		
-	proj_area_yr$scen[proj_area_yr$projection == "SSP126"] <- "low emission\n(SSP126)"
-	proj_area_yr$scen[proj_area_yr$projection == "SSP585"] <- "high emission\n(SSP585)"
+	proj_area_yr$scen[proj_area_yr$scenario == "ssp126"] <- "low emission\n(SSP126)"
+	proj_area_yr$scen[proj_area_yr$scenario == "ssp585"] <- "high emission\n(SSP585)"
 	
 	rolling_area_proj$scen <- NA
 		
-	rolling_area_proj$scen <- rolling_area_proj$projection 
-	rolling_area_proj$scen <- rolling_area_proj$projection 
+	rolling_area_proj$scen <- rolling_area_proj$scenario 
+	rolling_area_proj$scen <- rolling_area_proj$scenario 
 
 	proj_area_yr <- tidyr::unite(proj_area_yr,"sim_proj",
-															 simulation, projection, remove = F)
+															 simulation, scenario, remove = F)
 
 	colors <- c("#6dc3a9", "#ff7373", # cesm low, cesm high
 						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
@@ -535,7 +545,7 @@
 	
 	#### area plots ####
 	
-	area_plot <-    
+	area_plot_wkgc <-    
    	ggplot(data = proj_area_yr, aes(year, area)) +
 		geom_line(data = rolling_area_hind, 
    						aes(x = year, y = area), 
@@ -563,6 +573,11 @@
 		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
 	
+		#ggplot_build(area_plot_wkgc)$layout$panel_scales_y[[1]]$range$range
+
+		ggsave(file = "./scripts/with weekly grid cell level bias correct temps/area_plot_wkgc.png", 
+				 area_plot_wkgc)
+
 	#### mean latitude time series ####
 	
 	# calculating the mean latitude of spawning habitat suitability
@@ -604,12 +619,12 @@
 		
 	proj_mean_lat_yr <- function(x){
 		
-		new_dat <- ROMS_projected_dat %>%
-			filter(., sp_hab_suit_var >= x)
+		new_dat <- proj_mo_dfs_trim %>%
+			filter(., sp_hab_suit >= x)
 		
 		new_dat_sum <- new_dat %>%
-			group_by(simulation, projection, year) %>%
-			summarise(proj_mean_lat = mean(Lat)) 
+			group_by(simulation, scenario, year) %>%
+			summarise(proj_mean_lat = mean(latitude)) 
 
 		new_dat_sum		
 	}
@@ -632,7 +647,7 @@
 		filter(year %in% years_proj)
 	
 	mean_lat_proj <- proj_mean_lat_yr %>%
-		group_by(year, projection, simulation, sp_hab_threshold) %>%
+		group_by(year, scenario, simulation, sp_hab_threshold) %>%
 		summarize(mean_lat = mean(proj_mean_lat))
 
 	
@@ -676,7 +691,7 @@
 
 	# proj
 	proj_mlat_yr_sum <- proj_mean_lat_yr %>%
-		group_by(year, projection, sp_hab_threshold) %>%
+		group_by(year, scenario, sp_hab_threshold) %>%
 		summarise(mean_lat = mean(proj_mean_lat))
 	
 	proj_mlat_yr_sum_core <- proj_mlat_yr_sum %>%
@@ -686,10 +701,10 @@
 		filter(sp_hab_threshold == 0.5)
 
 	proj_mlat_yr_sum_core_low <- proj_mlat_yr_sum_core %>%
-		filter(projection == "SSP126") 
+		filter(scenario == "ssp126") 
 	
 	proj_mlat_yr_sum_pot_low <- proj_mlat_yr_sum_pot %>%
-		filter(projection == "SSP126")
+		filter(scenario == "ssp126")
 
 	means_proj_core_low <- NA
 	means_proj_pot_low <- NA
@@ -707,10 +722,10 @@
 	
 	
 	proj_mlat_yr_sum_core_high <- proj_mlat_yr_sum_core %>%
-		filter(projection == "SSP585") 
+		filter(scenario == "ssp585") 
 	
 	proj_mlat_yr_sum_pot_high <- proj_mlat_yr_sum_pot %>%
-		filter(projection == "SSP585")
+		filter(scenario == "ssp585")
 
 	means_proj_core_high <- NA
 	means_proj_pot_high <- NA
@@ -766,11 +781,11 @@
 	# for plotting by scenario
 	proj_mean_lat_yr$scen <- NA
 		
-	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "SSP126"] <- "low emission\n(SSP126)"
-	proj_mean_lat_yr$scen[proj_mean_lat_yr$projection == "SSP585"] <- "high emission\n(SSP585)"
+	proj_mean_lat_yr$scen[proj_mean_lat_yr$scenario == "ssp126"] <- "low emission\n(SSP126)"
+	proj_mean_lat_yr$scen[proj_mean_lat_yr$scenario == "ssp585"] <- "high emission\n(SSP585)"
 	
 	proj_mean_lat_yr <- tidyr::unite(proj_mean_lat_yr,"sim_proj",
-															 simulation, projection, remove = F)
+															 simulation, scenario, remove = F)
 
 	colors <- c("#6dc3a9", "#ff7373", # cesm low, cesm high
 						  "#4e8d9c", "#ff4040", # gfdl low, gfdl high
@@ -800,7 +815,7 @@
 	
 	#### mean latitude plot ####
 	
-	mean_latitude_plot <-    
+	mean_latitude_plot_wkgc <-    
    	ggplot(proj_mean_lat_yr, 
 							aes(year, proj_mean_lat)) +
 		geom_line(data = rolling_mean_lat_hind, 
@@ -831,6 +846,11 @@
   	theme(axis.title.x = element_text(size = 18),
   				axis.text.x = element_text(size = 16))
 
+	ggplot_build(mean_latitude_plot_wkgc)$layout$panel_scales_y[[1]]$range$range
+
+		ggsave(file = "./scripts/with weekly grid cell level bias correct temps/mean_latitude_plot_wkgc.png", 
+				 mean_latitude_plot_wkgc)
+
 	## put all plots together ####
 
 	# add text labels to top row
@@ -850,13 +870,17 @@
 		cols = c("#ffabab", "#ff4040", "#ffb733", "black", "black"))
 
 	plot_temp_form_text <- 
-		temp_plot +
+		temp_plot_wkgc +
 		geom_text(data = model_ids_low,
+							aes(x = model_ids_low$year,
+									 y = model_ids_low$avg_temp),
 							label = model_ids_low$lab,
 							color = model_ids_low$cols, 
 							size = 6,
 							alpha = 0.5) +
 		geom_text(data = model_ids_high,
+							aes(x = model_ids_high$year,
+									 y = model_ids_high$avg_temp),
 							label = model_ids_high$lab,
 							color = model_ids_high$cols, 
 							size = 6,
@@ -875,7 +899,7 @@
 		scen_f = factor("high emission (SSP585)"))
 
 	habsuit_plot_text <- 
-		habsuit_plot +
+		habsuit_plot_wkgc +
 		geom_text(data = habsuit_labs_dat_low,
 							label = "(c) Spawning habitat suitability index",
 							color = "black",
@@ -911,7 +935,7 @@
 		sp_hab_threshold = factor("potential"))
 
 	area_plot_text <- 
-		area_plot +
+		area_plot_wkgc +
 		geom_text(data = area_labs_dat_low_core,
 							label = expression(paste("(e) ", Core~habitat~area~(x~10^5~km^2))),
 							color = "black", 
@@ -967,7 +991,7 @@
 		thresh = factor("potential"))
 
 	mean_lat_plot_text <- 
-		mean_latitude_plot +
+		mean_latitude_plot_wkgc +
 		geom_text(data = meanlat_labs_dat_low_core,
 							label = meanlat_labs_dat_low_core$label,
 							color = meanlat_labs_dat_low_core$cols, 
@@ -990,7 +1014,7 @@
 							alpha = 0.5)
 	
 	#### final plot ####
-	plot_ts_in <- 
+	plot_ts_in_wkgc <- 
 		plot_temp_form_text/
 		plot_spacer()/
 		habsuit_plot_text/
@@ -1002,6 +1026,6 @@
 								widths = c(1,1,1,1,1,1,1), 
 								heights = c(0.5, -0.03, 0.5, -0.03, 1, -0.06, 1))
 	
-	ggsave(plot_ts_in, filename = "./output/plots/plot_ts_in_test.png",
+	ggsave(plot_ts_in, filename = "./scripts/with weekly grid cell level bias correct temps/plot_ts_in_wkgc.png",
 				 height = 60, width = 50, units = "cm")
 	

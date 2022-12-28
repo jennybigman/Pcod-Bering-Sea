@@ -1,4 +1,4 @@
-# test for 0 slope
+# test for 0 slope with weekly, grid cell level bias corrected temps
 
 	#### temperature ####
 	
@@ -19,25 +19,25 @@
 	# projection
 	years_proj <- 2020:2099
 
-	yearly_temp_proj <- ROMS_projected_dat %>% 
+	yearly_temp_proj <- proj_mo_dfs %>% 
 		filter(year %in% years_proj) %>%
-		group_by(simulation, projection, year) %>%
-   	summarise(avg_temp = mean(bc_temp_sd)) 
+		group_by(simulation, scenario, year) %>%
+   	summarise(avg_temp = mean(bc_temp_mo)) 
 
-	proj_temp_lm <- lme4::lmer(avg_temp ~ year * projection + (1 | simulation), data = yearly_temp_proj)
+	proj_temp_lm <- lme4::lmer(avg_temp ~ year * scenario + (1 | simulation), data = yearly_temp_proj)
 	confint(proj_temp_lm)
 	summary(proj_temp_lm)
 	
 	# mid century temp
-	temp_proj_sum <- ROMS_projected_dat %>%
-	 group_by(month, year, simulation, projection) %>%
-	 summarize(mean_temp = mean(bc_temp_sd))
+	temp_proj_sum <- proj_mo_dfs %>%
+	 group_by(month, year, simulation, scenario) %>%
+	 summarize(mean_temp = mean(bc_temp_mo))
 
 	temp_proj_sum_ssp126 <- temp_proj_sum %>%
-		filter(projection == "ssp126")
+		filter(scenario == "ssp126")
 
 	temp_proj_sum_ssp585 <- temp_proj_sum %>%
-		filter(projection == "ssp585")
+		filter(scenario == "ssp585")
 
 	temp2050_low <- temp_proj_sum_ssp126 %>%
 		filter(year == 2050) %>%
@@ -95,10 +95,10 @@
 	
 	years_proj <- 2020:2099
 
-	yearly_hab_dat_proj <- ROMS_projected_dat %>% 
+	yearly_hab_dat_proj <- proj_mo_dfs %>% 
 		filter(year %in% years_proj) %>%
-		group_by(simulation, projection, year) %>%
-   	summarise(mean_hab_suit = mean(sp_hab_suit_var))
+		group_by(simulation, scenario, year) %>%
+   	summarise(mean_hab_suit = mean(sp_hab_suit))
 
 	max(yearly_hab_dat_hind$mean_hab_suit) - min(yearly_hab_dat_hind$mean_hab_suit)
   
@@ -118,22 +118,22 @@
 	summary(hind_habsuit_lm)
 
 	# projection
-	proj_habsuit_lm <- lme4::lmer(mean_hab_suit ~ year * projection + (1 | simulation), 
+	proj_habsuit_lm <- lme4::lmer(mean_hab_suit ~ year * scenario + (1 | simulation), 
 																data = yearly_hab_dat_proj)
 	confint(proj_habsuit_lm)
 	summary(proj_habsuit_lm)
 
 	
 	# change to sp hab suit
-	sphabsuit_proj_sum <- ROMS_projected_dat %>%
-	 group_by(month, year, simulation, projection) %>%
-	 summarize(mean_shs = mean(sp_hab_suit_var))
+	sphabsuit_proj_sum <- proj_mo_dfs %>%
+	 group_by(month, year, simulation, scenario) %>%
+	 summarize(mean_shs = mean(sp_hab_suit))
 
 	sphabsuit_proj_sum_ssp126 <- sphabsuit_proj_sum %>%
-		filter(projection == "ssp126")
+		filter(scenario == "ssp126")
 
 	sphabsuit_proj_sum_ssp585 <- sphabsuit_proj_sum %>%
-		filter(projection == "ssp585")
+		filter(scenario == "ssp585")
 
 	shs2050_low <- sphabsuit_proj_sum_ssp126 %>%
 		filter(year == 2050) %>%
@@ -233,20 +233,20 @@
 	
 	years_proj <- 2021:2099
 	
-	ROMS_projected_dat_proj <- ROMS_projected_dat %>%
+	ROMS_projected_dat_proj <- proj_mo_dfs %>%
 		filter(year %in% years_proj)
 	
 	# with bias-corrected temperature using variance ratio
 	
 	c_area_proj_dat <- ROMS_projected_dat_proj %>%
-		filter(sp_hab_suit_var >= 0.9) 
+		filter(sp_hab_suit >= 0.9) 
 
 	c_area_proj_dat_sum <- c_area_proj_dat %>%
-		group_by(simulation, projection, latitude, longitude, year) %>%
+		group_by(simulation, scenario, latitude, longitude, year) %>%
 		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
 	
 	c_area_proj_dat_sum_yr <- c_area_proj_dat_sum %>%
-		group_by(simulation, projection, year) %>%
+		group_by(simulation, scenario, year) %>%
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "core",
 					 area_scl = rescale(area))
@@ -254,26 +254,26 @@
 
 	# potential habitat = sum of area where sps >= 0.5
 	p_area_proj_dat <- ROMS_projected_dat_proj %>%
-		filter(sp_hab_suit_var >= 0.5) 
+		filter(sp_hab_suit >= 0.5) 
 
 	p_area_proj_dat_sum <- p_area_proj_dat %>%
-		group_by(simulation, projection, latitude, longitude, year) %>%
+		group_by(simulation, scenario, latitude, longitude, year) %>%
 		distinct(across(c(latitude, longitude)), .keep_all = TRUE)
 	
 	p_area_proj_dat_sum_yr <- p_area_proj_dat_sum %>%
-		group_by(simulation, projection, year) %>%
+		group_by(simulation, scenario, year) %>%
 		summarize(area = sum(area_km2)) %>% ## avg per cell across a given time period
 		mutate(sp_hab_threshold = "potential",
 					 area_scl = rescale(area))
 	
 	# models
-	core_area_proj_lm <- lme4::lmer(area_scl ~ year * projection + (1 | simulation), 
+	core_area_proj_lm <- lme4::lmer(area_scl ~ year * scenario + (1 | simulation), 
 																 data = c_area_proj_dat_sum_yr)
 	confint(core_area_proj_lm)
 	summary(core_area_proj_lm)
 
 	# projection potential
-	pot_area_proj_lm <- lme4::lmer(area_scl ~ year * projection + (1 | simulation), 
+	pot_area_proj_lm <- lme4::lmer(area_scl ~ year * scenario + (1 | simulation), 
 																 data = p_area_proj_dat_sum_yr)
 	confint(pot_area_proj_lm)
 	summary(pot_area_proj_lm)
@@ -463,33 +463,14 @@
 	summary(hind_meanlat_pot_lm)
 
 	# projection core
-	mean_lat_proj_core <- mean_lat_proj %>%
-		filter(sp_hab_threshold == 0.9)
-	
-	proj_meanlat_core_lm <- lme4::lmer(mean_lat ~ year * projection + (1 | simulation), 
-																data = mean_lat_proj_core)
-	confint(proj_meanlat_core_lm)
-	summary(proj_meanlat_core_lm)
-	
-	# projection potential
-	mean_lat_proj_pot <- mean_lat_proj %>%
-		filter(sp_hab_threshold == 0.5)
-	
-	proj_meanlat_pot_lm <- lme4::lmer(mean_lat ~ year * projection + (1 | simulation), 
-																data = mean_lat_proj_pot)
-	confint(proj_meanlat_pot_lm)
-	summary(proj_meanlat_pot_lm)
-
-	
-	#### try again
 	
 		proj_mean_lat_yr <- function(x){
 		
-		new_dat <- ROMS_projected_dat %>%
-			filter(., sp_hab_suit_var >= x)
+		new_dat <- proj_mo_dfs_trim %>%
+			filter(., sp_hab_suit >= x)
 		
 		new_dat_sum <- new_dat %>%
-			group_by(simulation, projection, year) %>%
+			group_by(simulation, scenario, year) %>%
 			summarise(proj_mean_lat = mean(latitude)) 
 
 		new_dat_sum		
@@ -513,13 +494,14 @@
 		filter(year %in% years_proj)
 	
 	mean_lat_proj <- proj_mean_lat_yr %>%
-		group_by(year, projection, simulation, sp_hab_threshold) %>%
+		group_by(year, scenario, simulation, sp_hab_threshold) %>%
 		summarize(mean_lat = mean(proj_mean_lat))
 
+	
 	mean_lat_proj_core <- mean_lat_proj %>%
 		filter(sp_hab_threshold == 0.9)
 	
-	proj_meanlat_core_lm <- lme4::lmer(mean_lat ~ year * projection + (1 | simulation), 
+	proj_meanlat_core_lm <- lme4::lmer(mean_lat ~ year * scenario + (1 | simulation), 
 																data = mean_lat_proj_core)
 	confint(proj_meanlat_core_lm)
 	summary(proj_meanlat_core_lm)
@@ -528,7 +510,7 @@
 	mean_lat_proj_pot <- mean_lat_proj %>%
 		filter(sp_hab_threshold == 0.5)
 	
-	proj_meanlat_pot_lm <- lme4::lmer(mean_lat ~ year * projection + (1 | simulation), 
+	proj_meanlat_pot_lm <- lme4::lmer(mean_lat ~ year * scenario + (1 | simulation), 
 																data = mean_lat_proj_pot)
 	confint(proj_meanlat_pot_lm)
 	summary(proj_meanlat_pot_lm)

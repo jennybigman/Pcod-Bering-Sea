@@ -8,6 +8,8 @@
 		colfunc <- colorRampPalette(c("#005b96", "#b2cddf"))
 		rev_cols <- colfunc(6)
 
+	#### with monthly, regional level bias corrected temps ####
+		
 	### panel a: hatch success & temperature relationship ####
 	
 	# load in data
@@ -211,16 +213,18 @@
 
  plot4 <- therm_response_curve + theme(plot.margin = unit(c(0.2, 0.2, 0.2, 0.04), "in"))
 
- Figure1_dll <- plot1 + plot2 + plot3 + plot4 + plot_layout(ncol = 4)
+ Figure2 <- plot1 + plot2 + plot3 + plot4 + plot_layout(ncol = 4)
 
  ggsave("./output/plots/Figure1_dll.png",
 			 Figure1_dll,
 			 width = 16, height = 8, units = "in")
 
 
- 
- 
- 
+ ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure2.png",
+			 Figure2,
+			 width = 16, height = 8, units = "in")
+
+
  
  
  
@@ -373,4 +377,289 @@
  ggsave("./output/plots/Figure1_ltd.png",
 			 Figure1_ltd,
 			 width = 16, height = 8, units = "in")
+ 
+ 
+ 
+ #### with weekly, grid cell level bias-corrected temps ####
+ 
+	
+	#### panel c and d: map of projected averaged temps in march avg across models ####
+
+	years_proj <- 2080:2099
+	
+	march_temp_proj <- proj_mo_dfs %>%
+		filter(year %in% years_proj) %>%
+		filter(month == 3) %>%
+		mutate(long_not_360 = case_when(
+					 longitude >= 180 ~ longitude - 360,
+					 longitude < 180 ~ longitude))  %>% 
+		group_by(scenario, latitude, long_not_360) %>%
+		summarize(mean_temp = mean(bc_temp_mo)) %>%
+		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
+	
+	# low emissions scenario
+	march_temp_proj_ssp126 <- march_temp_proj %>%
+		filter(scenario == "ssp126")
+
+	march_avg_temps_proj_ssp126 <-
+		ggplot() +
+		geom_sf(data = march_temp_proj_ssp126, aes(color = mean_temp))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+		binned_scale(
+			aesthetics = "color",
+			scale_name = "stepsn",
+			palette = function(x) rev_cols,
+			breaks = c(0, 2, 4, 6, 8),
+			limits = c(-2.21, 10.55),
+			show.limits = FALSE,
+			nice.breaks = TRUE,
+			guide = "colorsteps") +
+		scale_x_continuous(
+ 		 breaks = c(-170, -160),
+		 labels = c("-170˚","-160˚"),
+		 limits = c(-1400000, 10000),
+ 			name = "Longitude") +
+ 		scale_y_continuous(
+ 			breaks = breaks_y,
+ 			limits = limits_y,
+ 			name = "Latitude") +
+    labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
+		labs(tag = "(b)") +
+		ggtitle("Low emission (SSP126):\n2080 - 2099") +
+		theme_bw() +
+		white_map_theme() +
+		theme(legend.position = "none",
+					plot.tag.position = c(0.06, 0.87),
+					plot.title = element_text(hjust = 0.5),
+					axis.text.x = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks.x = element_line(colour = "grey50"),
+  	  		axis.line = element_blank(),
+  	  		axis.title.x = element_text(size=14, color = "grey50"),
+					axis.text.y = element_blank(),
+  	  		axis.ticks.y = element_blank(),
+  	  		axis.title.y = element_blank(),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"),
+					plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+	# high emissions scenario
+	
+	march_temp_proj_ssp585 <- march_temp_proj %>%
+		filter(scenario == "ssp585")
+
+	march_avg_temps_proj_ssp585 <-
+		ggplot() +
+		geom_sf(data = march_temp_proj_ssp585, aes(color = mean_temp))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+		binned_scale(
+			aesthetics = "color",
+			scale_name = "stepsn",
+			palette = function(x) rev_cols,
+			breaks = c(0, 2, 4, 6, 8),
+			limits = c(-2.21, 10.55),
+			show.limits = FALSE,
+			nice.breaks = TRUE,
+			guide = "colorsteps") +		
+		scale_x_continuous(
+ 		 breaks = c(-170, -160),
+		 labels = c("-170˚","-160˚"),
+		 limits = c(-1400000, 10000),
+ 			name = "Longitude") +
+		scale_y_continuous(
+ 			breaks = breaks_y,
+ 			limits = limits_y,
+ 			name = "Latitude") +
+    labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
+		labs(tag = "(c)") +
+		ggtitle("High emission (SSP585):\n2080 - 2099") +
+		theme_bw() +
+		white_map_theme() +
+		theme(legend.title.align = 0.5,
+					legend.position = c(0.89, 0.72),
+					legend.background = element_blank(),
+					legend.title = element_text(size = 9),
+					legend.text = element_text(size = 8),
+					plot.tag.position = c(0.06, 0.87),
+					plot.title = element_text(hjust = 0.5),
+					axis.text.x = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks.x = element_line(colour = "grey50"),
+  	  		axis.line = element_blank(),
+  	  		axis.title.x = element_text(size=14, color = "grey50"),
+					axis.text.y = element_blank(),
+  	  		axis.ticks.y = element_blank(),
+  	  		axis.title.y = element_blank(),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"),
+					plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+ #### plot together ####
+
+
+ plot2 <- march_avg_temps_proj_ssp126 + theme(plot.margin = unit(c(0.2, -0.05, 0.2, 0), "in"))
+
+ plot3 <- march_avg_temps_proj_ssp585 + theme(plot.margin = unit(c(0.2, 0, 0.2, -0.05), "in"))
+
+
+ march_temps_proj_wkgc <- plot2 + plot3 + plot_layout(ncol = 2)
+
+ ggsave(here("./scripts/with weekly grid cell level bias correct temps/march_temps_proj_wkgc.png"),
+			 march_temps_proj_wkgc,
+			 width = 8, height = 4, units = "in")
+
+
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 	#### opposite colors ####
+ 
+	#### panel b: map of historical averaged temps in march ####
+
+	march_avg_temps_hind_ltd <-
+		ggplot() +
+		geom_sf(data = march_temp_hind, aes(color = mean_temp))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+		binned_scale(
+			aesthetics = "color",
+			scale_name = "stepsn",
+			palette = function(x) cols,
+			breaks = c(0, 2, 4, 6, 8),
+			limits = c(-2.21, 10.55),
+			show.limits = FALSE,
+			nice.breaks = TRUE,
+			guide = "colorsteps") +
+ 		scale_x_continuous(
+ 		 breaks = c(-170, -160),
+		 labels = c("-170˚", "-160˚"),
+		 limits = c(-1400000, 10000),
+ 			name = "Longitude") +
+ 		scale_y_continuous(
+ 			breaks = breaks_y,
+ 			limits = limits_y,
+ 			name = "Latitude") +
+    labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
+		labs(tag = "(a)") +
+		ggtitle("Historical:\n1970 - 1999") +
+		theme_bw() +
+		theme(legend.position = "none",
+					plot.title = element_text(hjust = 0.5),
+					plot.tag.position = c(0.2, 0.87),
+					axis.text = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks.x = element_line(colour = "grey50"),
+  	  		axis.line = element_blank(),
+  	  		axis.title.x = element_text(size=14, color = "grey50"),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"),
+					plot.margin = margin(0, 0, 0, 0, "cm"))
+
+	
+	#### panel c and d: map of projected averaged temps in march avg across models ####
+
+	march_avg_temps_proj_ssp126_ltd <-
+		ggplot() +
+		geom_sf(data = march_temp_proj_ssp126, aes(color = mean_temp))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+		binned_scale(
+			aesthetics = "color",
+			scale_name = "stepsn",
+			palette = function(x) cols,
+			breaks = c(0, 2, 4, 6, 8),
+			limits = c(-2.21, 10.55),
+			show.limits = FALSE,
+			nice.breaks = TRUE,
+			guide = "colorsteps") +
+		scale_x_continuous(
+ 		 breaks = c(-170, -160),
+		 labels = c("-170˚","-160˚"),
+		 limits = c(-1400000, 10000),
+ 			name = "Longitude") +
+ 		scale_y_continuous(
+ 			breaks = breaks_y,
+ 			limits = limits_y,
+ 			name = "Latitude") +
+    labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
+		labs(tag = "(b)") +
+		ggtitle("Low emission (SSP126):\n2080 - 2099") +
+		theme_bw() +
+		white_map_theme() +
+		theme(legend.position = "none",
+					plot.tag.position = c(0.06, 0.87),
+					plot.title = element_text(hjust = 0.5),
+					axis.text.x = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks.x = element_line(colour = "grey50"),
+  	  		axis.line = element_blank(),
+  	  		axis.title.x = element_text(size=14, color = "grey50"),
+					axis.text.y = element_blank(),
+  	  		axis.ticks.y = element_blank(),
+  	  		axis.title.y = element_blank(),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"),
+					plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+	march_avg_temps_proj_ssp585_ltd <-
+		ggplot() +
+		geom_sf(data = march_temp_proj_ssp585, aes(color = mean_temp))  +
+		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		coord_sf(crs = 3338) +
+		binned_scale(
+			aesthetics = "color",
+			scale_name = "stepsn",
+			palette = function(x) cols,
+			breaks = c(0, 2, 4, 6, 8),
+			limits = c(-2.21, 10.55),
+			show.limits = FALSE,
+			nice.breaks = TRUE,
+			guide = "colorsteps") +		
+		scale_x_continuous(
+ 		 breaks = c(-170, -160),
+		 labels = c("-170˚", "-160˚"),
+		 limits = c(-1400000, 10000),
+ 			name = "Longitude") +
+ 		scale_y_continuous(
+ 			position = "right",
+ 			breaks = c(55, 60, 65),
+ 			limits = limits_y,
+ 			name = "Latitude") +
+    labs(colour = "Mean\nbottom\ntemperature\n(˚C)") +
+		labs(tag = "(c)") +
+		ggtitle("High emission (SSP585):\n2080 - 2099") +
+		theme_bw() +
+		white_map_theme() +
+		theme(legend.title.align = 0.5,
+					legend.position = c(0.89, 0.72),
+					legend.background = element_blank(),
+					legend.title = element_text(size = 9),
+					legend.text = element_text(size = 8),
+					plot.tag.position = c(0.06, 0.87),
+					plot.title = element_text(hjust = 0.5),
+					axis.text.x = element_text(size = 12, colour = "grey50"),
+  	  		axis.ticks.x = element_line(colour = "grey50"),
+  	  		axis.line = element_blank(),
+  	  		axis.title.x = element_text(size=14, color = "grey50"),
+					axis.text.y = element_blank(),
+  	  		axis.ticks.y = element_blank(),
+  	  		axis.title.y = element_blank(),
+  	  		panel.border = element_rect(fill = NA, color = "grey50"),
+					plot.margin = margin(0, 0, 0, 0, "cm"))
+	
+ #### plot together ####
+
+ plot1_ltd <- march_avg_temps_hind_ltd #+ theme(plot.margin = unit(c(0.2, 0, 0.2, 0.2), "in"))
+
+ plot2_ltd <- march_avg_temps_proj_ssp126_ltd + theme(plot.margin = unit(c(0.2, 0.04, 0.2, 0), "in"))
+
+ plot3_ltd <- march_avg_temps_proj_ssp585_ltd #+ theme(plot.margin = unit(c(0.2, 0, 0.2, -0.05), "in"))
+
+ plot4 <- therm_response_curve #+ theme(plot.margin = unit(c(0.2, 0.2, 0.2, -0.05), "in"))
+
+ Figure1_ltd <- plot1_ltd + plot2_ltd + plot3_ltd + plot4 + plot_layout(ncol = 4)
+
+ ggsave("./output/plots/Figure1_ltd.png",
+			 Figure1_ltd,
+			 width = 16, height = 8, units = "in")
+ 
  

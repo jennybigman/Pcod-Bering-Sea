@@ -74,7 +74,7 @@
 	cor.test(stock_recruit_dat$mean_hab_suit, stock_recruit_dat$log_rec_SSB, 
 			method = "pearson")
 
-	xaxis_title <- "Log(number of recruits\spawning stock biomass)"
+	xaxis_title <- "Log(number of recruits/spawning stock biomass)"
 	
 	SSBrecruit_habsuit_plot <-
 		ggplot(data = stock_recruit_dat, aes(x = mean_hab_suit, y = log_rec_SSB)) +
@@ -167,7 +167,7 @@
 
 	stock_recruit_dat_area <- inner_join(stock_recruit_dat_trim, hind_area_yr_trim)
 		
-	xaxis_title <- "Log(number of recruits\spawning stock biomass)"
+	xaxis_title <- "Log(number of recruits/spawning stock biomass)"
 	
 	SSBrecruit_area_plot <-
 	 ggplot(data = stock_recruit_dat_area, 
@@ -220,7 +220,7 @@
 	cor.test(stock_recruit_dat_trim_pot$area, stock_recruit_dat_trim_core$log_raw_recruits, 
 			method = "pearson")
 
-	xaxis_title <- "Log(number of recruits\spawning stock biomass)"
+	xaxis_title <- "Log(number of recruits/spawning stock biomass)"
 	
 	recruit_area_plot <-
 	 ggplot(data = stock_recruit_dat_area, 
@@ -254,41 +254,13 @@
 	
 	### fit a model to assess whether spawning habitat suitability explains recruits/SSB
 
-	#log(recruit abundance) = log(a * SSB * exp(-b* SSB)) + hab suit metric + error
+	# fit one model without habitat suitability as a covariate and one with
 	
-	#R=aS * exp(-bS)
+	ricker_sr <- lm(log_rec_SSB ~ SSB_raw, data = stock_recruit_dat)
 	
+	ricker_sr_habsuit <- lm(log_rec_SSB ~ SSB_raw + mean_hab_suit, data = stock_recruit_dat)	
 	
-	nls_fit <- nls(raw_recruits ~ (a) * SSB_raw * (exp(-b * SSB_raw)), 
-								 start = list(a = 0.3, b = 0.3),
-								 data = stock_recruit_dat)
+	AICc(ricker_sr)
 	
-
-	
-	#### ricker model ####
-	
-	data <- list(
-		N = nrow(stock_recruit_dat),
-	  r = stock_recruit_dat$raw_recruits,
-	  ssb = stock_recruit_dat$SSB_raw)
-	
-	ricker_fit <- stan(
-	  file = here("./ricker_mod_stan.stan"),
-	  data = data,
-    iter = 5000,
-    warmup = 1000,
-    thin = 10,
-    chains=4,
-	  cores = 4,
-	  control = list(max_treedepth = 15),
-	  pars = c("a", "b", "log_lik", "resid", "sigma"))
-	
-	ricker_sum <- summary(rick_fit)$summary %>% 
-  	as.data.frame() %>% 
-  	mutate(variable = rownames(.)) %>% 
-  	dplyr::select(variable, everything()) %>% 
-  	as_data_frame()
-	
-	loo(ricker_fit)
-
+	AICc(ricker_sr_habsuit)
 	

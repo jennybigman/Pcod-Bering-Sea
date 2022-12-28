@@ -16,14 +16,14 @@
 					scale_color_viridis_c() +
     	  	facet_wrap(~ month_name, ncol = 2, nrow = 2) +
  					scale_x_continuous(
- 						breaks = c(-175, -170, -165, -160),
- 						labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
+ 						breaks = breaks_x,
+ 						labels = breaks_x,
  						name = "Longitude",
- 						limits = c(-1400000, -150000)
+ 						limits = limits_x
  					) +
  					scale_y_continuous(
- 						breaks = c(55, 60),
- 						limits = c(470000, 1900000),
+ 						breaks = breaks_y,
+ 						limits = limits_y,
  						name = "Latitude",
  					) +
     	  	labs(colour = "Temperature (˚C)") +
