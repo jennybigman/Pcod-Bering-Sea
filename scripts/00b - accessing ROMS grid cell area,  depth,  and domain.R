@@ -5,6 +5,24 @@
   library(thredds)   
   library(reshape2)
   library(data.table)
+  library(sf)
+  library(rnaturalearth)
+
+  # get set up for figures
+  
+  #### load map ####
+	world_map_data <- ne_countries(scale = "medium", returnclass = "sf") 
+  
+	# for plotting
+  breaks_x <- c(-170, -160)
+	labels_x <- c("-170˚", "-160˚") 
+	limits_x <- c(-1400000, -150000)
+	
+	breaks_y <- c(55, 60)
+	limits_y <- c(470000, 1900000)
+
+	
+
   
   # set up download from server 
   url_base <- "https://data.pmel.noaa.gov/aclim/thredds/"
@@ -31,7 +49,7 @@
   # turn into dataframe from array
   area_df <- reshape2::melt(area_array, 
                   varnames=c("Xi", "Eta"),
-                  value.name="area_km2") %>% na.omit()
+                  value.name="area_km2")
   
   # add lat/long cols
   area_df$longitude <- lons[cbind(area_df$Xi,area_df$Eta)]

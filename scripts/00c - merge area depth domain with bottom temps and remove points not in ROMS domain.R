@@ -5,89 +5,105 @@
 
 	library(here)
 	library(data.table)
+	library(tidyverse)
+	library(sf)
+	library(rnaturalearth)
 
+	# for plotting
+	world_map_data <- ne_countries(scale = "medium", returnclass = "sf") 
+	
+	breaks_x <- c(-170, -160)
+	labels_x <- c("-170˚", "-160˚") 
+	limits_x <- c(-1400000, -150000)
+	
+	breaks_y <- c(55, 60)
+	limits_y <- c(470000, 1900000)
+
+	
 	#### merge dfs ####
 	
 	# load dfs
-	temp_df <- fread("./data/ROMS_all_temp.csv")
-	area_df <- fread( "./data/ROMS_area_grid_cells.csv")
-	depth_df <- fread("./data/ROMS_depth_df.csv")
-	domain_df <- fread("./data/ROMS_domain_df.csv")
+	temp_hind_dat <- fread(file = here("./data/hindcast_temp_K20.csv")) 
+	area_df <-   fread(file = "./data/ROMS_area_grid_cells.csv") 
+	depth_df <- fread(file =  "./data/ROMS_depth_df.csv")  
+	domain_df <- fread(file = "./data/ROMS_domain_df.csv")  
+
+	# join dfs
 	
-	# merge
-	area_depth_df <- merge(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
+	vars <- c("Xi", "Eta", "latitude", "longitude")
+		
+	area_df <- area_df  %>%
+  		mutate_at(vars, as.character)
+	
+	depth_df <- depth_df  %>%
+  		mutate_at(vars, as.character)
 
-	area_depth_domain_df <- merge(area_depth_df, domain_df,
-													by = c("latitude", "longitude", "Xi", "Eta"))
+	domain_df <- domain_df  %>%
+  		mutate_at(vars, as.character)
+	
+	temp_df <- temp_hind_dat %>%
+  		mutate_at(vars, as.character)
 
-	ROMS_dat_hind <- merge(temp_df, area_depth_domain_df, 
-												 by = c("latitude", "longitude", "Xi", "Eta"),
-												 all = TRUE)
+	area_depth_df <- left_join(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
+
+	area_depth_domain_df <- left_join(area_depth_df, domain_df,
+																		by = c("latitude", "longitude", "Xi", "Eta")) %>%
+		  		mutate_at(vars, as.character)
+
+	ROMS_dat_hind <- left_join(temp_df, area_depth_domain_df)
 	
 	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
-	
-	# trim grid to only survey replicated strata/domains
-	
-	ROMS_dat_hind_trim <- ROMS_dat_hind %>%
-		filter(domain > 0) %>%
-		filter(., between(depth, 0, 250))
-	
-	# restrict dataset to only those months of spawning (January to June)
+
+	# add date and month name
+	ROMS_dat_hind$month_name <- NA
+     
+  ROMS_dat_hind$month_name[ROMS_dat_hind$month == 1] <- "January"
+  ROMS_dat_hind$month_name[ROMS_dat_hind$month == 2] <- "February"
+	ROMS_dat_hind$month_name[ROMS_dat_hind$month == 3] <- "March"
+	ROMS_dat_hind$month_name[ROMS_dat_hind$month == 4] <- "April"
+
+
+	# trim by month
 	sp_months <- c(1:4)
 	
-	ROMS_dat_hind_trim$date <- as.Date(ROMS_dat_hind_trim$DateTime) # date in Date format
-	ROMS_dat_hind_trim$month <- month(ROMS_dat_hind_trim$date) # month of year
-	ROMS_dat_hind_trim$week <- week(ROMS_dat_hind_trim$date) # week of year
-	ROMS_dat_hind_trim$year <- year(ROMS_dat_hind_trim$date)
-	
-	ROMS_hindcast_temp_dat <- ROMS_dat_hind_trim %>%
+	ROMS_dat_hind_trim <- ROMS_dat_hind2 %>%
 		filter(month %in% sp_months)
 
-  # add name of month for plotting
-	ROMS_hindcast_temp_dat$month_name <- NA
-     
-  ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 1] <- "January"
-  ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 2] <- "February"
-	ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 3] <- "March"
-	ROMS_hindcast_temp_dat$month_name[ROMS_hindcast_temp_dat$month == 4] <- "April"
+	ROMS_dat_hind_trim <- ROMS_dat_hind_trim %>%
+			filter(., between(depth, 0, 250)) %>%
+			filter(domain > 0) %>%
+			mutate(lat = as.numeric(latitude),
+					 lon= as.numeric(longitude)) 
 
-	
-	### plot to see if this works ####
-	ROMS_dat_hind_trim_sum <- ROMS_hindcast_temp_dat %>%
-		group_by(latitude, longitude) %>%
+	ROMS_dat_hind_trim_sum <-  ROMS_dat_hind_trim %>%
+		group_by(lat, lon) %>%
 		summarize(mean_temp = mean(temp))
 	
 	ROMS_dat_hind_trim_sum_sf <- ROMS_dat_hind_trim_sum	%>% 
 		mutate(long_not_360 = case_when(
-					 longitude >= 180 ~ longitude - 360,
-					 longitude < 180 ~ longitude))  %>%
-  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
+					 lon >= 180 ~ lon - 360,
+					 lon < 180 ~ lon))  %>%
+  	st_as_sf(coords = c("long_not_360", "lat"), crs = 4326, remove = FALSE)
 	
-	ROMS_strata_temp_plot <-
- 		ggplot() +
+ 	ggplot() +
 		geom_sf(data = ROMS_dat_hind_trim_sum_sf, aes(color = mean_temp))  +
 		geom_sf(data = world_map_data, fill = "darkgrey", lwd = 0) +
 		coord_sf(crs = 3338) +
 		scale_color_viridis_c() +
  		scale_x_continuous(
- 			breaks = c(-175, -170, -165, -160),
- 			labels = c("-175˚", "-170˚", "-165˚", "-160˚"),
- 			limits = c(-1400000, -150000)
+ 			breaks = breaks_x,
+ 			labels = labels_x,
+ 			limits = limits_x
  		) +
  		scale_y_continuous(
- 			breaks = c(55, 60),
- 			limits = c(470000, 1900000)
+ 			breaks = breaks_y,
+ 			limits = limits_y
  		) +
 		theme_bw() 
  	
-		 
 	# save
-	fwrite(ROMS_hindcast_temp_dat, "./data/ROMS_hindcast_temp_dat.csv")
+#	fwrite(ROMS_dat_hind_trim, "./data/ROMS_dat_hind_trim.csv")
 
-	
-	
-	
-	
 	
 	
 	
