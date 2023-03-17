@@ -2,8 +2,8 @@
 
 	# set up colors 
 
-		colfunc <- colorRampPalette(c("#b2cddf", "#005b96"))
-		cols <- colfunc(6)
+	#	colfunc <- colorRampPalette(c("#b2cddf", "#005b96"))
+	#	cols <- colfunc(6)
 
 		colfunc <- colorRampPalette(c("#005b96", "#b2cddf"))
 		rev_cols <- colfunc(6)
@@ -56,7 +56,7 @@
 		filter(year %in% years_hind) %>%
 		filter(month == 3) %>%
 		group_by(latitude, long_not_360) %>%
-		summarize(mean_temp = mean(temp)) %>%
+		summarise(mean_temp = mean(temp)) %>%
 		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
 		
 	march_avg_temps_hind <-
@@ -105,7 +105,7 @@
 		filter(year %in% years_proj) %>%
 		filter(month == 3) %>%
 		group_by(projection, latitude, long_not_360) %>%
-		summarize(mean_temp = mean(bc_temp_sd)) %>%
+		summarise(mean_temp = mean(bc_temp_sd)) %>%
 		st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
 	
 	# low emissions scenario
@@ -220,8 +220,8 @@
 			 width = 16, height = 8, units = "in")
 
 
- ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure2.png",
-			 Figure2,
+ ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure2.tiff",
+			 Figure2, dpi = 500,
 			 width = 16, height = 8, units = "in")
 
 
@@ -229,7 +229,7 @@
  
  
  
- 
+ ################# NOT USED BELOW ##########################################################################
  
  	#### opposite colors ####
  

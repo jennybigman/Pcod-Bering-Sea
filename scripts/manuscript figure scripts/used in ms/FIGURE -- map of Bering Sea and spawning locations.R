@@ -93,10 +93,10 @@
     color = "gray20")
 
 	
-	 ggsave("./output/plots/bering_sea_map.png",
-			 bering_sea_map_form,
+	 ggsave("./output/plots/bering_sea_map.tiff",
+			 bering_sea_map_form, dpi = 500,
 			 width = 4, height = 4, units = "in")
  
-	  ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure1.png",
-			 Figure1,
+	  ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure1.tiff",
+			 Figure1, dpi = 500,
 			 width = 4, height = 4, units = "in")

@@ -58,7 +58,7 @@
 								size = LARVALCATCHPER10M2),
 						alpha = 0.5) +
 		scale_color_viridis_c() +
-		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		geom_sf(data = world_map_data, fill = "white", lwd = 0) +
 		coord_sf(crs = 3338) +
  		scale_x_continuous(
  			breaks = breaks_x,
@@ -72,14 +72,14 @@
 		labs(color = "length (mm)", size = expression(paste("catch (per 10m"^{2}*")"))) +
 		theme_bw() +
 		theme(
-			legend.title = element_text(size = 8),
+			legend.title = element_text(size = 20, color = "white"),
   		legend.title.align=0.5,
-  		legend.text = element_text(size = 6),
- 			axis.text = element_text(size = 8, colour = "grey50"),
-  	  axis.ticks = element_line(colour = "grey50"),
-  	  axis.line = element_line(colour = "grey50"),
-			axis.title = element_text(size = 10, color = "grey50"),
-  	  panel.border = element_rect(fill = NA, color = "grey50"))
+  		legend.text = element_text(size = 20, color = "white"),
+ 			axis.text = element_text(size = 8, colour = "white"),
+  	  axis.ticks = element_line(colour = "white"),
+  	  axis.line = element_line(colour = "white"),
+			axis.title = element_text(size = 30, color = "white"),
+  	  panel.border = element_rect(fill = NA, color = "white"))
 	
 		ggsave("./output/plots/larval_yr_plot.png",
 			 larval_yr_plot,
@@ -117,7 +117,7 @@
 								size = LARVALCATCHPER10M2),
 						alpha = 0.5) +
 		scale_color_viridis_c() +
-		geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+		geom_sf(data = world_map_data, fill = "white", lwd = 0) +
 		coord_sf(crs = 3338) +
  		scale_x_continuous(
  			breaks = breaks_x,
@@ -131,14 +131,14 @@
 		labs(color = "length (mm)", size = expression(paste("catch (per 10m"^{2}*")"))) +
 		theme_bw() +
 		theme(
-			legend.title = element_text(size = 8),
+			legend.title = element_text(size = 20, colour = "white"),
   		legend.title.align=0.5,
-  		legend.text = element_text(size = 6),
- 			axis.text = element_text(size = 8, colour = "grey50"),
-  	  axis.ticks = element_line(colour = "grey50"),
-  	  axis.line = element_line(colour = "grey50"),
-			axis.title = element_text(size = 10, color = "grey50"),
-  	  panel.border = element_rect(fill = NA, color = "grey50"))
+  		legend.text = element_text(size = 20, colour = "white"),
+ 			axis.text = element_text(size = 20, colour = "white"),
+  	  axis.ticks = element_line(colour = "white"),
+  	  axis.line = element_line(colour = "white"),
+			axis.title = element_text(size = 30, color = "white"),
+  	  panel.border = element_rect(fill = NA, color = "white"))
 	
 		ggsave("./output/plots/larval_yr_plot_LATLON.png",
 			 larval_yr_plot_LATLON,

@@ -150,8 +150,8 @@
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
 	  	name = "Temperature (˚C)",
-	  	breaks = c(0, 2, 4),
-	  	labels = c(0, 2, 4),
+	  	breaks = c(-0, 2, 4),
+	  	labels = c(-0, 2, 4),
 	  	limits = c(-0.8, 4.5)
 	  ) +
 		scale_x_continuous(
@@ -161,6 +161,7 @@
 		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
 
+	#ggplot_build(temp_plot)$layout$panel_scales_y[[1]]$range$range
 
 	#### habitat suitability ####
 	
@@ -280,7 +281,7 @@
 	  	name = "Spawning habitat\nsuitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
-	  	limits = c(0.2, 0.65)
+	  	limits = c(0.19, 0.65)
 	  ) +
 		scale_x_continuous(
 	  	name = "Year",
@@ -289,7 +290,8 @@
 		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
 
-	
+		#ggplot_build(habsuit_plot)$layout$panel_scales_y[[1]]$range$range
+
 	#### area time series ####
 	
 	## hindcast ##
@@ -562,6 +564,9 @@
 								 color = "lightgrey", size = 0.5) +
 		time_series_plot_theme() +
 		theme(axis.text.x = element_blank())
+	
+	ggplot_build(area_plot)$layout$panel_scales_y[[1]]$range$range
+
 	
 	#### mean latitude time series ####
 	
@@ -1005,7 +1010,7 @@
 	ggsave(plot_ts_in, filename = "./output/plots/plot_ts_in_test.png",
 				 height = 60, width = 50, units = "cm")
 	
-	 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure3.png",
-			 Figure3,
+	 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure3_V2.tiff",
+			 Figure3, dpi = 500,
 			 width = 50, height = 45, units = "cm")
 
