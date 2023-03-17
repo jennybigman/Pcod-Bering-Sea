@@ -3,23 +3,23 @@
 
 	library(here)
 	library(data.table)
+	library(tidyverse)
 
 	#### merge dfs ####
 	
 	# load dfs
-	temp_df <- fread("./data/ROMS_all_temp.csv")
-	area_df <- fread( "./data/ROMS_area_grid_cells.csv")
-	depth_df <- fread("./data/ROMS_depth_df.csv")
-	domain_df <- fread("./data/ROMS_domain_df.csv")
-	
+	temp_df <- fread(file = here("./data/hindcast_temp_K20.csv")) 
+	area_df <-   fread(file = "./data/ROMS_area_grid_cells.csv") 
+	depth_df <- fread(file =  "./data/ROMS_depth_df.csv")  
+	domain_df <- fread(file = "./data/ROMS_domain_df.csv")  
+
 	# merge
 	area_depth_df <- merge(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
 
 	area_depth_domain_df <- merge(area_depth_df, domain_df,
-													by = c("latitude", "longitude", "Xi", "Eta"))
+																		by = c("latitude", "longitude", "Xi", "Eta"))
 
-	ROMS_dat_hind <- merge(temp_df, area_depth_df, by = c("latitude", "longitude"),
-												 all = TRUE)
+	ROMS_dat_hind <- merge(temp_df, area_depth_df, by = c("latitude", "longitude"))
 	
 	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
 	
