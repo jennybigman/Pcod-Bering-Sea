@@ -3,6 +3,7 @@
 	#### temperature ####
 	
 	# hindcast
+	
 	yearly_temp_hind <- ROMS_hindcast_dat %>%
 		group_by(year) %>%
     summarise(avg_temp = mean(temp))
@@ -14,7 +15,6 @@
 	range(yearly_temp_hind$avg_temp)
 	
 	max(yearly_temp_hind$avg_temp) - min(yearly_temp_hind$avg_temp)
-	
 	
 	# projection
 	years_proj <- 2020:2099
@@ -34,10 +34,10 @@
 	 summarize(mean_temp = mean(bc_temp_sd))
 
 	temp_proj_sum_ssp126 <- temp_proj_sum %>%
-		filter(projection == "ssp126")
+		filter(projection == "SSP126")
 
 	temp_proj_sum_ssp585 <- temp_proj_sum %>%
-		filter(projection == "ssp585")
+		filter(projection == "SSP585")
 
 	temp2050_low <- temp_proj_sum_ssp126 %>%
 		filter(year == 2050) %>%
@@ -130,10 +130,10 @@
 	 summarize(mean_shs = mean(sp_hab_suit_var))
 
 	sphabsuit_proj_sum_ssp126 <- sphabsuit_proj_sum %>%
-		filter(projection == "ssp126")
+		filter(projection == "SSP126")
 
 	sphabsuit_proj_sum_ssp585 <- sphabsuit_proj_sum %>%
-		filter(projection == "ssp585")
+		filter(projection == "SSP585")
 
 	shs2050_low <- sphabsuit_proj_sum_ssp126 %>%
 		filter(year == 2050) %>%
