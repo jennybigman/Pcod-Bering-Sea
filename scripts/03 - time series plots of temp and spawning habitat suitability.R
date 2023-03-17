@@ -71,12 +71,12 @@
 		
 	## facet by scenario
 	
-	yearly_hab_dat_proj <- yearly_hab_dat_proj %>% filter(., projection != "historical")
+	yearly_hab_dat_proj <- yearly_hab_dat_proj %>% filter(., projection != "HISTORICAL")
 		
 	yearly_hab_dat_proj$scen <- NA
 		
-	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "ssp126"] <- "low emission (ssp126)"
-	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "ssp585"] <- "high emission (ssp585)"
+	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "SSP126"] <- "low emission (ssp126)"
+	yearly_hab_dat_proj$scen[yearly_hab_dat_proj$projection == "SSP585"] <- "high emission (ssp585)"
 	
 	yearly_hab_dat_proj <- tidyr::unite(yearly_hab_dat_proj,"sim_proj",
 															 simulation, projection, remove = F)
@@ -90,8 +90,8 @@
 	names(colors) <- unique(yearly_hab_dat_proj$sim_proj)
 	
 	# order facets
-	yearly_hab_dat_proj$scen_f = factor(yearly_hab_dat_proj$scen, levels=c('low emission (ssp126)', 
-																																				 'high emission (ssp585)'))
+	yearly_hab_dat_proj$scen_f = factor(yearly_hab_dat_proj$scen, levels=c('low emission (SSP126)', 
+																																				 'high emission (SSP585)'))
 	
 	#plot
 	#annual_hatch_success_cauchy <-    
@@ -148,7 +148,7 @@
 		xlab("Year") + 
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Cross-shelf annual spawning\nhabitat suitability index",
+	  	name = "Yearly-averaged spawning\nhabitat suitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
 	  	limits = c(0.2, 0.65)
@@ -157,15 +157,19 @@
 	  	name = "Year",
 	  	breaks = c(1980, 2030, 2080),
 	  		  	limits = c(1970, 2110)) +
-		ggtitle("low emission (ssp126)") +
+		ggtitle("Low emission (SSP126)") +
+		geom_segment(x = 2020, y = 0.1, xend = 2020, yend = 0.6,
+				color = "lightgrey", size = 0.5) +	
    	theme_bw() +
   	theme(legend.position = "none") +
   	theme(
-  		plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-			axis.text = element_text(size = 12, colour = "grey50"),
+  		plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+			axis.text.x = element_text(size = 12, colour = "grey50"),
+			axis.text.y = element_text(size = 12, colour = "grey50", angle = 90),
   	  axis.ticks = element_line(colour = "grey50"),
   	  axis.line = element_line(colour = "grey50"),
-  	  axis.title = element_text(size=14, color = "grey30"),
+  	  axis.title.x = element_text(size=14, color = "grey30"),
+			axis.title.y = element_blank(),
   	  panel.grid.major = element_blank(),
   	  panel.grid.minor = element_blank(),
   	  panel.border = element_rect(fill = NA, color = "grey50"))
@@ -199,7 +203,7 @@
 		xlab("Year") + 
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Cross-shelf annual spawning\nhabitat suitability index",
+	  	name = "Yearly-averaged spawning\nhabitat suitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
 	  	limits = c(0.2, 0.65)
@@ -210,9 +214,11 @@
 	  	limits = c(1970, 2110)) +
    	theme_bw() +
   	theme(legend.position = "none") +
-		ggtitle("high emission (ssp585)") +
+		ggtitle("High emission (SSP585)") +
   	theme(
-  		plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+  		panel.background = element_rect(fill = "transparent", color = NA),
+			plot.background = element_rect(fill = "transparent", color = NA),
+  		plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
 			axis.text.x = element_text(size = 12, colour = "grey50"),
   	  axis.ticks.x = element_line(colour = "grey50"),
   	  axis.line = element_line(colour = "grey50"),
@@ -249,7 +255,7 @@
 	
 	ggsave("./output/plots/time_series_habsuit.png",
 			 time_series_habsuit,
-			 width = 15, height = 5, units = "in")
+			 width = 17, height = 5, units = "in")
 	
 	
 	

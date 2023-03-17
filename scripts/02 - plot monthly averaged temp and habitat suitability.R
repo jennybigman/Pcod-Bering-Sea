@@ -3,6 +3,71 @@
 	#### hindcasts ####
 	
 	#### temperature ####
+	vars <- c("latitude", "longitude", "Xi", "Eta")
+
+	ROMS_hindcast_temp_dat_sf <- ROMS_hindcast_temp_dat %>%
+  	mutate_at(vars, as.numeric) %>%
+		mutate(long_not_360 = case_when(
+					 longitude >= 180 ~ longitude - 360,
+					 longitude < 180 ~ longitude))  %>%
+  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
+	
+	# plots by year
+	
+	temp_yr_plot_func <- function(x){
+		
+		    new_dat <- ROMS_hindcast_temp_dat_sf %>% filter(., year == 1990)
+    
+    	  plot <- 
+    	  	ggplot() +
+					geom_sf(data = new_dat, aes(color = temp))  +
+					geom_sf(data = world_map_data, fill = "grey", lwd = 0) +
+					coord_sf(crs = 3338) +
+					scale_color_viridis_c() +
+ 					scale_x_continuous(
+ 						breaks = breaks_x,
+ 						labels = breaks_x,
+ 						name = "Longitude",
+ 						limits = limits_x
+ 					) +
+ 					scale_y_continuous(
+ 						breaks = breaks_y,
+ 						limits = limits_y,
+ 						name = "Latitude",
+ 					) +
+    	  	labs(colour = "Temperature (˚C)") +
+					theme_bw() +
+    	  	#ggtitle(paste0("Year:", x)) + 
+ 					theme(
+ 						strip.text = element_text(size = 14, face = "bold"),
+ 						strip.background = element_blank(),
+ 						axis.text = element_text(size = 12),	
+  					axis.title = element_text(size = 14),
+  					legend.title.align=0.5)
+    	  
+    	  plot
+    	  
+	}
+	
+	years <- c(1970:2020)
+
+	yr_plot_list <- lapply(years, temp_yr_plot_func)
+  
+  name_func_year <- function(x){
+  	year_name <- paste0(x, "_temp2")
+  }
+   
+  names_year <- sapply(years, name_func_year)
+  
+	name_func_file <- function(x){
+  	file_path <- paste0("/Users/jenniferbigman/Dropbox/NOAA AFSC Postdoc/Pcod Project/Pcod Bering Sea Habitat Suitability/Pcod-Bering-Sea/output/plots/monthly plots/bottom temperature/", x)
+  }
+   
+  file_names <- sapply(names_year, name_func_file)
+				
+	plot_list <- mapply(ggsave_func, x = yr_plot_list, y = file_names)
+
+	# plots by month
 
 		temp_monthly_plot_func <- function(x){
 		

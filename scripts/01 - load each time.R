@@ -38,7 +38,8 @@
 	#### load and transform data ####
 	
 	# hindcast data
-	ROMS_hindcast_dat  <- fread(file = here("./data/ROMS_hindcast_dat.csv")) %>% filter(., year != 2021)
+
+	ROMS_hindcast_dat <- fread(file = "./data/ROMS_dat_hind_trim.csv")
 
 	ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
 	 mutate(grid_cell_id = paste0(latitude, longitude))
@@ -48,24 +49,30 @@
 	 mutate(ID = 1: length(unique(ROMS_hindcast_dat$grid_cell_id)))
 
 	ROMS_hindcast_dat <- merge(ROMS_hindcast_dat, grid_cells, by = "grid_cell_id")
-
+	
 	# projected data
 
 	ROMS_projected_dat <- fread(file = "./data/ROMS_projected_dat.csv") %>%
 		mutate(latitude = Lat,
-					 longitude = Lon)
+					 longitude = Lon, 
+					 projection = scenario,
+					 simulation = toupper(simulation),
+					 projection = toupper(projection))
+	
 	
 	ROMS_projected_dat <- ROMS_projected_dat %>%
 	 mutate(grid_cell_id = paste0(latitude, longitude))
 
 	ROMS_projected_dat <- merge(ROMS_projected_dat, grid_cells, by = "grid_cell_id")
 
-	ROMS_projected_dat <- ROMS_projected_dat %>%
-		mutate(projection = scenario,
-					 simulation = toupper(simulation),
-					 projection = toupper(projection))
-	
-	# add name of month for plotting
+# add name of month for plotting
+	ROMS_hindcast_dat$month_name <- NA
+     
+  ROMS_hindcast_dat$month_name[ROMS_hindcast_dat$month == 1] <- "January"
+  ROMS_hindcast_dat$month_name[ROMS_hindcast_dat$month == 2] <- "February"
+	ROMS_hindcast_dat$month_name[ROMS_hindcast_dat$month == 3] <- "March"
+	ROMS_hindcast_dat$month_name[ROMS_hindcast_dat$month == 4] <- "April"
+
 	ROMS_projected_dat$month_name <- NA
      
   ROMS_projected_dat$month_name[ROMS_projected_dat$month == 1] <- "January"
@@ -84,25 +91,22 @@
 
   # convert to an sf object
   ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
-  		 mutate(long_not_360 = case_when(
+  	mutate(long_not_360 = case_when(
 						 longitude >= 180 ~ longitude - 360,
-						 longitude < 180 ~ longitude)) 
-  
-	 ROMS_hindcast_dat_sf <- ROMS_hindcast_dat %>% 
+						 longitude < 180 ~ longitude))  %>% 
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
   
   ROMS_projected_dat <- ROMS_projected_dat %>%
-  		mutate(longitude = Lon,
+  	mutate(longitude = Lon,
   					 latitude = Lat,
   					 long_not_360 = case_when(
 						 longitude >= 180 ~ longitude - 360,
-						 longitude < 180 ~ longitude)) 
-  
- ROMS_projected_dat_sf <-  ROMS_projected_dat %>%
+						 longitude < 180 ~ longitude))  %>%
   	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
 	
 	
 	#### load map ####
+  library(rnaturalearth)
 	world_map_data <- ne_countries(scale = "medium", returnclass = "sf") 
 	
 	#### plotting function ####
@@ -120,3 +124,5 @@
 	
 	breaks_y <- c(55, 60)
 	limits_y <- c(470000, 1900000)
+
+	
