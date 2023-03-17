@@ -169,7 +169,7 @@
  			limits = limits_y,
  			name = "Latitude",
  		) +
-    labs(colour = "Spawning habitat suitability") +
+    labs(colour = "Thermal spawning/nhabitat suitability") +
 		theme_bw() +
  		theme(
  			panel.spacing = unit(0.04, "in"),
@@ -212,7 +212,7 @@
  			limits = limits_y,
  			name = "Latitude",
  		) +
-    labs(colour = "Spawning\nhabitat\nsuitability") +
+    labs(colour = "Thermal\nspawning\nhabitat\nsuitability") +
 		theme_bw() +
 	 		theme(
 	 		legend.title.align = 0.5,

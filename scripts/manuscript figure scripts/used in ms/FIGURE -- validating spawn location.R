@@ -48,42 +48,42 @@
 
 	# larval plot year ####
 
-	larval_yr_plot <- 
-  	ggplot() +
-		geom_sf(data = catch0_dat_trim_sf,
-						aes(color = LARVALCATCHPER10M2),
-						color = "black", shape = 4, alpha = 0.1, size = 1) +
-		geom_sf(data = length_dat_sf, 
-						aes(color = CORRECTED_LENGTH, 
-								size = LARVALCATCHPER10M2),
-						alpha = 0.5) +
-		scale_color_viridis_c() +
-		geom_sf(data = world_map_data, fill = "white", lwd = 0) +
-		coord_sf(crs = 3338) +
- 		scale_x_continuous(
- 			breaks = breaks_x,
- 			labels =labels_x,
- 			name = "Longitude",
- 			limits = limits_x) +
- 		scale_y_continuous(
- 			breaks = breaks_y,
- 			limits = limits_y,
- 			name = "Latitude") +
-		labs(color = "length (mm)", size = expression(paste("catch (per 10m"^{2}*")"))) +
-		theme_bw() +
-		theme(
-			legend.title = element_text(size = 20, color = "white"),
-  		legend.title.align=0.5,
-  		legend.text = element_text(size = 20, color = "white"),
- 			axis.text = element_text(size = 8, colour = "white"),
-  	  axis.ticks = element_line(colour = "white"),
-  	  axis.line = element_line(colour = "white"),
-			axis.title = element_text(size = 30, color = "white"),
-  	  panel.border = element_rect(fill = NA, color = "white"))
+#	larval_yr_plot <- 
+#  	ggplot() +
+#		geom_sf(data = catch0_dat_trim_sf,
+#						aes(color = LARVALCATCHPER10M2),
+#						color = "black", shape = 4, alpha = 0.1, size = 1) +
+#		geom_sf(data = length_dat_sf, 
+#						aes(color = CORRECTED_LENGTH, 
+#								size = LARVALCATCHPER10M2),
+#						alpha = 0.5) +
+#		scale_color_viridis_c() +
+#		geom_sf(data = world_map_data, fill = "white", lwd = 0) +
+#		coord_sf(crs = 3338) +
+# 		scale_x_continuous(
+# 			breaks = breaks_x,
+# 			labels =labels_x,
+# 			name = "Longitude",
+# 			limits = limits_x) +
+# 		scale_y_continuous(
+# 			breaks = breaks_y,
+# 			limits = limits_y,
+# 			name = "Latitude") +
+#		labs(color = "length (mm)", size = expression(paste("catch (per 10m"^{2}*")"))) +
+#		theme_bw() +
+#		theme(
+#			legend.title = element_text(size = 20, color = "white"),
+#  		legend.title.align=0.5,
+#  		legend.text = element_text(size = 20, color = "white"),
+# 			axis.text = element_text(size = 8, colour = "white"),
+#  	  axis.ticks = element_line(colour = "white"),
+#  	  axis.line = element_line(colour = "white"),
+#			axis.title = element_text(size = 30, color = "white"),
+#  	  panel.border = element_rect(fill = NA, color = "white"))
 	
-		ggsave("./output/plots/larval_yr_plot.png",
-			 larval_yr_plot,
-			 width = 5, height = 5, units = "in")
+	#	ggsave("./output/plots/larval_yr_plot.png",
+	#		 larval_yr_plot,
+	#		 width = 5, height = 5, units = "in")
 
 	## with lat/longs rounded to 0 ##
 	
@@ -117,7 +117,7 @@
 								size = LARVALCATCHPER10M2),
 						alpha = 0.5) +
 		scale_color_viridis_c() +
-		geom_sf(data = world_map_data, fill = "white", lwd = 0) +
+		geom_sf(data = world_map_data, fill = "lightgrey", lwd = 0) +
 		coord_sf(crs = 3338) +
  		scale_x_continuous(
  			breaks = breaks_x,
@@ -131,24 +131,27 @@
 		labs(color = "length (mm)", size = expression(paste("catch (per 10m"^{2}*")"))) +
 		theme_bw() +
 		theme(
-			legend.title = element_text(size = 20, colour = "white"),
+			legend.title = element_text(size = 14, colour = "black"),
   		legend.title.align=0.5,
-  		legend.text = element_text(size = 20, colour = "white"),
- 			axis.text = element_text(size = 20, colour = "white"),
-  	  axis.ticks = element_line(colour = "white"),
-  	  axis.line = element_line(colour = "white"),
-			axis.title = element_text(size = 30, color = "white"),
-  	  panel.border = element_rect(fill = NA, color = "white"))
+  		legend.text = element_text(size = 12, colour = "black"),
+ 			axis.text = element_text(size = 14, colour = "black"),
+  	  axis.ticks = element_line(colour = "black"),
+  	  axis.line = element_line(colour = "black"),
+			axis.title = element_text(size = 16, color = "black"),
+  	  panel.border = element_rect(fill = NA, color = "black"))
 	
-		ggsave("./output/plots/larval_yr_plot_LATLON.png",
-			 larval_yr_plot_LATLON,
-			 width = 5, height = 5, units = "in")
+	#	ggsave("./output/plots/larval_yr_plot_LATLON.png",
+	#		 larval_yr_plot_LATLON,
+	#		 width = 5, height = 5, units = "in")
 		
-		 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure8.png",
-			 larval_yr_plot_LATLON,
-			 width = 5, height = 5, units = "in")
+		 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure8.tiff",
+			 larval_yr_plot_LATLON, dpi = 500,
+			 width = 7, height = 7, units = "in")
 
-		### try a fuzzy join to merge stations
+		 ####################### NOT USED BELOW ##############################################
+		
+		 
+		 ### try a fuzzy join to merge stations
 		
 		library(fuzzyjoin)
 		

@@ -278,7 +278,7 @@
 				color = "lightgrey", size = 0.5) +		
 		scale_color_manual(name = "sim_proj", values = colors) +
 	  scale_y_continuous(
-	  	name = "Spawning habitat\nsuitability index",
+	  	name = "Thermal\nspawning habitat\nsuitability index",
 	  	breaks = c(0.20, 0.40, 0.60),
 	  	labels = c(0.20, 0.40, 0.60),
 	  	limits = c(0.19, 0.65)
@@ -841,14 +841,14 @@
 	# add text labels to top row
 	
 	model_ids_low <- tibble(
-		year = c(2108, 2108, 2108, 1995, 1983), 
+		year = c(2108, 2108, 2108, 1995, 1982), 
 		avg_temp = c(2.1, 0.7, 0.1, 1, 4.4), 
 		lab = c("CESM", "GFDL", "MIROC", "hindcast", "(a) Temperature (˚C)"),
 		scen_f = factor("low emission (SSP126)"),
 		cols = c("#6dc3a9", "#4e8d9c", "#97c3e5", "black", "black"))
 	
 	model_ids_high <- tibble(
-		year = c(2108, 2108, 2108, 1994, 1983), 
+		year = c(2108, 2108, 2108, 1994, 1982), 
 		avg_temp = c(3.7, 2.2, 3.1, 1, 4.4), 
 		lab = c("CESM", "GFDL", "MIROC", "hindcast", "(b) Temperature (˚C)"),
 		scen_f = factor("high emission (SSP585)"),
@@ -870,47 +870,47 @@
 		theme(plot.title = element_text(size = 22, face = "bold", color = "black"))
 	
 	habsuit_labs_dat_low <- tibble(
-		year = c(1997), 
+		year = c(2003), 
 		mean_hab_suit = c(0.64), 
 		scen_f = factor("low emission (SSP126)"))
 
 	habsuit_labs_dat_high <- tibble(
-		year = c(1996.5), 
+		year = c(2003), 
 		mean_hab_suit = c(0.64), 
 		scen_f = factor("high emission (SSP585)"))
 
 	habsuit_plot_text <- 
 		habsuit_plot +
 		geom_text(data = habsuit_labs_dat_low,
-							label = "(c) Spawning habitat suitability index",
+							label = "(c) Thermal spawning habitat suitability index",
 							color = "black",
 							alpha = 0.5, size = 6) +
 		geom_text(data = habsuit_labs_dat_high,
-						label = "(d) Spawning habitat suitability index",
+						label = "(d) Thermal spawning habitat suitability index",
 						color = "black",
 						alpha = 0.5, size = 6)
 		
 	# area
 	area_labs_dat_low_core <- tibble(
-		year = c(1993), 
+		year = c(1992), 
 		area = c(530000), 
 		scen_f = factor("low emission\n(SSP126)"),
 		sp_hab_threshold = factor("core"))
 
 	area_labs_dat_low_potential <- tibble(
-		year = c(1997), 
+		year = c(1996), 
 		area = c(530000), 
 		scen_f = factor("low emission\n(SSP126)"),
 		sp_hab_threshold = factor("potential"))
 	
 	area_labs_dat_high_core <- tibble(
-		year = c(1993), 
+		year = c(1992), 
 		area = c(530000), 
 		scen_f = factor("high emission\n(SSP585)"),
 		sp_hab_threshold = factor("core"))
 
 	area_labs_dat_high_potential <- tibble(
-		year = c(1997), 
+		year = c(1996), 
 		area = c(530000), 
 		scen_f = factor("high emission\n(SSP585)"),
 		sp_hab_threshold = factor("potential"))
@@ -940,7 +940,7 @@
 	
 	# mean latitude
 	meanlat_labs_dat_low_core <- tibble(
-		year = c(1988), 
+		year = c(1987), 
 		proj_mean_lat = c(59.5), 
 		label = c("(i) Core mean latitude (˚N)"),
 		cols = c("black"),
@@ -948,7 +948,7 @@
 		thresh = factor("core"))
 
 	meanlat_labs_dat_low_potential <- tibble(
-		year = c(1992),
+		year = c(1991),
   	proj_mean_lat = c(59.5), 
 		lab = c("(k) Potential mean latitude (˚N)"),
 		cols = c("black"),
@@ -956,7 +956,7 @@
 		thresh = factor("potential"))
 	
 	meanlat_labs_dat_high_core <- tibble(
-		year = c(1988), 
+		year = c(1987), 
 		proj_mean_lat = c(59.5), 
 		lab = c("(j) Core mean latitude (˚N)"),
 		cols = c("black"),
@@ -964,7 +964,7 @@
 		thresh = factor("core"))
 
 	meanlat_labs_dat_high_potential <- tibble(
-		year = c(1991),
+		year = c(1990),
   	proj_mean_lat = c(59.5), 
 		lab = c("(l) Potential mean latitude (˚N)"),
 		cols = c("black"),
