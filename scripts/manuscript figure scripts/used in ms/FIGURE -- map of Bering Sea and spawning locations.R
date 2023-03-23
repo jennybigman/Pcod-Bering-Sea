@@ -111,7 +111,7 @@
 	bering_map_poster <- 
 	  ggplot() +
   	geom_polygon(data = reg, aes(x = long, y = lat, group = group), 
-  	             fill = "darkgrey", color = NA) + 
+  	             fill = "white", color = NA) + 
 		coord_map(xlim = lons, ylim = lats) +
 		scale_x_continuous(
 			name = "Longitude",
@@ -123,19 +123,24 @@
 			breaks = c(55, 60, 65),
 			labels = c("55", "60", "65")
 		) +
-  	theme_bw() +
-  	theme(
-			axis.text = element_text(size = 6, colour = "grey50"),
-			axis.title = element_text(size = 8, color = "grey50"),
-			panel.border = element_rect(fill = NA, color = "grey50"),
-			axis.line = element_blank())
+  		theme_bw() +
+			theme(
+					legend.position = "none",
+					panel.background = element_rect(fill = "transparent", color = NA),
+					plot.background = element_rect(fill = "transparent", color = NA),
+					axis.text = element_text(size = 6, colour = "white"),
+  	  		axis.ticks = element_line(colour = "white"),
+  	  		axis.line = element_blank(),
+  	  		axis.title = element_text(size= 8, color = "white"),
+  	  		panel.border = element_rect(fill = NA, color = "white", linewidth = 2))
+	
 	
 
 	bering_map_poster_form <- 
 	  bering_map_poster +
   	annotate("text", x = -153, y = 65, label = "Alaska", size = 4) +
   	annotate("text", x = 178, y = 67, label = "Russia", size = 4) +
-	  annotate("text", x = -175, y = 57.5, label = "Bering Sea", size = 4)
+	  annotate("text", x = -175, y = 57.5, label = "Bering Sea", size = 4, color = "white")
 	
 	  ggsave("./output/plots/BeringSeaMap.tiff",
 			 bering_map_poster_form, dpi = 500,
