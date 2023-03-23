@@ -83,7 +83,7 @@ hill_bayes_fit <- brm(
      # Nonlinear fit
      nl = TRUE)
 	
-	test_fit_gaussian <- brm(
+	test_fit_gaussian <- brm(bf(
   	fit_formula_gaussian,
   	family=gaussian(), 
   	prior = priors,
