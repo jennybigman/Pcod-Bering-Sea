@@ -200,6 +200,33 @@
 
 	lm_cauchy_outs <- bind_rows(lm_hind_out_cauch, lm_proj_out_cauchy)
 
+	lm_cauchy_outs <- fread(file = here("./data/lm_cauchy_outs.csv")) 
+		
+	lm_cauchy_outs$iter <- as.character(lm_cauchy_outs$iter)
+
+	mean = c(0.0007, 0.0008, 0.003)
+	lower = c(-0.0003, 0.0004, 0.002)
+	upper = c(0.002, 0.001, 0.004)
+	iter = c("in paper", "in paper", "in paper")
+	scenario = c("hindcast", "ssp126", "ssp585")
+	
+	paper_tib <- tibble(mean, lower, upper, iter, scenario)
+	
+	lm_cauchy_outs <- bind_rows(lm_cauchy_outs, paper_tib)
+	
+	#### make coefficient plot ####
+	
+	
+	p <- 
+		ggplot(lm_cauchy_outs) +
+		geom_point(aes(x = mean, y = as.factor(iter))) +
+		geom_segment(aes(x = lower, xend = upper, y = as.factor(iter), yend = as.factor(iter))) +
+		facet_wrap(~ scenario, scales = "free") 
+	
+	
+	#+
+	#	scale_y_discrete(expand = c(0, 4))
+	
 	#### make table ####
 	
 	#cauch_lm_fits <- gt(lm_cauchy_outs)
