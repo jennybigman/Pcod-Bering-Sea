@@ -40,7 +40,7 @@
 	# hindcast data
 
 	ROMS_hindcast_dat <- fread(file = "./data/ROMS_dat_hind_trim.csv")
-
+	
 	ROMS_hindcast_dat <- ROMS_hindcast_dat %>%
 	 mutate(grid_cell_id = paste0(latitude, longitude))
 	
