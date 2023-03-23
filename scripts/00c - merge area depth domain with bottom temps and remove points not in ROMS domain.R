@@ -52,7 +52,7 @@
 
 	ROMS_dat_hind <- left_join(temp_df, area_depth_domain_df)
 	
-	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
+#	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
 
 	# add date and month name
 	ROMS_dat_hind$month_name <- NA
@@ -66,7 +66,7 @@
 	# trim by month
 	sp_months <- c(1:4)
 	
-	ROMS_dat_hind_trim <- ROMS_dat_hind2 %>%
+	ROMS_dat_hind_trim <- ROMS_dat_hind %>%
 		filter(month %in% sp_months)
 
 	ROMS_dat_hind_trim <- ROMS_dat_hind_trim %>%
@@ -76,14 +76,14 @@
 					 lon= as.numeric(longitude)) 
 
 	ROMS_dat_hind_trim_sum <-  ROMS_dat_hind_trim %>%
-		group_by(lat, lon) %>%
+		group_by(latitude, longitude) %>%
 		summarize(mean_temp = mean(temp))
 	
 	ROMS_dat_hind_trim_sum_sf <- ROMS_dat_hind_trim_sum	%>% 
 		mutate(long_not_360 = case_when(
-					 lon >= 180 ~ lon - 360,
-					 lon < 180 ~ lon))  %>%
-  	st_as_sf(coords = c("long_not_360", "lat"), crs = 4326, remove = FALSE)
+					 longitude >= 180 ~ longitude - 360,
+					 longitude < 180 ~ longitude))  %>%
+  	st_as_sf(coords = c("long_not_360", "latitude"), crs = 4326, remove = FALSE)
 	
  	ggplot() +
 		geom_sf(data = ROMS_dat_hind_trim_sum_sf, aes(color = mean_temp))  +
