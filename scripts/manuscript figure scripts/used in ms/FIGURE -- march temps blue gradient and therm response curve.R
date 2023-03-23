@@ -47,6 +47,8 @@
 					panel.grid = element_blank(),
 					plot.margin = margin(0, 0, 0, 0, "cm"),
 					panel.border = element_rect(fill = NA, color = "grey50"))
+	
+	curve_df <- ggplot_build(therm_response_curve)$data[[1]]
 
 	#### panel b: map of historical averaged temps in march ####
 
