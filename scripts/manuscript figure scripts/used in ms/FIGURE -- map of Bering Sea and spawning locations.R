@@ -34,7 +34,7 @@
 	reg$long = (360 - reg$long)*-1
 	
 	# set map limits
-	lons = c(-179, -158)
+	lons = c(-179, -160)
 	lats = c(52, 65)
 	
 	# make plot
@@ -58,7 +58,7 @@
   							 alpha = 0.7,
   	             colour="#0c3966")+
   	geom_polygon(data = reg, aes(x = long, y = lat, group = group), 
-  	             fill = "darkgrey", color = NA) + 
+  	            fill = "darkgrey", color = NA) + 
 		coord_map(xlim = lons, ylim = lats) +
 		scale_x_continuous(
 			name = "Longitude",
@@ -100,3 +100,44 @@
 	  ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/Figure1.tiff",
 			 Figure1, dpi = 500,
 			 width = 4, height = 4, units = "in")
+	  
+	  
+	  ################################################
+	# set map limits
+	lons = c(-185, -150)
+	lats = c(52, 68)
+	
+
+	bering_map_poster <- 
+	  ggplot() +
+  	geom_polygon(data = reg, aes(x = long, y = lat, group = group), 
+  	             fill = "darkgrey", color = NA) + 
+		coord_map(xlim = lons, ylim = lats) +
+		scale_x_continuous(
+			name = "Longitude",
+			breaks = c(-180, -170, -160),
+			labels = c("180", "-170", "-160")
+		) +
+		scale_y_continuous(
+			name = "Latitude",
+			breaks = c(55, 60, 65),
+			labels = c("55", "60", "65")
+		) +
+  	theme_bw() +
+  	theme(
+			axis.text = element_text(size = 6, colour = "grey50"),
+			axis.title = element_text(size = 8, color = "grey50"),
+			panel.border = element_rect(fill = NA, color = "grey50"),
+			axis.line = element_blank())
+	
+
+	bering_map_poster_form <- 
+	  bering_map_poster +
+  	annotate("text", x = -153, y = 65, label = "Alaska", size = 4) +
+  	annotate("text", x = 178, y = 67, label = "Russia", size = 4) +
+	  annotate("text", x = -175, y = 57.5, label = "Bering Sea", size = 4)
+	
+	  ggsave("./output/plots/BeringSeaMap.tiff",
+			 bering_map_poster_form, dpi = 500,
+			 width = 4, height = 4, units = "in")
+	
