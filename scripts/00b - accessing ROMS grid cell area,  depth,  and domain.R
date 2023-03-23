@@ -96,7 +96,7 @@
                   	value.name="depth")
 
   # add lat/long cols
-  depth_df$longitude <- lons[cbind(depth_df$Xi,depth_df$Eta)]
+  depth_df$longitude <- longs[cbind(depth_df$Xi,depth_df$Eta)]
   depth_df$latitude <- lats[cbind(depth_df$Xi,depth_df$Eta)]
 	
   # plot
@@ -168,7 +168,7 @@
                   value.name="domain")
   
   # add lat/long cols
-  domain_df$longitude <- lons[cbind(domain_df$Xi,domain_df$Eta)]
+  domain_df$longitude <- longs[cbind(domain_df$Xi,domain_df$Eta)]
   domain_df$latitude <- lats[cbind(domain_df$Xi,domain_df$Eta)]
 
   
