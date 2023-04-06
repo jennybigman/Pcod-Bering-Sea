@@ -88,7 +88,7 @@
   SST_temp_hind_dat <- left_join(SST_temp_hind_dat, lats_longs)
 
 
-	write_csv(SST_temp_hind_dat, file = here("./data/SST_temp_hind_dat_K20P19.csv"))
+	write_csv(SST_temp_hind_dat, file = here("./scripts/for futR/data/generated/SST_temp_hind_dat_K20P19.csv"))
 	
 	
 	#### projection ####
@@ -181,7 +181,7 @@
   
   SST_hist_temps <- left_join(SST_hist_temps, lats_longs)
 
-	write_csv(SST_hist_temps, file = here("./data/SST_historical_temps.csv"))
+	write_csv(SST_hist_temps, file = here("./scripts/for futR/data/generated/SST_historical_temps_K20P19.csv"))
 	
 	
 	## future ####
@@ -278,10 +278,15 @@
   
   SST_proj_temp_ssp126_df <- left_join(SST_proj_temp_ssp126_df, lats_longs)
 
-	write_csv(SST_proj_temp_ssp126_df, file = here("./data/SST_proj_temp_ssp126_df.csv"))
+	write_csv(SST_proj_temp_ssp126_df, file = here("./scripts/for futR/data/generated/SST_proj_temp_ssp126_df.csv"))
 	
 	## ssp585 ####
 	
+	sim <- "B10K-K20P19_CMIP6_"
+	vname1 <- "temp_surface5m"    
+	vname2 <- "temp"            
+	tdsbase <- "https://data.pmel.noaa.gov/aclim/thredds/dodsC" 
+
 	# function to download ssp585 (get error of memory exhausted if try to download all three GCM & both 
 	# scenarios for each at once)
 	
@@ -367,7 +372,7 @@
   
   SST_proj_temp_ssp585_df <- left_join(SST_proj_temp_ssp585_df, lats_longs)
 
-	write_csv(SST_proj_temp_ssp585_df, file = here("./data/SST_proj_temp_ssp585_df.csv"))
+	write_csv(SST_proj_temp_ssp585_df, file = here("./scripts/for futR/data/generated/SST_proj_temp_ssp585_df.csv"))
 	
 	
 	

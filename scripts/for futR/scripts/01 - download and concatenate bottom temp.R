@@ -88,7 +88,7 @@
   BT_temp_hind_dat <- left_join(BT_temp_hind_dat, lats_longs)
 
 
-	write_csv(BT_temp_hind_dat, file = here("./data/BT_temp_hind_dat_K20P19.csv"))
+	write_csv(BT_temp_hind_dat, file = here("./scripts/for futR/data/generated/BT_temp_hind_dat_K20P19.csv"))
 	
 	
 	#### projection ####
@@ -181,7 +181,7 @@
   
   BT_hist_temps <- left_join(BT_hist_temps, lats_longs)
 
-	write_csv(BT_hist_temps, file = here("./data/BT_historical_temps.csv"))
+	write_csv(BT_hist_temps, file = here("./scripts/for futR/data/generated/BT_historical_temps.csv"))
 	
 	
 	## future ####
@@ -366,7 +366,7 @@
   
   BT_proj_temp_ssp585_df <- left_join(BT_proj_temp_ssp585_df, lats_longs)
 
-	write_csv(BT_proj_temp_ssp585_df, file = here("./data/BT_proj_temp_ssp585_df.csv"))
+	write_csv(BT_proj_temp_ssp585_df, file = here("./scripts/for futR/data/generated/BT_proj_temp_ssp585_df.csv"))
 	
 	
 	
