@@ -1,5 +1,5 @@
 
-	#00d - alternative way of trimming to ROMS grid by ROMS domains
+	#00d - trimming to ROMS grid by ROMS domains
 
 	# merge area and bottom temp dfs and trim by shelf region and depth
 
@@ -30,7 +30,7 @@
 
 	# join dfs
 	
-	vars <- c("Xi", "Eta", "latitude", "longitude")
+	vars <- c("Xi", "Eta")
 		
 	area_df <- area_df  %>%
   		mutate_at(vars, as.character)
@@ -44,16 +44,25 @@
 	temp_df <- temp_hind_dat %>%
   		mutate_at(vars, as.character)
 
-	area_depth_df <- left_join(area_df, depth_df, by = c("latitude", "longitude", "Xi", "Eta"))
+	area_depth_df <- full_join(area_df, depth_df, by = c("Xi", "Eta"))
 
-	area_depth_domain_df <- left_join(area_depth_df, domain_df,
-																		by = c("latitude", "longitude", "Xi", "Eta")) %>%
+	area_depth_domain_df <- full_join(area_depth_df, domain_df,
+					by = c("Xi", "Eta")) %>%
 		  		mutate_at(vars, as.character)
 
-	ROMS_dat_hind <- left_join(temp_df, area_depth_domain_df)
+	ROMS_dat_hind <- full_join(temp_df, area_depth_domain_df,
+														 by = c("Xi", "Eta"))
 	
-#	ROMS_dat_hind <- na.omit(ROMS_dat_hind)
+	ROMS_dat_hind <- ROMS_dat_hind %>%
+		rename(latitude = latitude.y,
+					 longitude = longitude.x)
 
+	ROMS_dat_hind <- ROMS_dat_hind %>%
+		dplyr::select(-contains("x"))
+	
+	ROMS_dat_hind <- ROMS_dat_hind %>%
+		dplyr::select(-contains("y"))
+	
 	# add date and month name
 	ROMS_dat_hind$month_name <- NA
      
@@ -71,10 +80,9 @@
 
 	ROMS_dat_hind_trim <- ROMS_dat_hind_trim %>%
 			filter(., between(depth, 0, 250)) %>%
-			filter(domain > 0) %>%
-			mutate(lat = as.numeric(latitude),
-					 lon= as.numeric(longitude)) 
+			filter(domain > 0) 
 
+	# summarize to plot
 	ROMS_dat_hind_trim_sum <-  ROMS_dat_hind_trim %>%
 		group_by(latitude, longitude) %>%
 		summarize(mean_temp = mean(temp))
