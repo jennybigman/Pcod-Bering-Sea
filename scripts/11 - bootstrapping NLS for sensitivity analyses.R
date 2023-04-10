@@ -8,6 +8,8 @@
   library(gtsummary)
 	library(modelsummary)
 	library(here)
+	library(patchwork)
+
 
 	# load in data 
 	eggs <- read.csv("../data and code from Laurel & Rogers 2020 CJFAS/laurelandrogerscode/Pcod and WP hatch probabilities.csv")
@@ -31,7 +33,9 @@
 		mutate(scenario = "hindcast",
 					 simulation = "hindcast")
 	
-	ROMS_projected_dat <- fread(file = "./data/ROMS_projected_dat.csv") %>%
+	ROMS_projected_dat <- fread(file = "./data/ROMS_projected_dat.csv")
+	
+	ROMS_projected_dat_trim <- ROMS_projected_dat	%>%
 		mutate(latitude = Lat,
 					 longitude = Lon, 
 					 projection = scenario,
@@ -107,9 +111,6 @@
 	dat_list2 <- mapply(samp_ID_func, dat_list, x = 1:10, SIMPLIFY=F)
 	
 	ROMS_cauchy_sens <- bind_rows(dat_list2)
-	
-#	new_data <- ROMS_cauchy_sens %>% filter_all(any_vars(is.na(.))) 
-
 
 	ROMS_cauchy_sens <- ROMS_cauchy_sens %>%
 		rename(iter = "...12") %>%
@@ -119,7 +120,162 @@
 	
 	ROMS_cauchy_sens <- fread(file = here("./data/ROMS_cauchy_sens.csv"))
 	
+	# linear trends
 	
+	# linear models of hindcast ####
+	
+	cauch_hind_yr <- ROMS_cauchy_sens_hind %>%
+		group_by(year, iter) %>%
+    summarise(mean_sphabsuit_cauch = mean(sphabsuit_cauch))
+	
+	cauch_hind_yr_fits <- cauch_hind_yr %>%
+    group_by(iter) %>%
+    do(broom::tidy(lm(mean_sphabsuit_cauch ~ year, data = .), conf.int = .95)) %>%
+    ungroup %>% rename(model = iter)
+	
+	cauch_hind_yr_fits <- cauch_hind_yr_fits %>%
+		dplyr::filter(term == "year")
+
+	in_paper <- tibble(
+		model = 0,
+		term = "year",
+		estimate = 0.0006616,
+		std.error = 0.0004994, 
+		statistic = NA,
+		p.value = 0.191,
+		conf.low = -0.0003408616,
+		conf.high = 0.001664144)
+	
+	cauch_hind_yr_fits <- bind_rows(in_paper, cauch_hind_yr_fits)
+	
+	cauch_hind_yr_fits$model[cauch_hind_yr_fits$model == "0"] <- "in paper"
+
+	
+	# make plot
+	coef_plot_cauch_hind <- 
+		secret_weapon(cauch_hind_yr_fits, var = "year") +
+	  xlab("Coefficient estimate") + 
+		ylab("Iteration") +
+		theme_bw() +
+		scale_colour_grey() +
+		scale_x_continuous(
+			breaks = c(0, 0.001),
+			labels = c(0, 0.001)
+		) +
+		theme(legend.position = "none") +
+		ggtitle("a)")
+	
+	
+	# projection ####
+	
+	# low emission scenario
+	cauch_proj_yr_ssp126 <- ROMS_cauchy_sens_proj %>%
+		filter(scenario == "ssp126") %>%
+		group_by(year, iter) %>%
+    summarise(mean_sphabsuit_cauch = mean(sphabsuit_cauch))
+	
+	cauch_proj_yr_ssp126_fits <- cauch_proj_yr_ssp126 %>%
+    group_by(iter) %>%
+    do(broom::tidy(lm(mean_sphabsuit_cauch ~ year, data = .), conf.int = .95)) %>%
+    ungroup %>% rename(model = iter)
+	
+	cauch_proj_yr_ssp126_fits <- cauch_proj_yr_ssp126_fits %>%
+		dplyr::filter(term == "year")
+
+	in_paper <- tibble(
+		model = 0,
+		term = "year",
+		estimate = 0.0007879,
+		std.error = 0.0002051,
+		statistic = NA,
+		p.value = 0.000157,
+		conf.low =  0.0003838231,
+		conf.high = 0.001191981)
+	
+	cauch_proj_yr_ssp126_fits <- bind_rows(in_paper, cauch_proj_yr_ssp126_fits)
+	
+	cauch_proj_yr_ssp126_fits$model[cauch_proj_yr_ssp126_fits$model == "0"] <- "in paper"
+
+	
+	# make plot
+	coef_plot_cauch_proj_ssp126 <- 
+		secret_weapon(cauch_proj_yr_ssp126_fits, var = "year") +
+	  xlab("Coefficient estimate") + 
+		ylab("Iteration") +
+		scale_colour_grey() +
+		ggtitle("b)") +
+		scale_x_continuous(
+			breaks = c(0.0006, 0.001),
+			labels = c("0.0006", 0.001)
+		) +
+		theme_bw() +
+		theme(legend.position = "none",
+					axis.text.y = element_blank(),
+					axis.title.y = element_blank(),
+					axis.ticks.y = element_blank())
+	
+ # high emission scenario
+	cauch_proj_yr_ssp585 <- ROMS_cauchy_sens_proj %>%
+		filter(scenario == "ssp585") %>%
+		group_by(year, iter) %>%
+    summarise(mean_sphabsuit_cauch = mean(sphabsuit_cauch))
+	
+	cauch_proj_yr_ssp585_fits <- cauch_proj_yr_ssp585 %>%
+    group_by(iter) %>%
+    do(broom::tidy(lm(mean_sphabsuit_cauch ~ year, data = .), conf.int = .95)) %>%
+    ungroup %>% rename(model = iter)
+	
+	cauch_proj_yr_ssp585_fits <- cauch_proj_yr_ssp585_fits %>%
+		dplyr::filter(term == "year")
+	
+
+	in_paper <- tibble(
+		model = 0,
+		term = "year",
+		estimate =  0.0029634,
+		std.error = 0.0001989,
+		statistic = NA,
+		p.value = NA,
+		conf.low =   0.002571493,
+		conf.high = 0.003355326)
+	
+	cauch_proj_yr_ssp585_fits <- bind_rows(in_paper, cauch_proj_yr_ssp585_fits)
+	
+	cauch_proj_yr_ssp585_fits$model[cauch_proj_yr_ssp585_fits$model == "0"] <- "in paper"
+
+	# make plot
+	coef_plot_cauch_proj_ssp585 <- 
+		secret_weapon(cauch_proj_yr_ssp585_fits, var = "year") +
+	  xlab("Coefficient estimate") + 
+		ylab("Iteration") +
+		scale_color_grey() +
+		scale_x_continuous(
+			breaks = c(0.0025, 0.003),
+			labels = c(0.0025, 0.003)
+		) +
+		ggtitle("c)") +
+		theme_bw() +
+		theme(legend.position = "none",
+					axis.text.y = element_blank(),
+					axis.title.y = element_blank(),
+					axis.ticks.y = element_blank())
+	
+	# plot together 
+	
+ plot1 <- coef_plot_cauch_hind 
+
+ plot2 <- coef_plot_cauch_proj_ssp126
+
+ plot3 <- coef_plot_cauch_proj_ssp585 
+
+
+ coef_plots_cauch <- plot1 + plot2 + plot3 
+
+
+ ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/coef_plots_cauch.tiff",
+			 coef_plots_cauch, dpi = 500)
+	
+	# plot time series 
 	ROMS_cauchy_sens_hind <- ROMS_cauchy_sens %>%
 		dplyr::filter(scenario == "hindcast") 
 
@@ -128,115 +284,7 @@
 	ROMS_cauchy_sens_proj <- ROMS_cauchy_sens %>%
 		dplyr::filter(scenario %in% scens) 
 	
-	# any trend?
-	
-	# hindcast
-	ROMS_cauchy_sens_hind$iter_c <- as.character(ROMS_cauchy_sens_hind$iter)
-	
-	lm_func_hind <- function(x){
-		
-		new_dat <- ROMS_cauchy_sens_hind %>% filter(iter_c == x)
-		
-		fit <- lm(sphabsuit_cauch ~ year, data = new_dat)
-		
-		fits <- coef(fit)[2]
-		lwr <- confint(fit)[2, 1]
-		upr <- confint(fit)[2, 2]
-		iter_c <- x
-		
-		fit_out <- tibble(fits, lwr, upr, iter_c)
-		
-	}
-	
-	iters <- unique(ROMS_cauchy_sens_hind$iter_c)
-	
-	lm_list <- lapply(iters, lm_func_hind)
-	
-	lm_hind_out <- bind_rows(lm_list)
-	
-	lm_hind_out_cauch <- lm_hind_out %>%
-		rename(mean = fits, 
-					 lower = lwr, 
-					 upper = upr, 
-					 iter = iter_c) %>%
-		mutate(scenario = "hindcast")
-	
-	# projection
-	
-	ROMS_cauchy_sens_proj$iter_c <- as.character(ROMS_cauchy_sens_proj$iter)
 
-	lm_func_proj <- function(x, y){
-		
-		new_dat <- ROMS_cauchy_sens_proj %>% filter(iter_c == x & scenario == y)
-		
-		fit <- lm(sphabsuit_cauch ~ year, data = new_dat)
-		
-		fits <- coef(fit)[2]
-		lwr <- confint(fit)[2, 1]
-		upr <- confint(fit)[2, 2]
-		iter_c <- x
-		scenario <- y
-		
-		fit_out <- tibble(fits, lwr, upr, iter_c, scenario)
-		
-	}
-	
-	iters <- unique(ROMS_cauchy_sens_hind$iter_c)
-	
-	scens <- rep(unique(ROMS_cauchy_sens_proj$scenario), each = 10)
-	
-	
-	lm_list_proj <- mapply(lm_func_proj, 
-												 x = iters, y = scens, 
-												 SIMPLIFY = FALSE)
-	
-	lm_proj_out <- bind_rows(lm_list_proj)
-	
-	lm_proj_out_cauchy <- lm_proj_out %>%
-		rename(mean = fits, 
-					 lower = lwr, 
-					 upper = upr, 
-					 iter = iter_c) 
-
-	lm_cauchy_outs <- bind_rows(lm_hind_out_cauch, lm_proj_out_cauchy)
-
-	lm_cauchy_outs <- fread(file = here("./data/lm_cauchy_outs.csv")) 
-		
-	lm_cauchy_outs$iter <- as.character(lm_cauchy_outs$iter)
-
-	mean = c(0.0007, 0.0008, 0.003)
-	lower = c(-0.0003, 0.0004, 0.002)
-	upper = c(0.002, 0.001, 0.004)
-	iter = c("in paper", "in paper", "in paper")
-	scenario = c("hindcast", "ssp126", "ssp585")
-	
-	paper_tib <- tibble(mean, lower, upper, iter, scenario)
-	
-	lm_cauchy_outs <- bind_rows(lm_cauchy_outs, paper_tib)
-	
-	#### make coefficient plot ####
-	
-	
-	p <- 
-		ggplot(lm_cauchy_outs) +
-		geom_point(aes(x = mean, y = as.factor(iter))) +
-		geom_segment(aes(x = lower, xend = upper, y = as.factor(iter), yend = as.factor(iter))) +
-		facet_wrap(~ scenario, scales = "free") 
-	
-	
-	#+
-	#	scale_y_discrete(expand = c(0, 4))
-	
-	#### make table ####
-	
-	#cauch_lm_fits <- gt(lm_cauchy_outs)
- #
-	#gtsave(cauch_lm_fits, 
-	#			 file = here("./scripts/manuscript figure scripts/used in ms/pngs of figs/cauch_lm_fits.docx"))
-
-	
-	# plots ####
-	
 	# time series
 	ROMS_cauchy_sens_hind_sum <- ROMS_cauchy_sens_hind %>%
 		group_by(year, iter) %>%
@@ -252,22 +300,22 @@
 	ROMS_sens_cauchy_sum <- bind_rows(ROMS_cauchy_sens_hind_sum, ROMS_cauchy_sens_proj_sum)
 
 	# add time series from manuscript
-	yearly_temp_hind <- ROMS_hindcast_dat %>%
+	yearly_habsuit_hind <- ROMS_hindcast_dat %>%
 		group_by(year) %>%
     summarise(mean_sp_hab_suit = mean(sp_hab_suit)) %>%
 		mutate(scenario = "hindcast")
 	
 	years_proj <- 2020:2099
 	
-	yearly_temp_proj <- ROMS_projected_dat %>% 
+	yearly_habsuit_proj <- ROMS_projected_dat %>% 
 		filter(year %in% years_proj) %>%
-		group_by(simulation, projection, year) %>%
+		group_by(projection, year) %>%
    	summarise(mean_sp_hab_suit = mean(sp_hab_suit_var)) 
 	
-	yearly_temp_proj$scenario <- NA
+	yearly_habsuit_proj$scenario <- NA
 		
-	yearly_temp_proj$scenario[yearly_temp_proj$projection == "SSP126"] <- "ssp126"
-	yearly_temp_proj$scenario[yearly_temp_proj$projection == "SSP585"] <- "ssp585"
+	yearly_habsuit_proj$scenario[yearly_habsuit_proj$projection == "ssp126"] <- "ssp126"
+	yearly_habsuit_proj$scenario[yearly_habsuit_proj$projection == "ssp585"] <- "ssp585"
 
 	sens_cauchy_plot <-
 		ggplot() +
@@ -275,10 +323,10 @@
 							aes(year, mean_hbsuit, 
 									group = iter, 
 									color = iter)) +
-		geom_line(data = yearly_temp_hind,
+		geom_line(data = yearly_habsuit_hind,
 					  	aes(year, mean_sp_hab_suit), 
 								color = "black") +
-		geom_line(data = yearly_temp_proj,
+		geom_line(data = yearly_habsuit_proj,
 						 aes(year, mean_sp_hab_suit), 
 								color = "black") +
 		facet_wrap(~ scenario, scales = "free") +
@@ -287,10 +335,11 @@
    	theme_bw()
    		
 	 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/sens_cauchy_plot_SI.tiff",
-			 sens_cauchy_plot)
+			 sens_cauchy_plot, dpi = 500)
 
 
-	## Gaussian equation: Phatch ~ k * e^(-1/2 * (temp - mu)^2/sigma^2) ####
+
+	 ## Gaussian equation: Phatch ~ k * e^(-1/2 * (temp - mu)^2/sigma^2) ####
 	
 	gaus_mod <- nls(Phatch ~ k * exp(-1/2 * (temp - mu)^2/sigma^2), 
 									 start = c(mu = 5, sigma = 2, k = 1), data = egg_dat, weights=Ntot)
@@ -355,101 +404,179 @@
 
 	ROMS_gaus_sens <- fread(file = here("./data/ROMS_gaus_sens.csv"))
 	
+	ROMS_gaus_sens <- ROMS_gaus_sens %>%
+		rename(iter = "...12")
+	
 	ROMS_gaus_sens_hind <- ROMS_gaus_sens %>%
-		dplyr::filter(scenario == "hindcast") %>%
-		rename(iter = "...12") 
+		dplyr::filter(scenario == "hindcast")
 
 	scens <- c("ssp126", "ssp585")
 	
 	ROMS_gaus_sens_proj <- ROMS_gaus_sens %>%
-		dplyr::filter(scenario %in% scens) %>%
-		rename(iter = "...12")
+		dplyr::filter(scenario %in% scens) 
 	
-	# any trend?
+	# linear trends
 	
-	# hindcast
-	ROMS_gaus_sens_hind$iter_c <- as.character(ROMS_gaus_sens_hind$iter)
+	# linear models of hindcast ####
+	
+	gaus_hind_yr <- ROMS_gaus_sens_hind %>%
+		group_by(year, iter) %>%
+    summarise(mean_sphabsuit_gaus = mean(sphabsuit_gaus))
+	
+	gaus_hind_yr_fits <- gaus_hind_yr %>%
+    group_by(iter) %>%
+    do(broom::tidy(lm(mean_sphabsuit_gaus ~ year, data = .), conf.int = .95)) %>%
+    ungroup %>% rename(model = iter)
+	
+	gaus_hind_yr_fits <- gaus_hind_yr_fits %>%
+		dplyr::filter(term == "year")
 
-	lm_func_hind <- function(x){
-		
-		new_dat <- ROMS_gaus_sens_hind %>% filter(iter_c == x)
-		
-		fit <- lm(sphabsuit_gaus ~ year, data = new_dat)
-		
-		fits <- coef(fit)[2]
-		lwr <- confint(fit)[2, 1]
-		upr <- confint(fit)[2, 2]
-		iter_c <- x
-		
-		fit_out <- tibble(fits, lwr, upr, iter_c)
-		
-	}
+	in_paper <- tibble(
+		model = 0,
+		term = "year",
+		estimate = 0.0006616,
+		std.error = 0.0004994, 
+		statistic = NA,
+		p.value = 0.191,
+		conf.low = -0.0003408616,
+		conf.high = 0.001664144)
 	
-	iters <- unique(ROMS_gaus_sens_hind$iter_c)
+	gaus_hind_yr_fits <- bind_rows(in_paper, gaus_hind_yr_fits)
 	
-	lm_list <- lapply(iters, lm_func_hind)
-	
-	lm_hind_out_gaus <- bind_rows(lm_list)
-	
-	lm_hind_out_gaus <- lm_hind_out_gaus %>%
-		rename(mean = fits, 
-					 lower = lwr, 
-					 upper = upr, 
-					 iter = iter_c) %>%
-		mutate(scenario = "hindcast")
-	
-	# projection
-	
-	ROMS_gaus_sens_proj$iter_c <- as.character(ROMS_gaus_sens_proj$iter)
-
-	lm_func_proj <- function(x, y){
-		
-		new_dat <- ROMS_gaus_sens_proj %>% filter(iter_c == x & scenario == y)
-		
-		fit <- lm(sphabsuit_gaus ~ year, data = new_dat)
-		
-		fits <- coef(fit)[2]
-		lwr <- confint(fit)[2, 1]
-		upr <- confint(fit)[2, 2]
-		iter_c <- x
-		scenario <- y
-		
-		fit_out <- tibble(fits, lwr, upr, iter_c, scenario)
-		
-	}
-	
-	iters <- unique(ROMS_gaus_sens_hind$iter_c)
-	
-	scens <- rep(unique(ROMS_gaus_sens_proj$scenario), each = 10)
-	
-	
-	lm_list_proj <- mapply(lm_func_proj, 
-												 x = iters, y = scens, 
-												 SIMPLIFY = FALSE)
-	
-	lm_proj_out_gaus <- bind_rows(lm_list_proj) 
-	
-	lm_proj_out_gaus <- lm_proj_out_gaus %>%
-		rename(mean = fits, 
-					 lower = lwr, 
-					 upper = upr, 
-					 iter = iter_c) 
-
-	lm_gaus_outs <- bind_rows(lm_hind_out_gaus, lm_proj_out_gaus)
-
-	#### make table ####
-	
-	gaus_lm_fits <- gt(lm_gaus_outs)
- 
-	gtsave(gaus_lm_fits, 
-				 file = here("./scripts/manuscript figure scripts/used in ms/pngs of figs/gaus_lm_fits.docx"))
+	gaus_hind_yr_fits$model[gaus_hind_yr_fits$model == "0"] <- "in paper"
 
 	
-		# plot ####
+	# make plot
+	coef_plot_gaus_hind <- 
+		secret_weapon(gaus_hind_yr_fits, var = "year") +
+	  xlab("Coefficient estimate") + 
+		ylab("Iteration") +
+		theme_bw() +
+		scale_colour_grey() +
+		scale_x_continuous(
+			breaks = c(0, 0.001),
+			labels = c(0, 0.001)
+		) +
+		theme(legend.position = "none") +
+		ggtitle("a)")
+	
+	
+	# projection ####
+	
+	# low emission scenario
+	gaus_proj_yr_ssp126 <- ROMS_gaus_sens_proj %>%
+		filter(scenario == "ssp126") %>%
+		group_by(year, iter) %>%
+    summarise(mean_sphabsuit_gaus = mean(sphabsuit_gaus))
+	
+	gaus_proj_yr_ssp126_fits <- gaus_proj_yr_ssp126 %>%
+    group_by(iter) %>%
+    do(broom::tidy(lm(mean_sphabsuit_gaus ~ year, data = .), conf.int = .95)) %>%
+    ungroup %>% rename(model = iter)
+	
+	gaus_proj_yr_ssp126_fits <- gaus_proj_yr_ssp126_fits %>%
+		dplyr::filter(term == "year")
+
+	in_paper <- tibble(
+		model = 0,
+		term = "year",
+		estimate = 0.0007879,
+		std.error = 0.0002051,
+		statistic = NA,
+		p.value = 0.000157,
+		conf.low =  0.0003838231,
+		conf.high = 0.001191981)
+	
+	gaus_proj_yr_ssp126_fits <- bind_rows(in_paper, gaus_proj_yr_ssp126_fits)
+	
+	gaus_proj_yr_ssp126_fits$model[gaus_proj_yr_ssp126_fits$model == "0"] <- "in paper"
+
+	
+	# make plot
+	coef_plot_gaus_proj_ssp126 <- 
+		secret_weapon(gaus_proj_yr_ssp126_fits, var = "year") +
+	  xlab("Coefficient estimate") + 
+		ylab("Iteration") +
+		scale_colour_grey() +
+		ggtitle("b)") +
+		scale_x_continuous(
+			breaks = c(0.0006, 0.001),
+			labels = c("0.0006", 0.001)
+		) +
+		theme_bw() +
+		theme(legend.position = "none",
+					axis.text.y = element_blank(),
+					axis.title.y = element_blank(),
+					axis.ticks.y = element_blank())
+	
+ # high emission scenario
+	gaus_proj_yr_ssp585 <- ROMS_gaus_sens_proj %>%
+		filter(scenario == "ssp585") %>%
+		group_by(year, iter) %>%
+    summarise(mean_sphabsuit_gaus = mean(sphabsuit_gaus))
+	
+	gaus_proj_yr_ssp585_fits <- gaus_proj_yr_ssp585 %>%
+    group_by(iter) %>%
+    do(broom::tidy(lm(mean_sphabsuit_gaus ~ year, data = .), conf.int = .95)) %>%
+    ungroup %>% rename(model = iter)
+	
+	gaus_proj_yr_ssp585_fits <- gaus_proj_yr_ssp585_fits %>%
+		dplyr::filter(term == "year")
+	
+
+	in_paper <- tibble(
+		model = 0,
+		term = "year",
+		estimate =  0.0029634,
+		std.error = 0.0001989,
+		statistic = NA,
+		p.value = NA,
+		conf.low =   0.002571493,
+		conf.high = 0.003355326)
+	
+	gaus_proj_yr_ssp585_fits <- bind_rows(in_paper, gaus_proj_yr_ssp585_fits)
+	
+	gaus_proj_yr_ssp585_fits$model[gaus_proj_yr_ssp585_fits$model == "0"] <- "in paper"
+
+	# make plot
+	coef_plot_gaus_proj_ssp585 <- 
+		secret_weapon(gaus_proj_yr_ssp585_fits, var = "year") +
+	  xlab("Coefficient estimate") + 
+		ylab("Iteration") +
+		scale_color_grey() +
+		scale_x_continuous(
+			breaks = c(0.003, 0.004),
+			labels = c(0.003, 0.004)
+		) +
+		ggtitle("c)") +
+		theme_bw() +
+		theme(legend.position = "none",
+					axis.text.y = element_blank(),
+					axis.title.y = element_blank(),
+					axis.ticks.y = element_blank())
+	
+	# plot together 
+	
+ plot1 <- coef_plot_gaus_hind 
+
+ plot2 <- coef_plot_gaus_proj_ssp126
+
+ plot3 <- coef_plot_gaus_proj_ssp585 
+
+
+ coef_plots_gaus <- plot1 + plot2 + plot3 
+
+
+ ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/coef_plots_gaus.tiff",
+			 coef_plots_gaus, dpi = 500)
+	
+	# plot time series 
+
+	# time series
 	ROMS_gaus_sens_hind_sum <- ROMS_gaus_sens_hind %>%
 		group_by(year, iter) %>%
 		summarise(mean_hbsuit = mean(sphabsuit_gaus)) %>%
-		mutate(scenario = "historical") %>%
+		mutate(scenario = "hindcast") %>%
 		mutate(iter = as.factor(iter))
 	
 	ROMS_gaus_sens_proj_sum <- ROMS_gaus_sens_proj %>%
@@ -457,17 +584,43 @@
 		summarise(mean_hbsuit = mean(sphabsuit_gaus)) %>%
 		mutate(iter = as.factor(iter))
 	
-	ROMS_sens_gaus <- bind_rows(ROMS_gaus_sens_hind_sum, ROMS_gaus_sens_proj_sum)
+	ROMS_sens_gaus_sum <- bind_rows(ROMS_gaus_sens_hind_sum, ROMS_gaus_sens_proj_sum)
+
+	# add time series from manuscript
+	yearly_habsuit_hind <- ROMS_hindcast_dat %>%
+		group_by(year) %>%
+    summarise(mean_sp_hab_suit = mean(sp_hab_suit)) %>%
+		mutate(scenario = "hindcast")
+	
+	years_proj <- 2020:2099
+	
+	yearly_habsuit_proj <- ROMS_projected_dat %>% 
+		filter(year %in% years_proj) %>%
+		group_by(projection, year) %>%
+   	summarise(mean_sp_hab_suit = mean(sp_hab_suit_var)) 
+	
+	yearly_habsuit_proj$scenario <- NA
+		
+	yearly_habsuit_proj$scenario[yearly_habsuit_proj$projection == "ssp126"] <- "ssp126"
+	yearly_habsuit_proj$scenario[yearly_habsuit_proj$projection == "ssp585"] <- "ssp585"
 
 	sens_gaus_plot <-
 		ggplot() +
-		geom_line(data = ROMS_sens_gaus,
+		geom_line(data = ROMS_sens_gaus_sum,
 							aes(year, mean_hbsuit, 
 									group = iter, 
 									color = iter)) +
+		geom_line(data = yearly_habsuit_hind,
+					  	aes(year, mean_sp_hab_suit), 
+								color = "black") +
+		geom_line(data = yearly_habsuit_proj,
+						 aes(year, mean_sp_hab_suit), 
+								color = "black") +
 		facet_wrap(~ scenario, scales = "free") +
 		xlab("Year") + 
+		ylab("Thermal spawning\nhabitat suitability") +
    	theme_bw()
    		
 	 ggsave("./scripts/manuscript figure scripts/used in ms/pngs of figs/sens_gaus_plot_SI.tiff",
-			 sens_gaus_plot)
+			 sens_gaus_plot, dpi = 500)
+
