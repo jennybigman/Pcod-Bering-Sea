@@ -1,4 +1,4 @@
-# area metric 
+# 04 - calculating the area metric 
 
 	#### by year #### each grid cell counted only once
 	
