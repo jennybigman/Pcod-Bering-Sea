@@ -1,5 +1,6 @@
 # Pcod-Bering-Sea 
-https://zenodo.org/badge/387891283.svg
+
+[![DOI](https://zenodo.org/badge/387891283.svg)](https://zenodo.org/doi/10.5281/zenodo.10552667)
 
 This repo houses code for the EBS Pacific Cod habitat suitability project - now published: Bigman, J. S., B. J. Laurel, K. Kearney, A. J. Hermann, W. Cheng, K. K. Holsman, and L. A. Rogers. "Predicting Pacific cod thermal spawning habitat in a changing climate." ICES Journal of Marine Science (2023): fsad096. Open access link is here: https://academic.oup.com/icesjms/advance-article/doi/10.1093/icesjms/fsad096/7204287
 
