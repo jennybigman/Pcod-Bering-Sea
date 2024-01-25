@@ -8,7 +8,7 @@ Bigman, J. S., B. J. Laurel, K. Kearney, A. J. Hermann, W. Cheng, K. K. Holsman,
 
 Open access link is here: <https://academic.oup.com/icesjms/advance-article/doi/10.1093/icesjms/fsad096/7204287>
 
-Author information:
+## Author information:
 Jennifer Bigman - NOAA Alaska Fisheries Science Center (AFSC), jennifersbigman@gmail.com;
 Ben Laurel - AFSC, ben.laurel@noaa.gov;
 Kelly Kearney - AFSC, kelly.kearney@noaa.gov;
@@ -17,13 +17,13 @@ Wei Cheng - PMEL & Cooperative Institute for Climate, Ocean, & Ecosystem Studies
 Kristin Holsman - AFSC, kirstin.holsman@noaa.gov;
 Lauren Rogers - AFSC, lauren.rogers@noaa.gov;
 
-Date of data collection:
+## Date of data collection:
 Bering 10k ROMS: ongoing, see <https://github.com/kholsman/ACLIM2>;
 Code creation: 2021 - 2023
 
-Geographic location: Eastern Bering Sea
+## Geographic location: Eastern Bering Sea
 
-Funders: North Pacific Research Board (see <https://projects.nprb.org/>)
+## Funders: North Pacific Research Board (see <https://projects.nprb.org/>)
 
 
 ## Sharing/Access Information
@@ -31,9 +31,9 @@ Funders: North Pacific Research Board (see <https://projects.nprb.org/>)
 Licensing information: These data and code are avilable under the Open Data Comments Attribution License ()
 
 
-## Description of files:
+# Description of files:
 
-# data preprocessing 
+## data preprocessing 
 
 00a - download and transform level 2 bottom temp data: code to download and concatenate Bering 10k ROMS model (Bering 10k) bottom temperature hindcast 
 
@@ -50,7 +50,7 @@ Licensing information: These data and code are avilable under the Open Data Comm
 00g - calculate hatch success for projected temps: code to combine thermal response curve from Laurel & Rogers 2020 (see citation in paper above) with Bering 10k bottom temperature timeseries projections
 
 
-# main analysis 
+## main analysis 
 
 01 - load each time: code to load libraries, helpful functions, data (hatch success and habitat suitability)
 
