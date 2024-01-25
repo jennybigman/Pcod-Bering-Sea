@@ -18,7 +18,7 @@ Kristin Holsman - AFSC, kirstin.holsman@noaa.gov;
 Lauren Rogers - AFSC, lauren.rogers@noaa.gov;
 
 Date of data collection:
-Bering 10k ROMS: ongoing, see <https://github.com/kholsman/ACLIM2>
+Bering 10k ROMS: ongoing, see <https://github.com/kholsman/ACLIM2>;
 Code creation: 2021 - 2023
 
 Geographic location: Eastern Bering Sea
