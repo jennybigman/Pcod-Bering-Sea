@@ -72,7 +72,7 @@ Licensing information: These data and code are avilable under the Open Data Comm
 
 * The folder "manuscript figure scripts" has all of the code for the figures in the main paper*
 
-# R version used for project: 4.1.3, 4.2.1, 4.3
-# libraries used for project: here; naturalearth; tidyverse; data.table; sd; forcats; lubridate; patchwork; marmap; zoo; RcolorBrewer; beepr; mapdata; runner; tidync; cowplot; scales; glue; MuMin
+R version used for project: 4.1.3, 4.2.1, 4.3
+libraries used for project: here; naturalearth; tidyverse; data.table; sd; forcats; lubridate; patchwork; marmap; zoo; RcolorBrewer; beepr; mapdata; runner; tidync; cowplot; scales; glue; MuMin
 
  
