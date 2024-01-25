@@ -21,9 +21,11 @@ Lauren Rogers - AFSC, lauren.rogers@noaa.gov;
 Bering 10k ROMS: ongoing, see <https://github.com/kholsman/ACLIM2>;
 Code creation: 2021 - 2023
 
-## Geographic location: Eastern Bering Sea
+## Geographic location: 
+Eastern Bering Sea
 
-## Funders: North Pacific Research Board (see <https://projects.nprb.org/>)
+## Funders: 
+North Pacific Research Board (see <https://projects.nprb.org/>)
 
 
 ## Sharing/Access Information
