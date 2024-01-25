@@ -30,7 +30,7 @@ North Pacific Research Board (see <https://projects.nprb.org/>)
 
 ## Sharing/Access Information
 
-Licensing information: These data and code are avilable under the Open Data Comments Attribution License ()
+Licensing information: This article is a work of the United States government. Such works are not entitled to domestic copyright protection under U.S. law and are therefore in the public domain. The findings and conclusions in the paper are those of the author(s) and do not necessarily represent the views of the National Marine Fisheries Service.
 
 
 # Description of files:
