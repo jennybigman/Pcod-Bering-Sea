@@ -9,16 +9,16 @@ Bigman, J. S., B. J. Laurel, K. Kearney, A. J. Hermann, W. Cheng, K. K. Holsman,
 Open access link is here: <https://academic.oup.com/icesjms/advance-article/doi/10.1093/icesjms/fsad096/7204287>
 
 Author information:
-Jennifer Bigman - NOAA Alaska Fisheries Science Center (AFSC), jennifersbigman@gmail.com
-Ben Laurel - AFSC, ben.laurel@noaa.gov
-Kelly Kearney - AFSC, kelly.kearney@noaa.gov
-Al Hermann - Pacific Marine Environmental Laboratory (NOAA/PMEL), albert.j.hermann@noaa.gov
-Wei Cheng - PMEL & Cooperative Institute for Climate, Ocean, & Ecosystem Studies (CICOES), University of Washington, wei.cheng@noaa.gov
-Kristin Holsman - AFSC, kirstin.holsman@noaa.gov
-Lauren Rogers - AFSC, lauren.rogers@noaa.gov
+Jennifer Bigman - NOAA Alaska Fisheries Science Center (AFSC), jennifersbigman@gmail.com;
+Ben Laurel - AFSC, ben.laurel@noaa.gov;
+Kelly Kearney - AFSC, kelly.kearney@noaa.gov;
+Al Hermann - Pacific Marine Environmental Laboratory (NOAA/PMEL), albert.j.hermann@noaa.gov;
+Wei Cheng - PMEL & Cooperative Institute for Climate, Ocean, & Ecosystem Studies (CICOES), University of Washington, wei.cheng@noaa.gov;
+Kristin Holsman - AFSC, kirstin.holsman@noaa.gov;
+Lauren Rogers - AFSC, lauren.rogers@noaa.gov;
 
 Date of data collection:
-Bering 10k ROMS: ongoing, see here
+Bering 10k ROMS: ongoing, see <https://github.com/kholsman/ACLIM2>
 Code creation: 2021 - 2023
 
 Geographic location: Eastern Bering Sea
