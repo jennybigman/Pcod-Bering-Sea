@@ -14,7 +14,7 @@ Ben Laurel - AFSC, ben.laurel@noaa.gov;
 Kelly Kearney - AFSC, kelly.kearney@noaa.gov;
 Al Hermann - Pacific Marine Environmental Laboratory (NOAA/PMEL), albert.j.hermann@noaa.gov;
 Wei Cheng - PMEL & Cooperative Institute for Climate, Ocean, & Ecosystem Studies (CICOES), University of Washington, wei.cheng@noaa.gov;
-Kristin Holsman - AFSC, kirstin.holsman@noaa.gov;
+Kirstin Holsman - AFSC, kirstin.holsman@noaa.gov;
 Lauren Rogers - AFSC, lauren.rogers@noaa.gov;
 
 ## Date of data collection:
